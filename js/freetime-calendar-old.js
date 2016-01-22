@@ -16,9 +16,6 @@ var svg = d3.select("body")
   .append("g");
 
 var year = svg
-    // .selectAll("year")
-    // .data(d3.range(year, year))
-    // .enter()
     .append("g")
         .append("rect")
             .attr("class", "year")
@@ -55,7 +52,6 @@ var months = svg.selectAll("months")
 ;
 
 var days = svg.selectAll("day")
-// 	.data(d3.range(1, moment().daysInMonth()))
 	.data(d3.time.days(moment(), moment().endOf("year")))
  ;
 
