@@ -106,9 +106,9 @@ function freetimeCalendar() {
             
                 
             var days = years.selectAll(".day")
-                .data(function(d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+                .data(function(d) { return d3.time.days(moment(new Date(d, 0, 1)), moment(new Date(d + 1, 0, 1))); })
             ;
-            
+            var selectionRange = {start: null, end: null};
             days.enter()
                 .append("rect")
                     .attr("class", "day")
@@ -119,19 +119,48 @@ function freetimeCalendar() {
                     .attr("x", function(d, i) { return d3.time.weekOfYear(d) * cellSize; })
                     .attr("y", function(d, i) { return d.getDay() * cellSize; })
                     .attr("pointer-events", "all")
-                    .on('mouseover', function(d){
-                            d3.select(this).style("fill", "blue")
-                            d3.select(this).style("fill-opacity", "0.7")
-                        })
-                    .on('mouseout', function(d){
-                        d3.select(this).style("fill", "white")
-                        d3.select(this).style("fill-opacity", "1")
+                    // .attr("fill", function(d) {
+                    //     if (selectionRange.start <= d && d <= selectionRange.end)
+                    //         return "blue"
+                    //     else
+                    //         return "white"
+                    // })
+                    .on('mousedown', function(d){
+                        if (d3.event.shiftKey) {
+                            // console.log(d);
+                            selectionRange.start = d;   
+                        }
                     })
-                    .on('click', function(d, i){
-                        // if (d3.event.shiftKey) {
-                        
-                        //     console.log("shift was pressed");
-                        // }
+                    .on('mouseup', function(d){
+                        if (d3.event.shiftKey) {
+                            selectionRange.end = d;
+                            console.log(moment.duration(selectionRange.end - selectionRange.start).asDays());
+                            
+                            selectionRange.start = null;
+                            selectionRange.end = null;
+                        }
+                    })
+                    .on('mouseover', function(d) {
+                        // d3.select(this).style("fill", "blue")
+                        d3.select(this).style("fill-opacity", "0.7")
+
+                        if (selectionRange.start && d3.event.shiftKey) {
+                            years.selectAll(".day")
+                                .each(function(e) {
+                                    if (selectionRange.start <= e && e <= d) {
+                                        d3.select(this).style("fill", "lightblue")
+                                        d3.select(this).style("fill-opacity", "0.7")
+                                    } else {
+                                        d3.select(this).style("fill", "white")
+                                        d3.select(this).style("fill-opacity", "1")
+                                    }
+                                })
+                            ;
+                        }
+                    })
+                    .on('mouseout', function(d){
+                        // d3.select(this).style("fill", "white")
+                        d3.select(this).style("fill-opacity", "1")
                     })
                     .on('dblclick', function(d, i){
                         var translate = [0, 0], scale = 1;
