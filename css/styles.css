@@ -4,9 +4,15 @@ body {
   background-color: lightgrey;
 }
 
-.day {
+.day rect {
   stroke: #ccc;
   fill: white;
+}
+
+.day text {
+    /*stroke: black;*/
+    /*fill: #ccc;*/
+    font-weight: bold;
 }
 
 .month {
@@ -15,8 +21,8 @@ body {
   stroke-width: 1px;
 }
 
-.axis path,
-.axis line {
+.yaxis path,
+.yaxis line {
   fill: none;
   /*stroke: #000;*/
   stroke: none;
