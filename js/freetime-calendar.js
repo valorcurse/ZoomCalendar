@@ -7,16 +7,11 @@ function freetimeCalendar() {
         selection.each(function(d, i) {
             var yearsRange = d3.range(moment().format("YYYY"), moment().add(4, "years").format("YYYY"));
             
-            // console.log(selection);
-            
             var selectionBounds = selection.node().getBoundingClientRect(),
                 width = selectionBounds.width * 0.99, // TODO: Remove percentage
                 height = selectionBounds.height * 0.98, // TODO: Remove percentage
                 yearHeight = height / yearsRange.length,
                 cellSize = Math.min(width / 53) * 0.95; // 53 weeks, because the first/last week can be split
-            
-            var centered,
-                previousTranslation = [0, 0];
             
             var zoomTranslation = [0, 0],
                 zoomScale = 1;
@@ -30,13 +25,16 @@ function freetimeCalendar() {
             selection
                 .on("keydown", function() {
                     if (d3.event.shiftKey) {
-                        zoom.on("zoom", null);
+                        // zoom.on("zoom", null);
+                        zoom.translate(zoomTranslation).scale(zoomScale).event
+                        zoom.on("zoom", zoomed);
                     }
                 })
                 .on("keyup", function() {
                     if (d3.event.keyCode === 16) {
-                        zoom.translate(zoomTranslation).scale(zoomScale).event
-                        zoom.on("zoom", zoomed);
+                        // zoom.translate(zoomTranslation).scale(zoomScale).event
+                        zoom.on("zoom", null);
+                        // zoom.on("zoom", zoomed);
                     }
                 })
             ;
@@ -104,100 +102,93 @@ function freetimeCalendar() {
             // ;
                 
             
-                
-            var days = years.selectAll(".day")
-                .data(function(d) { return d3.time.days(moment(new Date(d, 0, 1)), moment(new Date(d + 1, 0, 1))); })
-                .enter()
-                // .call(day)
-                .append(function(d) { return day(d, cellSize)})
-                // .append("g")
-                    // .attr("class", "day")
+            var days = day()
+                // .data(function(d) {
+                //     return d3.time.days(moment(new Date(d, 0, 1)), moment(new Date(d + 1, 0, 1))); 
+                // })
+                .cellSize(cellSize)
             ;
             
-            // var selectionRange = {start: null, end: null};
-            // days
-            //     .append("rect")
-            //         .attr("width", cellSize)
-            //         .attr("height", cellSize)
-            //         .attr("fill", "none")
-            //         .attr("fill-opacity", "1")
-            //         .attr("x", function(d, i) { return d3.time.weekOfYear(d) * cellSize; })
-            //         .attr("y", function(d, i) { return d.getDay() * cellSize; })
-            //         .attr("pointer-events", "all")
-            //         .on('mousedown', function(d){
-            //             if (d3.event.shiftKey) {
-            //                 // console.log(d);
-            //                 selectionRange.start = d;   
-            //             }
-            //         })
-            //         .on('mouseup', function(d){
-            //             if (d3.event.shiftKey) {
-            //                 selectionRange.end = d;
-            //                 console.log(moment.duration(selectionRange.end - selectionRange.start).asDays());
-                            
-            //                 selectionRange.start = null;
-            //                 selectionRange.end = null;
-            //             }
-            //         })
-            //         .on('mouseover', function(d) {
-            //             d3.select(this).style("fill-opacity", "0.7")
-
-            //             if (selectionRange.start && d3.event.shiftKey) {
-            //                 years.selectAll(".day")
-            //                     .each(function(e) {
-            //                         if (selectionRange.start <= e && e <= d) {
-            //                             d3.select(this).style("fill", "lightblue")
-            //                         } else {
-            //                             d3.select(this).style("fill", "white")
-            //                             d3.select(this).style("fill-opacity", "1")
-            //                         }
-            //                     })
-            //                 ;
-            //             }
-            //         })
-            //         .on('mouseout', function(d){
-            //             d3.select(this).style("fill-opacity", "1")
-            //         })
-            //         .on('click', function(d, i) {
-            //             d3.select(this).style("fill", "lightblue");
-            //         })
-            //         .on('dblclick', function(d, i){
-            //             var translate = [0, 0], scale = 1;
+            years
+                .selectAll(".day")
+                .data(function(d) {
+                    return d3.time.days(moment(new Date(d, 0, 1)), moment(new Date(d + 1, 0, 1))); 
+                })
+                .enter()
+                .append("g")
+                    .attr("class", "day")
+                    .call(function(d) {console.log(this)})
+                    .call(days)
+            ;
+            
+            var selectionRange = {start: null, end: null};
+            var centered;
+            days.rect()
+                .on('mousedown', function(d){
+                    if (!d3.event.shiftKey) {
+                        selectionRange.start = d;   
+                    }
+                })
+                .on('mouseup', function(d){
+                    if (!d3.event.shiftKey) {
+                        selectionRange.end = d;
+                        console.log(moment.duration(selectionRange.end - selectionRange.start).asDays());
                         
-            //             if (centered !== this) {
-            //                 var bBox = this.getBBox();
-            //                 var parent = d3.select(this.parentNode),
-            //                     parentY = d3.transform(parent.attr("transform")).translate[1],
-            //                     parentX = d3.transform(parent.attr("transform")).translate[0],
-            //                     parentHeight = parent.attr("height");
-                            
-            //                 var x = (parentX + bBox.x) + bBox.width / 2,
-            //                     y = parentY + bBox.y + bBox.height / 2 - 1; // TODO: Find out why the -1
-                            
-            //                 scale = 25;
-            //                 translate = [width / 2 - scale * x, height / 2 - scale * y];
-            //                 centered = this;
-            //             } else {
-            //                 scale = 1;
-            //                 translate = [0, 0];
-            //                 centered = null;
-            //             }
-            
-            //             svg.transition()
-            //                 .duration(750)
-            //                 .call(zoom.translate(translate).scale(scale).event);
-            //         })
-            // ;
-            
-            // days
-            //     .append("text")
-            //         .attr("pointer-events", "none")
-            //         .attr("x", function(d) { return d3.time.weekOfYear(d) * cellSize; })
-            //         .attr("y", function(d) { return d.getDay() * cellSize; })
-            //         .attr("dy", "12")
-            //         .attr("dx", "3")
-            //         .text(function(d) {return moment(d).format("D");})
-            // ;
+                        selectionRange.start = null;
+                        selectionRange.end = null;
+                    }
+                })
+                .on('mouseover', function(d) {
+                    d3.select(this).style("fill-opacity", "0.7");
+        
+                    if (selectionRange.start && d3.event.shiftKey) {
+                        years.selectAll(".day")
+                            .each(function(e) {
+                                if (selectionRange.start <= e && e <= d) {
+                                    d3.select(this).style("fill", "lightblue");
+                                } else {
+                                    d3.select(this).style("fill", "white");
+                                    d3.select(this).style("fill-opacity", "1");
+                                }
+                            })
+                        ;
+                    }
+                })
+                .on('mouseout', function(d){
+                    d3.select(this).style("fill-opacity", "1");
+                })
+                .on('click', function(d, i) {
+                    if (!d3.event.shiftKey) {
+                        d3.select(this).style("fill", "lightblue");
+                    }
+                })
+                .on('dblclick', function(d, i){
+                    var translate = [0, 0], scale = 1;
+                    
+                    if (centered !== this) {
+                        var bBox = this.getBBox();
+                        var parent = d3.select(this.parentNode),
+                            parentY = d3.transform(parent.attr("transform")).translate[1],
+                            parentX = d3.transform(parent.attr("transform")).translate[0],
+                            parentHeight = parent.attr("height");
+                        
+                        var x = parentX + bBox.x + bBox.width / 2,
+                            y = parentY + bBox.y + bBox.height / 2 - 1; // TODO: Find out why the -1
+                        
+                        scale = 25;
+                        translate = [width / 2 - scale * x, height / 2 - scale * y];
+                        centered = this;
+                    } else {
+                        scale = 1;
+                        translate = [0, 0];
+                        centered = null;
+                    }
+        
+                    svg.transition()
+                        .duration(750)
+                        .call(zoom.translate(translate).scale(scale).event);
+                })
+            ;
             
             years.selectAll(".month")
                 .data(function(d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
@@ -244,7 +235,7 @@ function freetimeCalendar() {
                     .style("text-anchor", "middle")
                     .attr("font-size", "10")
                     .attr("transform", function(d) {
-                        return "rotate(-90)" 
+                        return "rotate(-90)";
                     });
             
             
@@ -254,7 +245,7 @@ function freetimeCalendar() {
                 zoomTranslation = d3.event.translate;
                 zoomScale = d3.event.scale;
                 
-                // console.log("zoom: " + zoomScale);
+                console.log("zoom: " + zoomScale);
                 
                 // Move whole svg
                 svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -275,22 +266,6 @@ function freetimeCalendar() {
                                         return "0.95";
                                     }
                                 })
-                                // .attr("width", function(d) {
-                                //     var currentWidth = d3.select(this).node().getBBox().width;
-                                //     // console.log(d3.select(this).node());
-                                //     // console.log(zoomScale / zoom.scaleExtent()[1]);
-                                //     // return d3.select(this).
-                                //     return currentWidth * (1 - zoomScale / zoom.scaleExtent()[1]);
-                                // })
-                                // .attr("font-size", function(d) {
-                                    
-                                //     var currentSize = Math.max(d3.select(this).attr("font-size"), 1),
-                                //         zoomLevel = (1 - zoomScale / zoom.scaleExtent()[1]);
-                                    
-                                //     console.log(Math.round(currentSize * zoomLevel));    
-                                    
-                                //     return Math.round(10 * zoomLevel);
-                                // })
                     ;
                     
                      weekAxis
@@ -307,16 +282,6 @@ function freetimeCalendar() {
                         .selectAll("text")
                             .attr("font-size", "1")
                     ;
-                    //     .selectAll("rect")
-                    //         .transition()
-                    //         .duration(150)
-                    //             .attr("fill-opacity", "0")
-                    // ;
-                    
-                    // weekAxis
-                    //     .selectAll("text")
-                    //         .attr("font-size", "5")
-                    // ;
                 }
             }
             
