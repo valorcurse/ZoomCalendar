@@ -5,7 +5,7 @@ body {
 }
 
 .day rect {
-  stroke: #ccc;
+  /*stroke: #ccc;*/
   fill: white;
 }
 
@@ -21,8 +21,10 @@ body {
   stroke-width: 1px;
 }
 
-.yaxis path,
-.yaxis line {
+.xaxis path {
+    display: none;
+}
+.xaxis line {
   fill: none;
   /*stroke: #000;*/
   stroke: none;
