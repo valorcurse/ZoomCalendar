@@ -177,16 +177,15 @@ function freetimeCalendar() {
             
             var weekAxis = years.append("g")
                 .attr("class", "xaxis")
+                .call(xAxis)
             ;
             
             weekAxis
-                .call(xAxis)
-                // .attr("height", config.WEEKS.AXIS.HEIGHT)
                 .selectAll("text")
                     .attr("text-anchor", "end")
                     .attr("font-size", "20")
                     .attr("y", "0")
-                    .attr("alignment-baseline", "text-before-edge")
+                    .attr("alignment-baseline", "after-edge")
                     .attr("transform", function(e) {
                         return "translate(" + (cellSize/2 + e * config.DAYS.SPACE_BETWEEN) + ", " + 0 + ")"
                     })
@@ -194,21 +193,18 @@ function freetimeCalendar() {
 
             weekAxis
                 .insert('rect', '.tick')
-                    // .attr("height", "30")
-                    .attr("height", function(e) {
-                        return d3.select(this.parentNode).node().getBBox().height;
-                        // return weekAxis.select(".xaxis").node().getBBox().height;
-                    })
-                    // .attr("y", -config.WEEKS.AXIS.Y_PADDING)
+                    // .attr("height", function(e) {
+                    //     return d3.select(this.parentNode).node().getBBox().height;
+                    // })
                     .attr("width", function(e) {
                         return d3.select(this.parentNode.parentNode).node().getBBox().width; // Get year's width
                     })
-                    .attr("transform", function(d) {
-                        return "translate(" + 0  + ", " + -30 + ")"; // TODO: Get padding from somewhere
-                    })
+                    // .attr("transform", function(d) {
+                    //     return "translate(" + 0  + ", " + -30 + ")"; // TODO: Get padding from somewhere
+                    // })
                     // .attr("fill", "lightgrey")
                     .attr("fill", "grey")
-                    .attr("fill-opacity", "0.7")
+                    .attr("fill-opacity", "0")
             ;            
             
             
@@ -235,9 +231,18 @@ function freetimeCalendar() {
                                 var textHeight = d3.select(this.parentNode).select(".tick text").node().getBBox().height
                                 return "translate(" + 
                                     0 + " ," + 
-                                    Math.max(0, -zoomTranslation[1] / zoomScale + textHeight / 2) + 
+                                    Math.max(- textHeight, -zoomTranslation[1] / zoomScale + textHeight / 2) + 
                                 ")";
                             })
+                            .transition()
+                            .duration(250)
+                                .attr("fill-opacity", function(d) {
+                                    if (-d3.event.translate[1] / d3.event.scale <= -10) {
+                                        return "0";
+                                    } else {
+                                        return "0.7";
+                                    }
+                                })
                     ;
                     
                     weekAxis
@@ -248,7 +253,7 @@ function freetimeCalendar() {
                                 var currentX = d3.transform(d3.select(this).attr("transform")).translate[0];
                                 return "translate(" + 
                                     currentX + " ," + 
-                                    Math.max(0, -zoomTranslation[1] / zoomScale + textHeight / 2) + 
+                                    Math.max(0, -zoomTranslation[1] / zoomScale + textHeight * 1.5) + 
                                 ")";
                             })
                             .attr("font-size", function(d) {
