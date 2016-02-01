@@ -10,7 +10,7 @@ function freetimeCalendar() {
             var selectionBounds = selection.node().getBoundingClientRect(),
                 width = selectionBounds.width * 0.99, // TODO: Remove percentage
                 height = selectionBounds.height * 0.98, // TODO: Remove percentage
-                yearWidth = width / yearsRange.length,
+                // yearWidth = width / yearsRange.length,
                 cellSize = Math.min(width / 7) - margin/2; // 53 weeks, because the first/last week can be split
             
             var zoomTranslation = [0, 0],
@@ -18,7 +18,7 @@ function freetimeCalendar() {
             
             var zoom = d3.behavior.zoom()
                 .translate([0, 40])
-                .scaleExtent([0, 50])
+                .scaleExtent([0.5, 10])
                 .on("zoom", zoomed);
             
             selection
@@ -60,8 +60,12 @@ function freetimeCalendar() {
                     .append("g")
                         .attr("class", "year")
                         .attr("id", function(d) { return d; })
+                        // .attr("width", cellSize * config.DAYS.NUMBER_OF + config.DAYS.NUMBER_OF * config.DAYS.SPACE_BETWEEN)
                         .attr("transform", function(e, j) {
-                            return "translate(" + (j * 7 * cellSize + j * 7 * margin) + ", " + 0 + ")"
+                            return "translate(" + 
+                                    (j * config.DAYS.NUMBER_OF * cellSize + j * config.DAYS.NUMBER_OF * margin) + 
+                                    ", " + 0 + 
+                                ")"
                         })
             ;
             
@@ -77,7 +81,6 @@ function freetimeCalendar() {
                 .enter()
                 .append("g")
                     .attr("class", "day")
-                    // .call(function(d) {console.log(this)})
                     .call(days)
             ;
             
@@ -121,9 +124,9 @@ function freetimeCalendar() {
                     d3.select(this).style("fill-opacity", "1");
                 })
                 .on('click', function(d, i) {
-                    if (!d3.event.shiftKey) {
-                        d3.select(this).style("fill", "lightblue");
-                    }
+                    // if (!d3.event.shiftKey) {
+                    //     d3.select(this).style("fill", "lightblue");
+                    // }
                 })
                 .on('dblclick', function(d, i){
                     var translate = [0, 0], scale = 1;
@@ -168,38 +171,45 @@ function freetimeCalendar() {
             var xAxis = d3.svg.axis()
                 .scale(x)
                 .orient("top")
-                .ticks(7)
+                .ticks(config.DAYS.NUMBER_OF)
                 .tickFormat(function(d) { return moment.weekdaysShort(d); })
             ;
             
             var weekAxis = years.append("g")
                 .attr("class", "xaxis")
-                .attr("transform", "translate(" + (cellSize/2) + ", " + 0 + ")")
-                // .attr("height", "40")
-                // .attr("fill", "black")
-                // .call(xAxis)
             ;
-            
-            // weekAxis
-            //     .append('rect')
-            //     .attr("height", "30")
-            //     .attr("width", cellSize * 7)
-            //     // .attr("transform", function(d) {
-            //     //         return "translate(" + -90  + ", " + -235 + ")"; // TODO: Get padding from somewhere
-            //     //     })
-            //     .attr("fill", "lightgrey")
-            //     .attr("fill-opacity", "0")
-            // ;
             
             weekAxis
                 .call(xAxis)
-                .attr("height", "40")
+                // .attr("height", config.WEEKS.AXIS.HEIGHT)
                 .selectAll("text")
-                
-                    .style("text-anchor", "middle")
+                    .attr("text-anchor", "end")
                     .attr("font-size", "20")
+                    .attr("y", "0")
+                    .attr("alignment-baseline", "text-before-edge")
+                    .attr("transform", function(e) {
+                        return "translate(" + (cellSize/2 + e * config.DAYS.SPACE_BETWEEN) + ", " + 0 + ")"
+                    })
             ;
-            
+
+            weekAxis
+                .insert('rect', '.tick')
+                    // .attr("height", "30")
+                    .attr("height", function(e) {
+                        return d3.select(this.parentNode).node().getBBox().height;
+                        // return weekAxis.select(".xaxis").node().getBBox().height;
+                    })
+                    // .attr("y", -config.WEEKS.AXIS.Y_PADDING)
+                    .attr("width", function(e) {
+                        return d3.select(this.parentNode.parentNode).node().getBBox().width; // Get year's width
+                    })
+                    .attr("transform", function(d) {
+                        return "translate(" + 0  + ", " + -30 + ")"; // TODO: Get padding from somewhere
+                    })
+                    // .attr("fill", "lightgrey")
+                    .attr("fill", "grey")
+                    .attr("fill-opacity", "0.7")
+            ;            
             
             
             function zoomed() {
@@ -216,30 +226,35 @@ function freetimeCalendar() {
                     // Move weekdays axis
                     // console.log("translate: " + -d3.event.translate[1] / d3.event.scale);
                     weekAxis
-                        .attr("transform", function(d) {
-                            var trans =  "translate(" + (cellSize/2) + " ," + Math.max(0, -d3.event.translate[1] / d3.event.scale + 40) + ")";
-                            
-                            return trans;
-                        })
-                        // .call(function(e) {
-                        //     console.log(d3.transform(d3.select(this)).attr("transform"));
-                        // })
                         .selectAll("rect")
-                            .transition()
-                            .duration(150)
-                                .attr("fill-opacity", function(d) {
-                                    if (-d3.event.translate[1] / d3.event.scale <= -10) {
-                                        return "0";
-                                    } else {
-                                        return "0.95";
-                                    }
-                                })
+                            .attr("height", function(d) {
+                                var textHeight = d3.select(this.parentNode).select(".tick text").node().getBBox().height;
+                                return textHeight;
+                            })
+                            .attr("transform", function(d) {
+                                var textHeight = d3.select(this.parentNode).select(".tick text").node().getBBox().height
+                                return "translate(" + 
+                                    0 + " ," + 
+                                    Math.max(0, -zoomTranslation[1] / zoomScale + textHeight / 2) + 
+                                ")";
+                            })
                     ;
                     
-                //      weekAxis
-                //         .selectAll("text")
-                //             .attr("font-size", "10")
-                //     ;
+                    weekAxis
+                        .selectAll(".tick text")
+                            .attr("transform", function(d) {
+                                var textHeight = d3.select(this).node().getBBox().height
+
+                                var currentX = d3.transform(d3.select(this).attr("transform")).translate[0];
+                                return "translate(" + 
+                                    currentX + " ," + 
+                                    Math.max(0, -zoomTranslation[1] / zoomScale + textHeight / 2) + 
+                                ")";
+                            })
+                            .attr("font-size", function(d) {
+                                return Math.min(20, 20 / zoomScale);
+                            })
+                    ;
                 // } else if (zoomScale > 25) {
                 //     weekAxis
                 //         .transition()

@@ -17,7 +17,7 @@ function day() {
                     .attr("x", function(d) { return d.getDay() * cellSize })
                     .attr("pointer-events", "all")
                     .attr("transform", function(e, j) {
-                            return "translate(" + (e.getDay() * 5) + ", " + (d3.time.weekOfYear(e) * 5) + ")";
+                            return "translate(" + (e.getDay() * config.DAYS.SPACE_BETWEEN) + ", " + (d3.time.weekOfYear(e) * config.DAYS.SPACE_BETWEEN) + ")";
                     })
                 ;
                 
@@ -29,9 +29,9 @@ function day() {
                     .attr("dx", "15")
                     .attr("font-size", "20")
                     .attr("transform", function(e, j) {
-                            return "translate(" + (e.getDay() * 5) + ", " + (d3.time.weekOfYear(e) * 5) + ")";
+                            return "translate(" + (e.getDay() * config.DAYS.SPACE_BETWEEN) + ", " + (d3.time.weekOfYear(e) * config.DAYS.SPACE_BETWEEN) + ")";
                     })
-                    .text(function(d) { return moment(d).format("D") })
+                    .text(function(d) { return moment(d).format("D MMM") })
                 ;
             });
         }
@@ -45,8 +45,6 @@ function day() {
         my.rect = function() {
             console.log(rect);
             return rect;
-            // cellSize = value;
-            // return my;
         };
         
     return my;

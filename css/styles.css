@@ -1,7 +1,11 @@
 body {
   font: 10px sans-serif;
   shape-rendering: crispEdges;
-  background-color: lightgrey;
+  background-color: black;
+}
+
+svg {
+    background-color: lightgrey;
 }
 
 .day rect {
