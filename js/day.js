@@ -2,38 +2,122 @@ function day() {
         var cellSize = 10;
         
         var rect,
-            text;
-        
+            text,
+            hours,
+            container;
+     
         function my(selection) {
             selection.call(function(d, i) {
-                var container = d3.select(this).node();
+                container = d3.select(this).node();
                 
-                rect = container.append("rect")
+                container
+                    .attr("class", "day")
                     .attr("width", cellSize)
                     .attr("height", cellSize)
-                    .attr("fill", "none")
-                    .attr("fill-opacity", "1")
-                    .attr("y", function(d) { return d3.time.weekOfYear(d) * cellSize })
-                    .attr("x", function(d) { return d.getDay() * cellSize })
-                    .attr("pointer-events", "all")
+                    .attr("y", function(d) { return d3.time.weekOfYear(d) * cellSize + d3.time.weekOfYear(d) * config.DAYS.SPACE_BETWEEN })
+                    .attr("x", function(e) { return e.getDay() * cellSize + e.getDay() * config.DAYS.SPACE_BETWEEN })
                     .attr("transform", function(e, j) {
                             return "translate(" + (e.getDay() * config.DAYS.SPACE_BETWEEN) + ", " + (d3.time.weekOfYear(e) * config.DAYS.SPACE_BETWEEN) + ")";
                     })
+                    .attr("pointer-events", "all")
+                    // .attr("fill", "white")
                 ;
                 
-                text = container.append("text")
-                    .attr("pointer-events", "none")
-                    .attr("y", function(d) { return d3.time.weekOfYear(d) * cellSize })
-                    .attr("x", function(d) { return d.getDay() * cellSize })
-                    .attr("dy", "30")
-                    .attr("dx", "15")
-                    .attr("font-size", "20")
-                    .attr("transform", function(e, j) {
-                            return "translate(" + (e.getDay() * config.DAYS.SPACE_BETWEEN) + ", " + (d3.time.weekOfYear(e) * config.DAYS.SPACE_BETWEEN) + ")";
-                    })
-                    .text(function(d) { return moment(d).format("D MMM") })
+                container
+                    .append("rect")
+                        .attr("height", "100%")
+                        .attr("width", "100%")
+                        .attr("fill", "white")
+                        
                 ;
+                    
+                
+                hours = container
+                    .append("svg")
+                        .attr("height", "70%")
+                        .attr("width", "90%")
+                        .attr("y", "25%") // 100% - Height% - 5% 
+                        .attr("x", "5%")    // 100% - Width% - 5%
+                        .attr("fill", "#ccc")
+                        .attr("display", "none")
+                ;
+                
+                // children
+                        // .append("rect")
+                            // .attr("height", "70%")
+                            // .attr("width", "90%")
+                            // .attr("y", "25%") // 100% - Height% - 5% 
+                            // .attr("x", "5%")    // 100% - Width% - 5%
+                            // .attr("fill", "#ccc")
+                        // .attr("fill-opacity", "0.5")
+                // ;
+                
+                hours
+                    .selectAll(".hour")
+                    .data(d3.range(24))
+                    .enter()
+                    .append("line")
+                        .attr("width", "100%")
+                        // .attr("height", (100 / 24) + "%")
+                        .attr("x1", 0)
+                        .attr("x2", "100%")
+                        .attr("y1", function(d, i) {
+                            return (i * (100 / 24)) + "%";
+                        })
+                        .attr("y2", function(d, i) {
+                            return (i * (100 / 24)) + "%";
+                            
+                        })
+                        .attr("stroke-width", 0.5)
+                        .attr("stroke", "black")
+                ;
+                        
+                
+                text = container
+                    .append("text")
+                        .attr("pointer-events", "none")
+                        .attr("y", "30")
+                        .attr("x", "15")
+                        .attr("font-size", "20")
+                        .text(function(d) { return moment(d).format("D MMM") })
+                ;
+                
             });
+        }
+        
+        my.redraw = function() {
+                // container
+                //     .attr("display", function(d) {
+                //         var dayX = this.getScreenCTM().e,
+                //             dayY = this.getScreenCTM().f;
+                        
+                //         if (dayX + cellSize < 0 && dayY + cellSize < 0 || dayX > clientWidth + cellSize && dayX > clientHeight + cellSize) {
+                //             // console.log("Hiding: " + moment(d).format("D MMM"));
+                //             return "none";
+                //         }
+                //         // console.log("Showing: " + moment(d).format("D MMM"));
+                //         return "visible";
+                //         // console.log([this.node().getScreenCTM().e, this.node().getScreenCTM().f]);
+                //     })
+            
+            if (previousZoomLevel !== zoomLevel) {
+                switch (zoomLevel) {
+                  case ZoomLevel.YEAR:
+                      hours.attr("display", "none");
+                      break;
+                  case ZoomLevel.MONTH:
+                      text.text(function(d) { return moment(d).format("D MMM") })
+                      hours.attr("display", "none");
+                       
+                      container.attr("pointer-events", "all");
+                      break;
+                  case ZoomLevel.DAY:
+                      text.text(function(d) { return moment(d).format("D MMM YYYY") })
+                      container.attr("pointer-events", "none");
+                      hours.attr("display", "visible");
+                      break;
+                }
+            }
         }
     
         my.cellSize = function(value) {
@@ -43,8 +127,11 @@ function day() {
         };
         
         my.rect = function() {
-            console.log(rect);
-            return rect;
+            return container;
+        };
+        
+        my.children = function() {
+            return children;
         };
         
     return my;

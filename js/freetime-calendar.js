@@ -2,10 +2,15 @@
 function freetimeCalendar() {
 
     var margin = 5;
-
+    
+         
+    var clientWidth = d3.select("body").node().offsetWidth, 
+        clientHeight = d3.select("body").node().offsetHeight;
+        
+    
     function my(selection) {
         selection.each(function(d, i) {
-            var yearsRange = d3.range(moment().format("YYYY"), moment().add(4, "years").format("YYYY"));
+            var yearsRange = d3.range(moment().format("YYYY"), moment().add(1, "years").format("YYYY"));
             
             var selectionBounds = selection.node().getBoundingClientRect(),
                 width = selectionBounds.width * 0.99, // TODO: Remove percentage
@@ -18,7 +23,7 @@ function freetimeCalendar() {
             
             var zoom = d3.behavior.zoom()
                 .translate([0, 40])
-                .scaleExtent([0.5, 10])
+                .scaleExtent([0.5, 5])
                 .on("zoom", zoomed);
             
             selection
@@ -29,6 +34,7 @@ function freetimeCalendar() {
                     //     zoom.on("zoom", zoomed);
                     // }
                 })
+                
                 .on("keyup", function() {
                     // if (d3.event.keyCode === 16) {
                     //     // zoom.translate(zoomTranslation).scale(zoomScale).event
@@ -39,6 +45,7 @@ function freetimeCalendar() {
             ;
             
             var svg = selection
+                // .append("svg")
                 .append("svg")
                     .attr("class", "container")
                     .attr("width", width)
@@ -65,23 +72,36 @@ function freetimeCalendar() {
                             return "translate(" + 
                                     (j * config.DAYS.NUMBER_OF * cellSize + j * config.DAYS.NUMBER_OF * margin) + 
                                     ", " + 0 + 
-                                ")"
+                                ")";
                         })
             ;
             
+            var months = years
+                // .selectAll(".month")
+                .selectAll("g")
+                .data(d3.range(0, 12))
+                .enter()
+                .append("g")
+                    .attr("class", "month")
+                    .attr("id", function(d) { return d; })
+            ;
+
             var days = day()
                 .cellSize(cellSize)
             ;
             
-            years
-                .selectAll(".day")
-                .data(function(d) {
-                    return d3.time.days(moment(new Date(d, 0, 1)), moment(new Date(d + 1, 0, 1))); 
-                })
-                .enter()
-                .append("g")
-                    .attr("class", "day")
-                    .call(days)
+            months
+                    .selectAll(".day")
+                    .data(function(d) {
+                        var year = d3.select(this.parentNode.parentNode).data()[0],
+                             month = d3.select(this.parentNode).data()[0],
+                             currentDate = new Date(year, month);
+                             
+                        return d3.time.days(moment(currentDate).startOf("month"), moment(currentDate).endOf("month"));
+                    })
+                    .enter()
+                        .append("svg")
+                        .call(days)
             ;
             
             var selectionRange = {start: null, end: null};
@@ -94,9 +114,6 @@ function freetimeCalendar() {
                 })
                 .on('mouseup', function(d){
                     if (!d3.event.shiftKey) {
-                        selectionRange.end = d;
-                        console.log(moment.duration(selectionRange.end - selectionRange.start).asDays());
-                        
                         selectionRange.start = null;
                         selectionRange.end = null;
                     }
@@ -124,6 +141,12 @@ function freetimeCalendar() {
                     d3.select(this).style("fill-opacity", "1");
                 })
                 .on('click', function(d, i) {
+                    console.log([this.getScreenCTM().e, this.getScreenCTM().f]);
+
+                    // console.log(d3.event.pageX);
+                    // console.log(this.getScreenCTM().e);
+                    // console.log(this.getScreenCTM().e)
+                    // console.log(svg.node().getScreenCTM().e);
                     // if (!d3.event.shiftKey) {
                     //     d3.select(this).style("fill", "lightblue");
                     // }
@@ -141,8 +164,8 @@ function freetimeCalendar() {
                         var x = parentX + bBox.x + bBox.width / 2,
                             y = parentY + bBox.y + bBox.height / 2 - 1; // TODO: Find out why the -1
                         
-                        scale = 5;
-                        translate = [width / 2 - scale * x, height / 2 - scale * y];
+                        scale = 3.5;
+                        translate = [width / 2 - scale * x - 5 * scale, height / 2 - scale * y - 5 * scale];
                         centered = this;
                     } else {
                         scale = 1;
@@ -155,6 +178,15 @@ function freetimeCalendar() {
                         .call(zoom.translate(translate).scale(scale).event);
                 })
             ;
+            
+            // console.log(days);
+            
+            // days.children()
+            //     .append("rect")
+            //         .attr("fill", "blue")
+                    // .attr("height", "inherit")
+                    // .attr("width", "inherit")
+            // ;
             
             // years.selectAll(".month")
             //     .data(function(d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
@@ -186,32 +218,37 @@ function freetimeCalendar() {
                     .attr("font-size", "20")
                     .attr("y", "0")
                     .attr("alignment-baseline", "after-edge")
-                    .attr("transform", function(e) {
-                        return "translate(" + (cellSize/2 + e * config.DAYS.SPACE_BETWEEN) + ", " + 0 + ")"
+                    .attr("transform", function(d) {
+                        return "translate(" + (cellSize/2 + d * config.DAYS.SPACE_BETWEEN) + ", " + 0 + ")";
                     })
             ;
 
             weekAxis
                 .insert('rect', '.tick')
-                    // .attr("height", function(e) {
-                    //     return d3.select(this.parentNode).node().getBBox().height;
-                    // })
                     .attr("width", function(e) {
                         return d3.select(this.parentNode.parentNode).node().getBBox().width; // Get year's width
                     })
-                    // .attr("transform", function(d) {
-                    //     return "translate(" + 0  + ", " + -30 + ")"; // TODO: Get padding from somewhere
-                    // })
-                    // .attr("fill", "lightgrey")
-                    .attr("fill", "grey")
+                    .attr("fill", "lightgrey")
                     .attr("fill-opacity", "0")
             ;            
             
-            
+            // var previousZoomLevel = zoomLevel;
             function zoomed() {
                 // Save current values
-                zoomTranslation = d3.event.translate;
+                zoomTranslation = [d3.event.translate[0], d3.event.translate[1]];
                 zoomScale = d3.event.scale;
+                
+                // console.log(d3.event.sourceEvent.pageX);
+                
+                if (ZoomLevel.MONTH > zoomScale && zoomScale >= ZoomLevel.YEAR) {
+                    zoomLevel = ZoomLevel.YEAR;
+                }
+                else if (ZoomLevel.DAY > zoomScale && zoomScale >= ZoomLevel.MONTH) {
+                    zoomLevel = ZoomLevel.MONTH;
+                }
+                else if (ZoomLevel.DAY >= zoomLevel) {
+                    zoomLevel = ZoomLevel.DAY;
+                }
                 
                 // console.log("zoom: " + zoomScale);
                 
@@ -221,17 +258,21 @@ function freetimeCalendar() {
                 // if (zoomScale <= 25) {
                     // Move weekdays axis
                     // console.log("translate: " + -d3.event.translate[1] / d3.event.scale);
+                    
+                    
                     weekAxis
                         .selectAll("rect")
                             .attr("height", function(d) {
-                                var textHeight = d3.select(this.parentNode).select(".tick text").node().getBBox().height;
+                                // var textHeight = d3.select(".tick text").node().getBBox().height;
+                                var textHeight = 20 / zoomScale;
                                 return textHeight;
                             })
                             .attr("transform", function(d) {
-                                var textHeight = d3.select(this.parentNode).select(".tick text").node().getBBox().height
+                                // var textHeight = weekAxis.select(".tick text").node().getBBox().height;
+                                var textHeight = 20 / zoomScale;
                                 return "translate(" + 
                                     0 + " ," + 
-                                    Math.max(- textHeight, -zoomTranslation[1] / zoomScale + textHeight / 2) + 
+                                    Math.max(-textHeight, -zoomTranslation[1] / zoomScale ) + 
                                 ")";
                             })
                             .transition()
@@ -248,18 +289,58 @@ function freetimeCalendar() {
                     weekAxis
                         .selectAll(".tick text")
                             .attr("transform", function(d) {
-                                var textHeight = d3.select(this).node().getBBox().height
+                                // var textHeight = d3.select(this).node().getBBox().height;
+                                var textHeight = 20 / zoomScale;
 
                                 var currentX = d3.transform(d3.select(this).attr("transform")).translate[0];
                                 return "translate(" + 
                                     currentX + " ," + 
-                                    Math.max(0, -zoomTranslation[1] / zoomScale + textHeight * 1.5) + 
+                                    Math.max(0, -zoomTranslation[1] / zoomScale + textHeight) + 
                                 ")";
                             })
                             .attr("font-size", function(d) {
                                 return Math.min(20, 20 / zoomScale);
                             })
                     ;
+                    
+                months
+                    // .attr("display", function(d) {
+                    .each(function(d, i) {
+                        console.log(d3.select(this));
+                        
+                        // var dayX = this.getScreenCTM().e,
+                        //     dayY = this.getScreenCTM().f;
+                            
+                        // var dayX = this.getCTM().e,
+                        //     dayY = this.getCTM().f;
+                        
+                        // console.log(d + " - " +[dayX, dayY] + " | " + [bbox.x, bbox.y]);
+                        // var bbox = this.getBBox(),
+                        //     width = bbox.width,
+                        //     height = bbox.height;
+                        
+                        // console.log(d + " - " +(dayY - clientHeight) + " | " + (bbox.y * zoomScale));
+                        // console.log(d + " - " + ((dayY - clientHeight) + (bbox.y * zoomScale)));
+                        // console.log(d + " ----------------------- ");
+
+                        // var clippingX = dayX + (bbox.x * zoomScale);
+
+                        // if (dayX + (bbox.x * zoomScale) + bbox.width < 0 || dayY + (bbox.y * zoomScale) + bbox.height < 0 ||
+                        //     (dayX - clientWidth) + (bbox.x * zoomScale) > 0 || (dayY - clientHeight) + (bbox.y * zoomScale) > 0) { 
+                        if (!isOnScreen(this)) {
+                            d3.select(this).attr("display", "none");
+                        } else {
+                        // console.log("Showing: " + moment(d).format("D MMM"));
+                        // return "visible";
+                            d3.select(this).attr("display", "visible");
+                        }
+                        // console.log([this.node().getScreenCTM().e, this.node().getScreenCTM().f]);
+                    })
+                    
+                    days.redraw();
+                    
+                    previousZoomLevel = zoomLevel;
+                    
                 // } else if (zoomScale > 25) {
                 //     weekAxis
                 //         .transition()
@@ -282,6 +363,36 @@ function freetimeCalendar() {
                   + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
                   + "H" + (w1 + 1) * cellSize + "V" + 0
                   + "H" + (w0 + 1) * cellSize + "Z";
+            }
+            
+            function isOnScreen(element) {
+                var bbox = element.getBBox(),
+                    x = -(element.getCTM().e) / zoomScale,
+                    y = -(element.getCTM().f / zoomScale);
+                
+                // console.log(element.id + " ------------------------- ");
+                // console.log(element.id + " - y ");
+                // console.log(element.id + " - " + (y) + " > "+ (bbox.y + bbox.height) + " = " + (y > bbox.y + bbox.height));
+                // console.log(element.id + " - " + (y + clientHeight) + " < "+ (bbox.y) + " = " + (y + clientHeight < bbox.y));
+                // // console.log(element.id + " ------------------------- ");
+                
+                // console.log(element.id + " - x ");
+                // console.log(element.id + " - " + (x) + " > "+ (bbox.x + bbox.width) + " = " + (x > bbox.x + bbox.width));
+                // console.log(element.id + " - " + (x + clientWidth) + " < "+ (bbox.x) + " = " + (x + clientWidth < bbox.x));
+                    
+                 if (x > bbox.x + bbox.width    ||
+                    y > bbox.y + bbox.height    ||
+                    x + clientWidth / zoomScale < bbox.x    ||
+                    y + clientHeight / zoomScale < bbox.y)
+                {
+                    // console.log(element.id + " - outside ");
+                    // console.log(element.id + " ------------------------- ");
+                    return false;
+                }
+                
+                // console.log(element.id + " - inside ");
+                // console.log(element.id + " ------------------------- ");
+                return true;
             }
         });
     }

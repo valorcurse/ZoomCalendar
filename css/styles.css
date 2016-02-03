@@ -1,22 +1,35 @@
+@font-face {
+    font-family: overpass;
+    /*src: url(https://rawgit.com/RedHatBrand/overpass/master/Webfonts/Overpass-ExtraLight.ttf);*/
+    /*src: url(https://rawgit.com/RedHatBrand/overpass/master/Webfonts/Overpass-Light.woff);*/
+    src: url(https://rawgit.com/RedHatBrand/overpass/master/Webfonts/Overpass-Regular.woff);
+}
+
 body {
-  font: 10px sans-serif;
+  /*font: 10px sans-serif;*/
+  font: 10px overpass;
   shape-rendering: crispEdges;
   background-color: black;
 }
 
-svg {
+.container {
     background-color: lightgrey;
 }
 
-.day rect {
+/*.day rect {*/
   /*stroke: #ccc;*/
-  fill: white;
+  /*fill: white;*/
+/*}*/
+
+.day {
+    stroke-width: 0px;
+        /*background-color: white;*/
 }
 
 .day text {
     /*stroke: black;*/
-    /*fill: #ccc;*/
-    font-weight: bold;
+    fill: black;
+    /*font-weight: bold;*/
 }
 
 .month {
@@ -29,8 +42,9 @@ svg {
     display: none;
 }
 .xaxis line {
-  fill: none;
+  /*fill: none;*/
+  display: none;
   /*stroke: #000;*/
-  stroke: none;
-  shape-rendering: crispEdges;
+  /*stroke: none;*/
+  /*shape-rendering: crispEdges;*/
 }
