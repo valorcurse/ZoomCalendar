@@ -42,16 +42,6 @@ function day() {
                         .attr("display", "none")
                 ;
                 
-                // children
-                        // .append("rect")
-                            // .attr("height", "70%")
-                            // .attr("width", "90%")
-                            // .attr("y", "25%") // 100% - Height% - 5% 
-                            // .attr("x", "5%")    // 100% - Width% - 5%
-                            // .attr("fill", "#ccc")
-                        // .attr("fill-opacity", "0.5")
-                // ;
-                
                 hours
                     .selectAll(".hour")
                     .data(d3.range(24))

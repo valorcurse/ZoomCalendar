@@ -15,7 +15,7 @@ const config = {
 const ZoomLevel = {
     YEAR: 0.5,
     MONTH: 1,
-    DAY: 5,
+    DAY: 3,
 };
 
 var zoomLevel = ZoomLevel.YEAR;
