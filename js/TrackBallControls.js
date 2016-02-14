@@ -297,11 +297,11 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		_eye.subVectors( _this.object.position, _this.target );
 
-		if ( ! _this.noRotate ) {
+// 		if ( ! _this.noRotate ) {
 
-			_this.rotateCamera();
+// 			_this.rotateCamera();
 
-		}
+// 		}
 
 		if ( ! _this.noZoom ) {
 

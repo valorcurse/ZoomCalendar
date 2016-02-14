@@ -9,7 +9,8 @@ body {
   /*font: 10px sans-serif;*/
   font: 10px overpass;
   shape-rendering: crispEdges;
-  background-color: black;
+  background-color: white;
+  overflow: hidden;
 }
 
 .container {
