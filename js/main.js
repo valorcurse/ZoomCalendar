@@ -47,7 +47,8 @@ var year = 2016,
 	month = 1,
 	currentDate = new Date(year, month);
 
-var dates = d3.time.days(moment(currentDate).startOf("month"), moment(currentDate).add(1, "month").endOf("month"))
+// var dates = d3.time.days(moment(currentDate).startOf("month"), moment(currentDate).add(1, "month").endOf("month"))
+var dates = d3.time.days(moment(currentDate).startOf("year"), moment(currentDate).endOf("month"))
 // var dates = d3.time.days(moment(currentDate).startOf("year"), moment(currentDate).endOf("year"))
 
 // function makeTextSprite(message, size) {
@@ -92,50 +93,17 @@ var dates = d3.time.days(moment(currentDate).startOf("month"), moment(currentDat
 
 var draw = function() {
     // var cellSize = sceneSize.width / 7 - 5 * 7;
-    var cellSize = 5;
-    var margin = 1;
+            
     for (var i = 0; i <= dates.length; i++) {
         var date = moment(dates[i]);
-        // console.log(date);
-        var x = date.day() * cellSize + date.day() * margin,
-            // weekOfMonth = Math.floor(date.date() / 7), 
-            weekOfMonth = date.week(), 
-            y = -weekOfMonth * cellSize + -weekOfMonth * margin;
         
-        var rectShape = new THREE.Shape();
-        rectShape.moveTo(x, y);
-        rectShape.lineTo(x, y + cellSize);
-        rectShape.lineTo(x + cellSize, y + cellSize);
-        rectShape.lineTo(x + cellSize, y);
-        rectShape.lineTo(x, y);
-    
-        var rectGeom = new THREE.ShapeGeometry(rectShape);
-        var rectMesh = new THREE.Mesh(rectGeom, new THREE.MeshBasicMaterial({ color: 0xffffff }));
-        scene.add(rectMesh);
-        
-        var textGeo = new THREE.TextGeometry(date.format("DD MMM"), {
-            font: font,
-            size: cellSize / 8,
-            dynamic: false
-        });
-	
-		var textMaterial = new THREE.MeshBasicMaterial({
-            color: 0x00000,
-            overdraw: true,
-            shading: THREE.FlatShading
-        });
-        
-        var textMesh = new THREE.Mesh(textGeo, textMaterial);
-        var bb = new THREE.Box3();
-        bb.setFromObject(textMesh);
-        
-        var padding = 0.5;
-        textMesh.position.set(x + padding, y + cellSize - bb.max.y - padding, 0);
-        textGeo.computeBoundingBox();
-        textGeo.computeVertexNormals();
-        scene.add(textMesh);
-        
-        // console.log("Adding " + date.format("DD MMM"));
+        var newDay = day(date)
+            // .textMaterial(textMaterial)
+            // .rectMaterial(rectMaterial)
+            // .rectGeom(rectGeom)
+            // .lineMaterial(lineMaterial)
+            .create();
+        scene.add(newDay);
     }
 
     var cameraBB = new THREE.Box3();
@@ -156,7 +124,7 @@ loader.load('fonts/helvetiker_regular.typeface.js', function (f) {
 
 view = d3.select(renderer.domElement);
 zoom = d3.behavior.zoom()
-    // .scaleExtent([0.2, 1.5])
+    .scaleExtent([0.05, 0.45])
     .scale(0.2)
 ;
 
@@ -167,7 +135,7 @@ var zoomed = function() {
     _ref = zoom.translate(), x = _ref[0], y = _ref[1];
     return requestAnimationFrame(function() {
         // stats.begin();
-        stats.update();    
+        // stats.update();    
         x = x - sceneSize.width / 2;
         y = y - sceneSize.height / 2;
         camera.left = -DZOOM / z * aspect - x / sceneSize.width * DZOOM / z * 2 * aspect;

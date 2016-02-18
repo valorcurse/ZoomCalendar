@@ -1,113 +1,55 @@
-function day() {
-        var cellSize = 10;
+function day(date) {
+        var margin = 0.1;
         
-        var rect,
-            text,
-            hours,
-            container;
-     
-        function my(selection) {
-            selection.call(function(d, i) {
-                container = d3.select(this).node();
-                
-                container
-                    .attr("class", "day")
-                    .attr("width", cellSize)
-                    .attr("height", cellSize)
-                    .attr("y", function(d) { return d3.time.weekOfYear(d) * cellSize + d3.time.weekOfYear(d) * config.DAYS.SPACE_BETWEEN })
-                    .attr("x", function(e) { return e.getDay() * cellSize + e.getDay() * config.DAYS.SPACE_BETWEEN })
-                    .attr("transform", function(e, j) {
-                            return "translate(" + (e.getDay() * config.DAYS.SPACE_BETWEEN) + ", " + (d3.time.weekOfYear(e) * config.DAYS.SPACE_BETWEEN) + ")";
-                    })
-                    .attr("pointer-events", "all")
-                    // .attr("fill", "white")
-                ;
-                
-                container
-                    .append("rect")
-                        .attr("height", "100%")
-                        .attr("width", "100%")
-                        .attr("fill", "white")
-                        
-                ;
-                    
-                
-                hours = container
-                    .append("svg")
-                        .attr("height", "70%")
-                        .attr("width", "90%")
-                        .attr("y", "25%") // 100% - Height% - 5% 
-                        .attr("x", "5%")    // 100% - Width% - 5%
-                        .attr("fill", "#ccc")
-                        .attr("display", "none")
-                ;
-                
-                hours
-                    .selectAll(".hour")
-                    .data(d3.range(24))
-                    .enter()
-                    .append("line")
-                        .attr("width", "100%")
-                        // .attr("height", (100 / 24) + "%")
-                        .attr("x1", 0)
-                        .attr("x2", "100%")
-                        .attr("y1", function(d, i) {
-                            return (i * (100 / 24)) + "%";
-                        })
-                        .attr("y2", function(d, i) {
-                            return (i * (100 / 24)) + "%";
-                            
-                        })
-                        .attr("stroke-width", 0.5)
-                        .attr("stroke", "black")
-                ;
-                        
-                
-                text = container
-                    .append("text")
-                        .attr("pointer-events", "none")
-                        .attr("y", "30")
-                        .attr("x", "15")
-                        .attr("font-size", "20")
-                        .text(function(d) { return moment(d).format("D MMM") })
-                ;
-                
-            });
-        }
+        var x = date.day() * cellSize + date.day() * margin,
+            weekOfMonth = date.week(), 
+            y = -weekOfMonth * cellSize + -weekOfMonth * margin;
         
-        my.redraw = function() {
-                // container
-                //     .attr("display", function(d) {
-                //         var dayX = this.getScreenCTM().e,
-                //             dayY = this.getScreenCTM().f;
-                        
-                //         if (dayX + cellSize < 0 && dayY + cellSize < 0 || dayX > clientWidth + cellSize && dayX > clientHeight + cellSize) {
-                //             // console.log("Hiding: " + moment(d).format("D MMM"));
-                //             return "none";
-                //         }
-                //         // console.log("Showing: " + moment(d).format("D MMM"));
-                //         return "visible";
-                //         // console.log([this.node().getScreenCTM().e, this.node().getScreenCTM().f]);
-                //     })
+        function my() {
+            var rectMesh = new THREE.Mesh(rectGeom, rectMaterial);
+            rectMesh.position.x = x;
+            rectMesh.position.y = y;
             
-            if (previousZoomLevel !== zoomLevel) {
-                switch (zoomLevel) {
-                  case ZoomLevel.YEAR:
-                      hours.attr("display", "none");
-                      break;
-                  case ZoomLevel.MONTH:
-                      text.text(function(d) { return moment(d).format("D MMM") })
-                      hours.attr("display", "none");
-                       
-                      container.attr("pointer-events", "all");
-                      break;
-                  case ZoomLevel.DAY:
-                      text.text(function(d) { return moment(d).format("D MMM YYYY") })
-                      container.attr("pointer-events", "none");
-                      hours.attr("display", "visible");
-                      break;
-                }
+            var dateSize = cellSize / 8;
+            var textGeo = new THREE.TextGeometry(date.format("DD MMM"), {
+                font: font,
+                size: dateSize,
+                dynamic: false
+            });
+            
+            var textMesh = new THREE.Mesh(textGeo, textMaterial);
+            var bb = new THREE.Box3();
+            bb.setFromObject(textMesh);
+            
+            var padding = 0.5;
+            textMesh.position.x = -cellSize / 4;
+            textMesh.position.y = cellSize / 2 - bb.max.y - padding;
+            // textGeo.computeBoundingBox();
+            // textGeo.computeVertexNormals();
+            rectMesh.add(textMesh);
+            
+            var hoursArea = cellSize - padding*2 - bb.max.y*2;
+            var fontSize = hoursArea / 24;
+            for (var i = 0; i <= 24; i++) {
+                var hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
+                var hourBox = new THREE.Mesh(hourBoxGeom, hourMaterial);
+                hourBox.position.y = -cellSize / 2 +  (24 - i) * fontSize * 1.1 + padding;
+                hourBox.position.x = fontSize/2;
+                rectMesh.add(hourBox);
+                
+                var hourGeo = new THREE.TextGeometry(i, {
+                    font: font,
+                    size: fontSize,
+                    dynamic: false
+                });
+                
+                var hour = new THREE.Mesh(hourGeo, textMaterial);
+                hour.position.x = -cellSize / 2;
+                hour.position.y = -cellSize / 2 +  (24 - i) * fontSize * 1.1 + padding - fontSize / 2;
+                rectMesh.add(hour);
             }
+
+            return rectMesh;
         }
     
         my.cellSize = function(value) {
@@ -116,13 +58,15 @@ function day() {
             return my;
         };
         
-        my.rect = function() {
-            return container;
+        my.margin = function(value) {
+            if (!arguments.length) return margin;
+            margin = value;
+            return my;
         };
         
-        my.children = function() {
-            return children;
-        };
+        my.create = function() {
+            return my();
+        }
         
     return my;
 }
