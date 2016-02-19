@@ -1,29 +1,28 @@
 const config = {
-    "DAYS": {
-        "NUMBER_OF" :7,
-        "SPACE_BETWEEN": 5
+    "HOURS": {
+        "NUMBER_OF": 24,
+        "GEOMETRY": []
     },
-    "WEEKS": {
-         "AXIS": {
-             "HEIGHT": 40,
-             "Y_PADDING": 30
-         }
+    "DAYS": {
+        "NUMBER_OF": 31,
+        "GEOMETRY": []
+    },
+    "MONTHS": {
+        "NUMBER_OF": 12,
+        "GEOMETRY": []
     }
     
 };
 
-const ZoomLevel = {
-    YEAR: 0.5,
-    MONTH: 1,
-    DAY: 3,
-};
+var font;
 
-var zoomLevel = ZoomLevel.YEAR;
-var previousZoomLevel = ZoomLevel.YEAR;
-
+const cellSize = 20;
+const dateSize = cellSize / 8;
+const padding = 0.5;
+const hoursArea = cellSize - padding*2 - dateSize*2;
+const fontSize = hoursArea / 24;
 
 const rectMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const cellSize = 20;
 const rectGeom = new THREE.BoxGeometry(cellSize, cellSize, 0);
 
 const textMaterial = new THREE.MeshBasicMaterial({
@@ -32,15 +31,40 @@ const textMaterial = new THREE.MeshBasicMaterial({
     shading: THREE.FlatShading
 });
 
-const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0xdddddd
-});
-
-const linePadding = 0.5;
-const lineGeometry = new THREE.Geometry();
-lineGeometry.vertices.push(
-    new THREE.Vector3(linePadding, 0, 0),
-    new THREE.Vector3(cellSize - linePadding, 0, 0)
-);
+var generateTextGeometry = function() {
+    for (var h = 1; h <= config.HOURS.NUMBER_OF; h++) {
+        var hourGeom = new THREE.TextGeometry(h, {
+            font: font,
+            size: fontSize,
+            dynamic: false
+        });
+        
+        config.HOURS.GEOMETRY.push(hourGeom)
+    }
+    
+    for (var d = 1; d <= config.DAYS.NUMBER_OF; d++) {
+        var dayGeom = new THREE.TextGeometry(d, {
+            font: font,
+            size: dateSize,
+            dynamic: false
+        });
+        
+        config.DAYS.GEOMETRY.push(dayGeom)
+    }
+    
+    var dates = d3.time.months(moment(currentDate).startOf("year"), moment(currentDate).endOf("year"));
+    // console.log(dates);
+    for (var m = 0; m < dates.length; m++) {
+        var date = moment(dates[m]);
+        var monthGeom = new THREE.TextGeometry(date.format("MMM"), {
+            font: font,
+            size: dateSize,
+            dynamic: false
+        });
+        
+        config.MONTHS.GEOMETRY.push(monthGeom);
+    }
+}
 
 const hourMaterial = new THREE.MeshBasicMaterial({ color: 0xdddddd });
+const hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
