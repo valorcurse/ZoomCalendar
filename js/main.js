@@ -10,6 +10,8 @@
 var stats = new Stats();
 stats.setMode( 1 ); // 0: fps, 1: ms, 2: mb
 
+var mouse = new THREE.Vector2();
+
 // align top-left
 stats.domElement.style.position = 'absolute';
 stats.domElement.style.left = '0px';
@@ -31,15 +33,56 @@ camera.updateProjectionMatrix();
 // camera.position.set(-50, 50, 0);
 // camera.position.set(scene.position);
 
+document.addEventListener( 'mousemove', onMouseMove, false );
+var raycaster = new THREE.Raycaster();
 
-// console.log(camera);
+function onMouseMove( event ) {
+	event.preventDefault();
+
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    // console.log([mouse.x, mouse.y]);
+    // console.log([event.clientX, event.clientY]);
+    render();
+}
+
 
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(sceneSize.width, sceneSize.height);
 renderer.setClearColor(0xcccccc, 1);
 document.body.appendChild(renderer.domElement);
 
+var intersected = [];
 var render = function() {
+    raycaster.setFromCamera(mouse, camera);
+	var intersects = raycaster.intersectObjects(scene.children, true);
+	
+	for (var j = 0; j < intersected.length; j++) {
+	    
+	    if (intersects.indexOf(intersected[j]) <= 0 && typeof intersected[j].defaultMaterial !== 'undefined') {
+            intersected[j].material = intersected[j].defaultMaterial.clone();
+            // console.log(intersected[j]);
+            // intersected[j].material.color = new THREE.Color(0x00ff00);
+            intersected.splice(j, 1);
+	    }
+	}
+	
+	for (var i = 0; i < intersects.length; i++) {
+        var intersect = intersects[i].object;
+        
+        // intersects[i].object.onMouseHover();
+        // intersect.defaultMaterial = intersects[i].object.material;
+        intersect.material = intersects[i].object.material.clone();
+        intersect.material.color = new THREE.Color(0x0000ff);
+        intersected.push(intersect);
+        // intersects[i].object.material = intersects[i].object.material.clone();
+        // intersects[i].object.material.color = new THREE.Color( 0xff0000 );
+
+        // intersects[i].object.color = new THREE.Color( 0xff0000 );
+	}
+	
+	console.log(intersected);
+	
 	return renderer.render(scene, camera);
 }
 
@@ -87,7 +130,6 @@ var aspectRatio = sceneSize.width / sceneSize.height;
 var zoomed = function() {
     var x, y, z, _ref;
     z = zoom.scale();
-    console.log(z);
     _ref = zoom.translate(), x = _ref[0], y = _ref[1];
     return requestAnimationFrame(function() {
         // stats.begin();

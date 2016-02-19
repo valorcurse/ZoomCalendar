@@ -9,6 +9,11 @@ function day(date) {
             var rectMesh = new THREE.Mesh(rectGeom, rectMaterial);
             rectMesh.position.x = x;
             rectMesh.position.y = y;
+            rectMesh.defaultMaterial = rectMaterial
+            // rectMesh.onMouseHover = function() {
+            //     rectMesh.material = rectMesh.material.clone();
+            //     rectMesh.material.color = new THREE.Color( 0xff0000 );
+            // }
             
             var day = date.date() - 1,
                 month = date.month();
@@ -18,7 +23,7 @@ function day(date) {
             
             var dayBB = new THREE.Box3();
             dayBB.setFromObject(dayMesh);
-            monthMesh.position.x = dayBB.max.x + padding;
+            monthMesh.position.x = dayBB.max.x + padding*2;
 
             var textMesh = new THREE.Object3D();
             textMesh.add(dayMesh);
@@ -34,6 +39,14 @@ function day(date) {
                 var hourBox = new THREE.Mesh(hourBoxGeom, hourMaterial);
                 hourBox.position.y = -(cellSize / 2) + (config.HOURS.NUMBER_OF - i) * fontSize * 1.1 + padding;
                 hourBox.position.x = fontSize / 2;
+                hourBox.position.z = 5;
+                hourBox.defaultMaterial = hourMaterial;
+                
+                // hourBox.onMouseHover = function() {
+                //     console.log(hourBox.position);
+                //     hourBox.material = hourBox.material.clone();
+                //     hourBox.material.color = new THREE.Color(0x0000ff);
+                // }
                 rectMesh.add(hourBox);
                 
                 var hour = new THREE.Mesh(config.HOURS.GEOMETRY[i], textMaterial);
