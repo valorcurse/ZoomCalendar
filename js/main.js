@@ -33,10 +33,10 @@ camera.updateProjectionMatrix();
 // camera.position.set(-50, 50, 0);
 // camera.position.set(scene.position);
 
-document.addEventListener( 'mousemove', onMouseMove, false );
+document.addEventListener('mousemove', onMouseMove, false );
 var raycaster = new THREE.Raycaster();
 
-function onMouseMove( event ) {
+function onMouseMove(event) {
 	event.preventDefault();
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -46,6 +46,14 @@ function onMouseMove( event ) {
     render();
 }
 
+// document.addEventListener('click', onKeyPressed, false);
+// function onKeyPressed(event) {
+    // console.log(event);
+    // if (event.shiftKey) {
+    //     console.log("Shift is pressed.");
+    //     shiftPressed = true;
+    // }
+// }
 
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(sceneSize.width, sceneSize.height);
@@ -58,30 +66,18 @@ var render = function() {
 	var intersects = raycaster.intersectObjects(scene.children, true);
 	
 	for (var j = 0; j < intersected.length; j++) {
-	    
-	    if (intersects.indexOf(intersected[j]) <= 0 && typeof intersected[j].defaultMaterial !== 'undefined') {
-            intersected[j].material = intersected[j].defaultMaterial.clone();
-            // console.log(intersected[j]);
-            // intersected[j].material.color = new THREE.Color(0x00ff00);
+        if (intersects.indexOf(intersected[j]) <= 0 && typeof intersected[j].defaultMaterial !== 'undefined') {
+            // intersected[j].material = intersected[j].defaultMaterial.clone();
+            intersected[j].onMouseOut();
             intersected.splice(j, 1);
-	    }
+        }
 	}
 	
 	for (var i = 0; i < intersects.length; i++) {
         var intersect = intersects[i].object;
-        
-        // intersects[i].object.onMouseHover();
-        // intersect.defaultMaterial = intersects[i].object.material;
-        intersect.material = intersects[i].object.material.clone();
-        intersect.material.color = new THREE.Color(0x0000ff);
+        intersect.onMouseHover();
         intersected.push(intersect);
-        // intersects[i].object.material = intersects[i].object.material.clone();
-        // intersects[i].object.material.color = new THREE.Color( 0xff0000 );
-
-        // intersects[i].object.color = new THREE.Color( 0xff0000 );
 	}
-	
-	console.log(intersected);
 	
 	return renderer.render(scene, camera);
 }
@@ -95,7 +91,6 @@ var dates = d3.time.days(moment(currentDate).startOf("year"), moment(currentDate
 // var dates = d3.time.days(moment(currentDate).startOf("year"), moment(currentDate).endOf("year"))
 
 var draw = function() {
-    // var cellSize = sceneSize.width / 7 - 5 * 7;
     for (var i = 0; i < dates.length; i++) {
         var date = moment(dates[i]);
         
@@ -126,24 +121,54 @@ zoom = d3.behavior.zoom()
     .scale(0.115)
 ;
 
+function translate(x, y, z) {
+    x = x - sceneSize.width / 2;
+    y = y - sceneSize.height / 2;
+    camera.left = -DZOOM / z * aspect - x / sceneSize.width * DZOOM / z * 2 * aspect;
+    camera.right = DZOOM / z * aspect - x / sceneSize.width * DZOOM / z * 2 * aspect;
+    camera.top = DZOOM / z + y / sceneSize.height * DZOOM / z * 2;
+    camera.bottom = -DZOOM / z + y / sceneSize.height * DZOOM / z * 2;
+    camera.updateProjectionMatrix();
+}
+
 var aspectRatio = sceneSize.width / sceneSize.height;
+var previousTranslation = null;
 var zoomed = function() {
-    var x, y, z, _ref;
-    z = zoom.scale();
-    _ref = zoom.translate(), x = _ref[0], y = _ref[1];
-    return requestAnimationFrame(function() {
-        // stats.begin();
-        stats.update();    
-        x = x - sceneSize.width / 2;
-        y = y - sceneSize.height / 2;
-        camera.left = -DZOOM / z * aspect - x / sceneSize.width * DZOOM / z * 2 * aspect;
-        camera.right = DZOOM / z * aspect - x / sceneSize.width * DZOOM / z * 2 * aspect;
-        camera.top = DZOOM / z + y / sceneSize.height * DZOOM / z * 2;
-        camera.bottom = -DZOOM / z + y / sceneSize.height * DZOOM / z * 2;
-        camera.updateProjectionMatrix();
-        // stats.end();
-        return render();
-    });
+    
+    var x, y, z;
+    
+    // if (previousTranslation) {
+        // translate(previousTranslation[0], previousTranslation[1], previousTranslation[2]);
+        // x = previousTranslation[0];
+        // y = previousTranslation[1];
+        // z = previousTranslation[2];
+        // previousTranslation = null;
+    // } else {
+        x = zoom.translate()[0];
+        y = zoom.translate()[1];
+        z = zoom.scale();
+    // }
+    console.log([x, y, z]);
+
+    if (d3.event && !d3.event.sourceEvent.shiftKey) {
+        return requestAnimationFrame(function() {
+            stats.update();
+            
+            if (previousTranslation) {
+                console.log("Previous: " + [x, y, z]);
+                translate(previousTranslation[0], previousTranslation[1], previousTranslation[2]);
+                previousTranslation = null;
+            } else {
+                translate(x, y, z);
+            }
+            // previousTranslation = [x, y ,z];
+            return render();
+        });
+    } else {
+        if (previousTranslation === null) {
+            previousTranslation = [x, y, z];
+        }
+    }
 }
 
 zoom.on('zoom', zoomed);

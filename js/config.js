@@ -1,7 +1,8 @@
 const config = {
     "HOURS": {
         "NUMBER_OF": 24,
-        "GEOMETRY": []
+        "GEOMETRY": [],
+        "INSTANCES": {}
     },
     "DAYS": {
         "NUMBER_OF": 31,
@@ -16,10 +17,10 @@ const config = {
 
 var font;
 
-const cellSize = 20;
-const dateSize = cellSize / 8;
+const cellSize = 30;
+const dateSize = cellSize / 16;
 const padding = 0.5;
-const hoursArea = cellSize - padding*2 - dateSize*2;
+const hoursArea = cellSize - padding*2 - dateSize*3;
 const fontSize = hoursArea / 24;
 
 const rectMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -68,3 +69,7 @@ var generateTextGeometry = function() {
 
 const hourMaterial = new THREE.MeshBasicMaterial({ color: 0xdddddd });
 const hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
+
+var days = [];
+
+var shiftPressed = false;
