@@ -35,39 +35,18 @@ camera.updateProjectionMatrix();
 
 document.addEventListener('mousemove', onMouseMove, false );
 var raycaster = new THREE.Raycaster();
-
+var intersects;
 function onMouseMove(event) {
 	event.preventDefault();
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    // console.log([mouse.x, mouse.y]);
-    // console.log([event.clientX, event.clientY]);
-    render();
-}
 
-// document.addEventListener('click', onKeyPressed, false);
-// function onKeyPressed(event) {
-    // console.log(event);
-    // if (event.shiftKey) {
-    //     console.log("Shift is pressed.");
-    //     shiftPressed = true;
-    // }
-// }
-
-var renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(sceneSize.width, sceneSize.height);
-renderer.setClearColor(0xcccccc, 1);
-document.body.appendChild(renderer.domElement);
-
-var intersected = [];
-var render = function() {
     raycaster.setFromCamera(mouse, camera);
-	var intersects = raycaster.intersectObjects(scene.children, true);
+	intersects = raycaster.intersectObjects(scene.children, true);
 	
 	for (var j = 0; j < intersected.length; j++) {
         if (intersects.indexOf(intersected[j]) <= 0 && typeof intersected[j].defaultMaterial !== 'undefined') {
-            // intersected[j].material = intersected[j].defaultMaterial.clone();
             intersected[j].onMouseOut();
             intersected.splice(j, 1);
         }
@@ -78,6 +57,26 @@ var render = function() {
         intersect.onMouseHover();
         intersected.push(intersect);
 	}
+
+    render();
+}
+
+document.addEventListener('click', onKeyPressed, false);
+function onKeyPressed(event) {
+    for (var i = 0; i < intersects.length; i++) {
+        var intersect = intersects[i].object;
+        intersect.onMouseClick();
+    }
+}
+
+var renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(sceneSize.width, sceneSize.height);
+renderer.setClearColor(0xcccccc, 1);
+document.body.appendChild(renderer.domElement);
+
+var intersected = [];
+var render = function() {
+    
 	
 	return renderer.render(scene, camera);
 }
@@ -134,42 +133,17 @@ function translate(x, y, z) {
 var aspectRatio = sceneSize.width / sceneSize.height;
 var previousTranslation = null;
 var zoomed = function() {
-    
-    var x, y, z;
-    
-    // if (previousTranslation) {
-        // translate(previousTranslation[0], previousTranslation[1], previousTranslation[2]);
-        // x = previousTranslation[0];
-        // y = previousTranslation[1];
-        // z = previousTranslation[2];
-        // previousTranslation = null;
-    // } else {
-        x = zoom.translate()[0];
-        y = zoom.translate()[1];
+    var x = zoom.translate()[0],
+        y = zoom.translate()[1],
         z = zoom.scale();
-    // }
-    console.log([x, y, z]);
 
-    if (d3.event && !d3.event.sourceEvent.shiftKey) {
-        return requestAnimationFrame(function() {
-            stats.update();
-            
-            if (previousTranslation) {
-                console.log("Previous: " + [x, y, z]);
-                translate(previousTranslation[0], previousTranslation[1], previousTranslation[2]);
-                previousTranslation = null;
-            } else {
-                translate(x, y, z);
-            }
-            // previousTranslation = [x, y ,z];
-            return render();
-        });
-    } else {
-        if (previousTranslation === null) {
-            previousTranslation = [x, y, z];
-        }
-    }
+    return requestAnimationFrame(function() {
+        translate(x, y, z);
+        return render();
+    });
 }
 
 zoom.on('zoom', zoomed);
-view.call(zoom);
+view.call(zoom)
+    .on("dblclick.zoom", null) // disable zoom in on double-click
+;

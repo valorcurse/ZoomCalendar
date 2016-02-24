@@ -1,6 +1,7 @@
 function hour(date) {
     var newHour = new THREE.Object3D();
     newHour.date = date;
+    newHour.selected = false;
     
     var currentHour = date.format("H");    
     newHour.rect = new THREE.Mesh(hourBoxGeom, hourMaterial);
@@ -11,6 +12,7 @@ function hour(date) {
     newHour.rect.defaultMaterial = hourMaterial;
     newHour.rect.onMouseHover = function() { newHour.onMouseHover(); }
     newHour.rect.onMouseOut = function() { newHour.onMouseOut(); }
+    newHour.rect.onMouseClick = function() { newHour.onMouseClick(); }
     newHour.add(newHour.rect);
     
     newHour.text = new THREE.Mesh(config.HOURS.GEOMETRY[currentHour], textMaterial);
@@ -20,15 +22,27 @@ function hour(date) {
     newHour.text.defaultMaterial = textMaterial;
     newHour.text.onMouseHover = function() { newHour.onMouseHover(); }
     newHour.text.onMouseOut = function() { newHour.onMouseOut(); }
+    newHour.text.onMouseClick = function() { newHour.onMouseClick(); }
     newHour.add(newHour.text);
     
     newHour.onMouseHover = function() {
-        newHour.rect.material = newHour.rect.material.clone();
-        newHour.rect.material.color = new THREE.Color(0x00ff00);
+        // newHour.rect.material = newHour.rect.material.clone();
+        // newHour.rect.material.color = new THREE.Color(0x00ff00);
     }
     
     newHour.onMouseOut = function() {
-        newHour.rect.material = newHour.rect.defaultMaterial;
+        // newHour.rect.material = newHour.rect.defaultMaterial;
+    }
+    
+    newHour.onMouseClick = function() {
+        newHour.selected = !newHour.selected;
+        
+        if (newHour.selected) {
+            newHour.rect.material = newHour.rect.material.clone();
+            newHour.rect.material.color = new THREE.Color(0x00ff00);
+        } else {
+            newHour.rect.material = newHour.rect.defaultMaterial;
+        }
     }
     
     config.HOURS.INSTANCES[date] = newHour;
@@ -55,6 +69,8 @@ function day(date) {
             rectMesh.onMouseOut = function() {
                 // rectMesh.material = rectMesh.defaultMaterial;
             }
+            
+            rectMesh.onMouseClick = function() { }
             
             var day = date.date() - 1,
                 month = date.month();
