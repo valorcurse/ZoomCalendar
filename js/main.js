@@ -36,6 +36,7 @@ camera.updateProjectionMatrix();
 document.addEventListener('mousemove', onMouseMove, false );
 var raycaster = new THREE.Raycaster();
 var intersects;
+var selection = { start: null, end: null };
 function onMouseMove(event) {
 	event.preventDefault();
 
@@ -57,15 +58,53 @@ function onMouseMove(event) {
         intersect.onMouseHover();
         intersected.push(intersect);
 	}
+	console.log(intersects[0].object.parent.date)
+// 	if (selection.start && intersects[0].object.date) {
+//         var intersectedHour = intersects[0].object.date.clone();
+//         console.log(selection.start.clone());
+//         console.log(intersectedHour);
+//         // console.log(selection.start.clone().toDate() <= hour);
+//         console.log(intersectedHour.isAfter(selection.start));
+//         console.log("--------------------------------------");
+        // for (var h = selection.start.clone(); intersectedHour.isAfter(h); h.add(1, "hours")) {
+        //     console.log(h.toDate());
+        //     // console.log(intersectedHour);
+        //     // console.log(h <= intersectedHour);
+        //     console.log("--------------------------------------");
+        //     config.HOURS.INSTANCES[h].onMouseHover();
+        // }
+        
+        // if (+selection.start.clone() <= +hour) {
+        //   // && hour <= intersect.parent.date.toDate()) {
+        //     console.log(selection.start);
+        //     config.HOURS.INSTANCES[hour].onMouseHover();
+        // } else {
+        //     config.HOURS.INSTANCES[hour].onMouseOut();
+        // }
+// 	}
 
     render();
 }
 
 document.addEventListener('click', onKeyPressed, false);
 function onKeyPressed(event) {
-    for (var i = 0; i < intersects.length; i++) {
-        var intersect = intersects[i].object;
-        intersect.onMouseClick();
+    if (intersects.length <= 0)
+        return
+        
+    var intersect = intersects[0].object;
+    intersect.onMouseClick();
+    // console.log(intersect.parent.date);
+    if (intersect.parent.date) {
+        // console.log(intersect.parent.date);
+        if (!selection.start) {
+            console.log("Setting start date:")
+            console.log(intersect.parent.date.toDate());
+            console.log("#############################")
+            selection.start = intersect.parent.date;
+        } else {
+            console.log("Setting end date: " + intersect.parent.date)
+            selection.end = intersect.parent.date;
+        }
     }
 }
 

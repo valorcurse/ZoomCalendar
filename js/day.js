@@ -2,6 +2,7 @@ function hour(date) {
     var newHour = new THREE.Object3D();
     newHour.date = date;
     newHour.selected = false;
+    newHour.name = "hour";
     
     var currentHour = date.format("H");    
     newHour.rect = new THREE.Mesh(hourBoxGeom, hourMaterial);
@@ -26,8 +27,10 @@ function hour(date) {
     newHour.add(newHour.text);
     
     newHour.onMouseHover = function() {
-        // newHour.rect.material = newHour.rect.material.clone();
-        // newHour.rect.material.color = new THREE.Color(0x00ff00);
+        if (!newHour.selected) {
+            newHour.rect.material = newHour.rect.material.clone();
+            newHour.rect.material.color = new THREE.Color(0x00ff00);
+        }
     }
     
     newHour.onMouseOut = function() {
@@ -37,9 +40,13 @@ function hour(date) {
     newHour.onMouseClick = function() {
         newHour.selected = !newHour.selected;
         
+        console.log("Hour clicked:");
+        console.log(newHour.date);
+        console.log("############################");
+        
         if (newHour.selected) {
             newHour.rect.material = newHour.rect.material.clone();
-            newHour.rect.material.color = new THREE.Color(0x00ff00);
+            newHour.rect.material.color = new THREE.Color(0x0000ff);
         } else {
             newHour.rect.material = newHour.rect.defaultMaterial;
         }
@@ -61,6 +68,7 @@ function day(date) {
             rectMesh.position.x = x;
             rectMesh.position.y = y;
             rectMesh.defaultMaterial = rectMaterial
+            rectMesh.name = "day";
             rectMesh.onMouseHover = function() {
                 // rectMesh.material = rectMesh.material.clone();
                 // rectMesh.material.color = new THREE.Color( 0xff0000 );
@@ -96,7 +104,8 @@ function day(date) {
             rectMesh.add(textMesh);
             
             for (var i = date.clone().startOf("day"); +i < +date.clone().endOf("day"); i.add(1, "hours")) {
-                // console.log("Creating hour: " + i);
+                // console.log("Creating hour:");
+                // console.log(i.toDate());
                 // console.log(i.format("HH:mm") + " = " + date.clone().endOf("day").format("HH:mm"));
                 // startDate.add(1, "hours");
                 

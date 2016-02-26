@@ -5,6 +5,8 @@ var sass        = require('gulp-sass');
 var browserify  = require('browserify')
 var source      = require('vinyl-source-stream')
 var glob        = require('glob');
+var ts	 	= require('gulp-typescript');
+
 
 
 // Static Server + watching scss/html files
@@ -15,14 +17,10 @@ gulp.task('serve', ['sass'], function() {
     });
 
     gulp.watch("./sass/*.scss", ['sass']).on('change', browserSync.reload);
+    gulp.watch("./ts/*.ts", ['typescript']);
     gulp.watch("./js/*.js").on('change', browserSync.reload);
     gulp.watch("./*.html").on('change', browserSync.reload);
 });
-
-// process JS files and return the stream.
-// create a task that ensures the `js` task is complete before
-// reloading browsers
-
 
 // Compile sass into CSS & auto-inject into browsers
 gulp.task('sass', function() {
@@ -30,6 +28,15 @@ gulp.task('sass', function() {
         .pipe(sass())
         .pipe(gulp.dest("css"))
         .pipe(browserSync.stream());
+});
+
+gulp.task('typescript', function () {
+	return gulp.src('./ts/*.ts')
+		.pipe(ts({
+			noImplicitAny: true,
+			out: 'output.js'
+		}))
+		.pipe(gulp.dest('js/'));
 });
 
 gulp.task('default', ['serve']);

@@ -1,0 +1,15 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "threejs/three.d.ts": {
+      "commit": "193bbd4d668520b3c20a7972b211e9a082e8db8b"
+    },
+    "d3/d3.d.ts": {
+      "commit": "193bbd4d668520b3c20a7972b211e9a082e8db8b"
+    }
+  }
+}

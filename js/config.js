@@ -12,7 +12,6 @@ const config = {
         "NUMBER_OF": 12,
         "GEOMETRY": []
     }
-    
 };
 
 var font;
