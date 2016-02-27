@@ -1,18 +1,19 @@
 ///<reference path="../typings/threejs/three.d.ts"/>
+///<reference path="../typings/d3/d3.d.ts"/>
 // var calendar = freetimeCalendar()
 //     .margin(10)
 // ;
 // d3.select("body")
 //     .call(calendar)
 // ;
-var stats = new Stats();
-stats.setMode(1); // 0: fps, 1: ms, 2: mb
+// var stats = new Stats();
+// stats.setMode( 1 ); // 0: fps, 1: ms, 2: mb
 var mouse = new THREE.Vector2();
 // align top-left
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.left = '0px';
-stats.domElement.style.top = '0px';
-document.body.appendChild(stats.domElement);
+// stats.domElement.style.position = 'absolute';
+// stats.domElement.style.left = '0px';
+// stats.domElement.style.top = '0px';
+// document.body.appendChild( stats.domElement );
 var view;
 var DZOOM = 5;
 // var font;
@@ -124,7 +125,7 @@ loader.load('fonts/helvetiker_regular.typeface.js', function (f) {
     zoomed();
 });
 view = d3.select(renderer.domElement);
-zoom = d3.behavior.zoom()
+var zoom = d3.behavior.zoom()
     .scaleExtent([0.115, 0.45])
     .scale(0.115);
 function translate(x, y, z) {

@@ -1,0 +1,6 @@
+{
+  "ambientDependencies": {
+    "d3": "github:DefinitelyTyped/DefinitelyTyped/d3/d3.d.ts#c09bd959175c3ca80ef4a92bcbac93307f266c12",
+    "three": "github:DefinitelyTyped/DefinitelyTyped/threejs/three.d.ts#c6c3d3e65dd2d7035428f9c7b371ec911ff28542"
+  }
+}
