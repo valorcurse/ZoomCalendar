@@ -1,13 +1,8 @@
-///<reference path="../typings/threejs/three.d.ts"/>
-///<reference path="../typings/d3/d3.d.ts"/>
+///<reference path="../typings/main/ambient/three/three.d.ts"/>
+///<reference path="../typings/main/ambient/d3/d3.d.ts"/>
+///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
 
-// var calendar = freetimeCalendar()
-//     .margin(10)
-// ;
-
-// d3.select("body")
-//     .call(calendar)
-// ;
+/// <reference path="day.ts"/>
 
 
 // var stats = new Stats();
@@ -21,7 +16,7 @@ var mouse = new THREE.Vector2();
 // stats.domElement.style.top = '0px';
 // document.body.appendChild( stats.domElement );
 
-var view;
+var view: any;
 var DZOOM = 5;
 // var font;
 
@@ -38,10 +33,16 @@ camera.updateProjectionMatrix();
 
 document.addEventListener('mousemove', onMouseMove, false );
 var raycaster = new THREE.Raycaster();
-var intersects;
-var selection = { start: null, end: null };
-function onMouseMove(event) {
-	event.preventDefault();
+var intersects: THREE.Intersection[] = [];
+var intersected: THREE.Intersection[] = [];
+interface DateSelection {
+    start?: Date,
+    end?: Date
+}
+var selection: DateSelection = { start: null, end: null };
+function onMouseMove(event: MouseEvent) {
+    console.log(event);
+    event.preventDefault();
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -116,10 +117,7 @@ renderer.setSize(sceneSize.width, sceneSize.height);
 renderer.setClearColor(0xcccccc, 1);
 document.body.appendChild(renderer.domElement);
 
-var intersected = [];
 var render = function() {
-    
-	
 	return renderer.render(scene, camera);
 }
 
@@ -146,6 +144,7 @@ var draw = function() {
     camera.updateProjectionMatrix();
 };
 
+declare module THREE { export var FontLoader }
 var loader = new THREE.FontLoader();
 loader.load('fonts/helvetiker_regular.typeface.js', function (f) {
     font = f;
