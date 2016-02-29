@@ -14,7 +14,7 @@
 //     }
 // };
 ///<reference path="../typings/main/ambient/three/three.d.ts"/>
-///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
+///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
 var Config;
 (function (Config) {
     var HOURS;
@@ -43,7 +43,6 @@ var rectMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
 var rectGeom = new THREE.BoxGeometry(cellSize, cellSize, 0);
 var textMaterial = new THREE.MeshBasicMaterial({
     color: 0x00000,
-    overdraw: true,
     shading: THREE.FlatShading
 });
 var generateTextGeometry = function () {
@@ -63,7 +62,7 @@ var generateTextGeometry = function () {
         });
         Config.DAYS.GEOMETRY.push(dayGeom);
     }
-    var dates = d3.time.months(moment(currentDate).startOf("year"), moment(currentDate).endOf("year"));
+    var dates = d3.time.months(moment(currentDate).startOf("year").toDate(), moment(currentDate).endOf("year").toDate());
     // console.log(dates);
     for (var m = 0; m < dates.length; m++) {
         var date = moment(dates[m]);
@@ -80,6 +79,7 @@ var hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fontS
 var days = [];
 var shiftPressed = false;
 ///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
+///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
 ///<reference path="config.ts"/>
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -102,7 +102,7 @@ var Hour = (function (_super) {
         this.selected = false;
         this.date = date;
         this.name = "hour";
-        draw();
+        this.draw();
     }
     Hour.prototype.draw = function () {
         var currentHour = +this.date.format("H");
@@ -113,14 +113,14 @@ var Hour = (function (_super) {
         // this.rect.onMouseHover = function() { this.onMouseHover(); }
         // this.rect.onMouseOut = function() { this.onMouseOut(); }
         // this.rect.onMouseClick = function() { this.onMouseClick(); }
-        this.add(rect);
-        this.text = new HourMesh(config.HOURS.GEOMETRY[currentHour], textMaterial);
+        this.add(this.rect);
+        this.text = new HourMesh(Config.HOURS.GEOMETRY[currentHour], textMaterial);
         this.text.position.x = -cellSize / 2;
-        this.text.position.y = -cellSize / 2 + (config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding - fontSize / 2;
+        this.text.position.y = -cellSize / 2 + (Config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding - fontSize / 2;
         // this.text.onMouseHover = function() { this.onMouseHover(); }
         // this.text.onMouseOut = function() { this.onMouseOut(); }
         // this.text.onMouseClick = function() { this.onMouseClick(); }
-        this.add(text);
+        this.add(this.text);
         // this.onMouseHover = function() {
         //     if (!this.selected) {
         //         rect.material = rect.material.clone();
@@ -142,42 +142,43 @@ var Hour = (function (_super) {
         //         this.rect.material = rect.defaultMaterial;
         //     }
         // }
-        config.HOURS.INSTANCES[date] = this;
+        // Config.HOURS.INSTANCES[this.date] = this;
     };
     return Hour;
 }(THREE.Object3D));
 var Day = (function (_super) {
     __extends(Day, _super);
     function Day(date) {
-        _super.call(this, this.geometry, this.material);
+        _super.call(this, rectGeom, rectMaterial);
         this.margin = 0.1;
         this.cellSize = 30;
         this.material = rectMaterial;
         this.geometry = rectGeom;
-        var weekOfMonth = date.week();
-        var dayOfMonth = date.day();
-        this.position.x = dayOfMonth * this.cellSize + dayOfMonth * this.margin;
-        this.position.y = -weekOfMonth * this.cellSize + -weekOfMonth * this.margin;
-        this.name = "day";
-        draw();
+        this.date = date;
+        this.draw();
     }
     Day.prototype.draw = function () {
         // var rectMesh = new THREE.Mesh(rectGeom, rectMaterial);
-        this.position.x = x;
-        this.position.y = y;
+        // this.position.x = x;
+        // this.position.y = y;
+        this.name = "day";
+        var weekOfMonth = this.date.week();
+        var dayOfMonth = this.date.day();
+        this.position.x = dayOfMonth * this.cellSize + dayOfMonth * this.margin;
+        this.position.y = -weekOfMonth * this.cellSize + -weekOfMonth * this.margin;
         // this.name = "day";
-        this.onMouseHover = function () {
-            // rectMesh.material = rectMesh.material.clone();
-            // rectMesh.material.color = new THREE.Color( 0xff0000 );
-        };
-        this.onMouseOut = function () {
-            // rectMesh.material = rectMesh.defaultMaterial;
-        };
-        this.onMouseClick = function () { };
-        var day = date.date() - 1, month = date.month();
-        var dayMesh = new THREE.Mesh(config.DAYS.GEOMETRY[day], textMaterial), monthMesh = new THREE.Mesh(config.MONTHS.GEOMETRY[month], textMaterial);
-        dayMesh.defaultMaterial = textMaterial;
-        monthMesh.defaultMaterial = textMaterial;
+        // this.onMouseHover = function() {
+        // rectMesh.material = rectMesh.material.clone();
+        // rectMesh.material.color = new THREE.Color( 0xff0000 );
+        // }
+        // this.onMouseOut = function() {
+        // rectMesh.material = rectMesh.defaultMaterial;
+        // }
+        // this.onMouseClick = function() { }
+        var day = this.date.date() - 1, month = this.date.month();
+        var dayMesh = new THREE.Mesh(Config.DAYS.GEOMETRY[day], textMaterial), monthMesh = new THREE.Mesh(Config.MONTHS.GEOMETRY[month], textMaterial);
+        // dayMesh.defaultMaterial = textMaterial;
+        // monthMesh.defaultMaterial = textMaterial;
         var dayBB = new THREE.Box3();
         dayBB.setFromObject(dayMesh);
         monthMesh.position.x = dayBB.max.x + padding * 2;
@@ -189,7 +190,7 @@ var Day = (function (_super) {
         textMesh.position.x = -cellSize / 4;
         textMesh.position.y = cellSize / 2 - bb.max.y - padding;
         this.add(textMesh);
-        for (var i = date.clone().startOf("day"); +i < +date.clone().endOf("day"); i.add(1, "hours")) {
+        for (var i = this.date.startOf("day"); i < this.date.endOf("day"); i.add(1, "hours")) {
             // console.log("Creating hour:");
             // console.log(i.toDate());
             // console.log(i.format("HH:mm") + " = " + date.clone().endOf("day").format("HH:mm"));
@@ -197,15 +198,18 @@ var Day = (function (_super) {
             // startDate;
             // console.log(startDate);
             // console.log(startDate.isBefore(date.endOf("day")));
-            this.add(hour(i));
+            this.add(new Hour(i));
         }
     };
     return Day;
 }(THREE.Mesh));
 ///<reference path="../typings/main/ambient/three/three.d.ts"/>
 ///<reference path="../typings/main/ambient/d3/d3.d.ts"/>
-///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
+///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
+/// <reference path="config.ts"/>
 /// <reference path="day.ts"/>
+// import Moment = moment.Moment;
+// declare var Moment: moment.Moment;
 // var stats = new Stats();
 // stats.setMode( 1 ); // 0: fps, 1: ms, 2: mb
 var mouse = new THREE.Vector2();
@@ -232,24 +236,22 @@ var intersects = [];
 var intersected = [];
 var selection = { start: null, end: null };
 function onMouseMove(event) {
-    console.log(event);
+    // console.log(event);
     event.preventDefault();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
     intersects = raycaster.intersectObjects(scene.children, true);
     for (var j = 0; j < intersected.length; j++) {
-        if (intersects.indexOf(intersected[j]) <= 0 && typeof intersected[j].defaultMaterial !== 'undefined') {
-            intersected[j].onMouseOut();
+        if (intersects.indexOf(intersected[j]) <= 0) {
+            // intersected[j].onMouseOut();
             intersected.splice(j, 1);
         }
     }
     for (var i = 0; i < intersects.length; i++) {
         var intersect = intersects[i].object;
-        intersect.onMouseHover();
-        intersected.push(intersect);
     }
-    console.log(intersects[0].object.parent.date);
+    // 	console.log(intersects[0].object.parent.date)
     // 	if (selection.start && intersects[0].object.date) {
     //         var intersectedHour = intersects[0].object.date.clone();
     //         console.log(selection.start.clone());
@@ -274,26 +276,25 @@ function onMouseMove(event) {
     // 	}
     render();
 }
-document.addEventListener('click', onKeyPressed, false);
-function onKeyPressed(event) {
+document.addEventListener('click', onClick, false);
+function onClick(event) {
     if (intersects.length <= 0)
         return;
     var intersect = intersects[0].object;
-    intersect.onMouseClick();
+    // intersect.onMouseClick();
     // console.log(intersect.parent.date);
-    if (intersect.parent.date) {
-        // console.log(intersect.parent.date);
-        if (!selection.start) {
-            console.log("Setting start date:");
-            console.log(intersect.parent.date.toDate());
-            console.log("#############################");
-            selection.start = intersect.parent.date;
-        }
-        else {
-            console.log("Setting end date: " + intersect.parent.date);
-            selection.end = intersect.parent.date;
-        }
-    }
+    // if (intersect.parent.date) {
+    // console.log(intersect.parent.date);
+    // if (!selection.start) {
+    // console.log("Setting start date:")
+    // console.log(intersect.parent.date.toDate());
+    // console.log("#############################")
+    // selection.start = intersect.parent.date;
+    // } else {
+    // console.log("Setting end date: " + intersect.parent.date)
+    // selection.end = intersect.parent.date;
+    // }
+    // }
 }
 var renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(sceneSize.width, sceneSize.height);
@@ -304,12 +305,12 @@ var render = function () {
 };
 var year = 2016, month = 1, currentDate = new Date(year, month);
 // var dates = d3.time.days(moment(currentDate).startOf("month"), moment(currentDate).add(1, "month").endOf("month"))
-var dates = d3.time.days(moment(currentDate).startOf("year"), moment(currentDate).endOf("month"));
+var dates = d3.time.days(moment(currentDate).startOf("year").toDate(), moment(currentDate).endOf("month").toDate());
 // var dates = d3.time.days(moment(currentDate).startOf("year"), moment(currentDate).endOf("year"))
 var draw = function () {
     for (var i = 0; i < dates.length; i++) {
         var date = moment(dates[i]);
-        var newDay = day(date).create();
+        var newDay = new Day(date);
         scene.add(newDay);
     }
     var cameraBB = new THREE.Box3();
@@ -338,8 +339,6 @@ function translate(x, y, z) {
     camera.bottom = -DZOOM / z + y / sceneSize.height * DZOOM / z * 2;
     camera.updateProjectionMatrix();
 }
-var aspectRatio = sceneSize.width / sceneSize.height;
-var previousTranslation = null;
 var zoomed = function () {
     var x = zoom.translate()[0], y = zoom.translate()[1], z = zoom.scale();
     return requestAnimationFrame(function () {

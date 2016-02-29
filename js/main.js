@@ -58,7 +58,7 @@ function onMouseMove(event) {
         intersect.onMouseHover();
         intersected.push(intersect);
 	}
-	console.log(intersects[0].object.parent.date)
+// 	console.log(intersects[0].object.parent.date)
 // 	if (selection.start && intersects[0].object.date) {
 //         var intersectedHour = intersects[0].object.date.clone();
 //         console.log(selection.start.clone());

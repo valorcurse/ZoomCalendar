@@ -1,4 +1,5 @@
 ///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
+///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
 ///<reference path="config.ts"/>
 
  class HourMesh extends THREE.Mesh {
@@ -25,7 +26,7 @@ class Hour extends THREE.Object3D {
         this.date = date;
         this.name = "hour";
         
-        draw();
+        this.draw();
     }
     
     draw() {
@@ -39,16 +40,16 @@ class Hour extends THREE.Object3D {
         // this.rect.onMouseHover = function() { this.onMouseHover(); }
         // this.rect.onMouseOut = function() { this.onMouseOut(); }
         // this.rect.onMouseClick = function() { this.onMouseClick(); }
-        this.add(rect);
+        this.add(this.rect);
         
-        this.text = new HourMesh(config.HOURS.GEOMETRY[currentHour], textMaterial);
+        this.text = new HourMesh(Config.HOURS.GEOMETRY[currentHour], textMaterial);
         this.text.position.x = -cellSize / 2;
-        this.text.position.y = -cellSize / 2 +  (config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding - fontSize / 2;
+        this.text.position.y = -cellSize / 2 +  (Config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding - fontSize / 2;
     
         // this.text.onMouseHover = function() { this.onMouseHover(); }
         // this.text.onMouseOut = function() { this.onMouseOut(); }
         // this.text.onMouseClick = function() { this.onMouseClick(); }
-        this.add(text);
+        this.add(this.text);
         
         // this.onMouseHover = function() {
         //     if (!this.selected) {
@@ -76,7 +77,7 @@ class Hour extends THREE.Object3D {
         //     }
         // }
         
-        config.HOURS.INSTANCES[date] = this;
+        // Config.HOURS.INSTANCES[this.date] = this;
     }
 }
 
@@ -85,44 +86,45 @@ class Day extends THREE.Mesh {
         cellSize: number = 30;
         material: THREE.MeshBasicMaterial = rectMaterial;
         geometry: THREE.BoxGeometry = rectGeom;
+        date: moment.Moment;
         
         constructor(date: moment.Moment) {
-            super(this.geometry, this.material);
-            
-            var weekOfMonth: number = date.week();
-            var dayOfMonth: number = date.day();
-            this.position.x = dayOfMonth * this.cellSize + dayOfMonth * this.margin;
-            this.position.y = -weekOfMonth * this.cellSize + -weekOfMonth * this.margin;
-            this.name = "day";
-            
-            draw();
+            super(rectGeom, rectMaterial);
+            this.date = date;
+            this.draw();
         }
 
         draw() {
             // var rectMesh = new THREE.Mesh(rectGeom, rectMaterial);
-            this.position.x = x;
-            this.position.y = y;
+            // this.position.x = x;
+            // this.position.y = y;
+            this.name = "day";
+            
+            var weekOfMonth: number = this.date.week();
+            var dayOfMonth: number = this.date.day();
+            this.position.x = dayOfMonth * this.cellSize + dayOfMonth * this.margin;
+            this.position.y = -weekOfMonth * this.cellSize + -weekOfMonth * this.margin;
             
             // this.name = "day";
-            this.onMouseHover = function() {
+            // this.onMouseHover = function() {
                 // rectMesh.material = rectMesh.material.clone();
                 // rectMesh.material.color = new THREE.Color( 0xff0000 );
-            }
+            // }
             
-            this.onMouseOut = function() {
+            // this.onMouseOut = function() {
                 // rectMesh.material = rectMesh.defaultMaterial;
-            }
+            // }
             
-            this.onMouseClick = function() { }
+            // this.onMouseClick = function() { }
             
-            var day = date.date() - 1,
-                month = date.month();
+            var day = this.date.date() - 1,
+                month = this.date.month();
 
-            var dayMesh = new THREE.Mesh(config.DAYS.GEOMETRY[day], textMaterial),
-                monthMesh = new THREE.Mesh(config.MONTHS.GEOMETRY[month], textMaterial);
+            var dayMesh = new THREE.Mesh(Config.DAYS.GEOMETRY[day], textMaterial),
+                monthMesh = new THREE.Mesh(Config.MONTHS.GEOMETRY[month], textMaterial);
             
-            dayMesh.defaultMaterial = textMaterial;
-            monthMesh.defaultMaterial = textMaterial;
+            // dayMesh.defaultMaterial = textMaterial;
+            // monthMesh.defaultMaterial = textMaterial;
             
             var dayBB = new THREE.Box3();
             dayBB.setFromObject(dayMesh);
@@ -138,7 +140,7 @@ class Day extends THREE.Mesh {
             textMesh.position.y = cellSize / 2 - bb.max.y - padding;
             this.add(textMesh);
             
-            for (var i = date.clone().startOf("day"); +i < +date.clone().endOf("day"); i.add(1, "hours")) {
+            for (var i = this.date.startOf("day"); i < this.date.endOf("day"); i.add(1, "hours")) {
                 // console.log("Creating hour:");
                 // console.log(i.toDate());
                 // console.log(i.format("HH:mm") + " = " + date.clone().endOf("day").format("HH:mm"));
@@ -148,7 +150,7 @@ class Day extends THREE.Mesh {
                 // console.log(startDate);
                 // console.log(startDate.isBefore(date.endOf("day")));
                 
-                this.add(hour(i));
+                this.add(new Hour(i));
             }
         }
     

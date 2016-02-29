@@ -15,7 +15,7 @@
 // };
 
 ///<reference path="../typings/main/ambient/three/three.d.ts"/>
-///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
+///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
 declare module THREE { 
     export var FontLoader: any;
     export class Font {
@@ -57,7 +57,6 @@ const rectGeom = new THREE.BoxGeometry(cellSize, cellSize, 0);
 
 const textMaterial = new THREE.MeshBasicMaterial({
     color: 0x00000,
-    overdraw: true,
     shading: THREE.FlatShading
 });
 
@@ -82,7 +81,7 @@ var generateTextGeometry = function() {
         Config.DAYS.GEOMETRY.push(dayGeom)
     }
     
-    var dates = d3.time.months(moment(currentDate).startOf("year"), moment(currentDate).endOf("year"));
+    var dates = d3.time.months(moment(currentDate).startOf("year").toDate(), moment(currentDate).endOf("year").toDate());
     // console.log(dates);
     for (var m = 0; m < dates.length; m++) {
         var date = moment(dates[m]);
@@ -99,6 +98,6 @@ var generateTextGeometry = function() {
 const hourMaterial = new THREE.MeshBasicMaterial({ color: 0xdddddd });
 const hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
 
-var days: Day = [];
+var days: Day[] = [];
 
 var shiftPressed = false;
