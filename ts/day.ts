@@ -1,93 +1,119 @@
 ///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
 ///<reference path="config.ts"/>
 
-function hour(date) {
-    var newHour = new THREE.Object3D();
-    newHour.date = date;
-    newHour.selected = false;
-    newHour.name = "hour";
-    
-    var currentHour = date.format("H");    
-    newHour.rect = new THREE.Mesh(hourBoxGeom, hourMaterial);
-    newHour.rect.position.y = -(cellSize / 2) + (config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding;
-    newHour.rect.position.x = fontSize / 2;
-    newHour.rect.position.z = 5;
-
-    newHour.rect.defaultMaterial = hourMaterial;
-    newHour.rect.onMouseHover = function() { newHour.onMouseHover(); }
-    newHour.rect.onMouseOut = function() { newHour.onMouseOut(); }
-    newHour.rect.onMouseClick = function() { newHour.onMouseClick(); }
-    newHour.add(newHour.rect);
-    
-    newHour.text = new THREE.Mesh(config.HOURS.GEOMETRY[currentHour], textMaterial);
-    newHour.text.position.x = -cellSize / 2;
-    newHour.text.position.y = -cellSize / 2 +  (config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding - fontSize / 2;
-
-    newHour.text.defaultMaterial = textMaterial;
-    newHour.text.onMouseHover = function() { newHour.onMouseHover(); }
-    newHour.text.onMouseOut = function() { newHour.onMouseOut(); }
-    newHour.text.onMouseClick = function() { newHour.onMouseClick(); }
-    newHour.add(newHour.text);
-    
-    newHour.onMouseHover = function() {
-        if (!newHour.selected) {
-            newHour.rect.material = newHour.rect.material.clone();
-            newHour.rect.material.color = new THREE.Color(0x00ff00);
-        }
-    }
-    
-    newHour.onMouseOut = function() {
-        // newHour.rect.material = newHour.rect.defaultMaterial;
-    }
-    
-    newHour.onMouseClick = function() {
-        newHour.selected = !newHour.selected;
+ class HourMesh extends THREE.Mesh {
+    defaultGeometry: THREE.Geometry;
+    defaultMaterial: THREE.Material;
         
-        console.log("Hour clicked:");
-        console.log(newHour.date);
-        console.log("############################");
-        
-        if (newHour.selected) {
-            newHour.rect.material = newHour.rect.material.clone();
-            newHour.rect.material.color = new THREE.Color(0x0000ff);
-        } else {
-            newHour.rect.material = newHour.rect.defaultMaterial;
-        }
+    constructor(geometry: THREE.Geometry, material: THREE.Material) {
+        super(geometry, material);
+        this.defaultGeometry = geometry;
+        this.defaultMaterial = material;
     }
-    
-    config.HOURS.INSTANCES[date] = newHour;
-    return newHour;
 }
 
-class Day {
+class Hour extends THREE.Object3D {
+    date: moment.Moment;
+    selected: boolean = false;
+    
+    rect: THREE.Mesh;
+    text: THREE.Mesh;
+    
+    constructor(date: moment.Moment) {
+        super();
+        
+        this.date = date;
+        this.name = "hour";
+        
+        draw();
+    }
+    
+    draw() {
+        var currentHour: number = +this.date.format("H");
+        
+        this.rect = new HourMesh(hourBoxGeom, hourMaterial);
+        this.rect.position.y = -(cellSize / 2) + (Config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding;
+        this.rect.position.x = fontSize / 2;
+        this.rect.position.z = 5;
+    
+        // this.rect.onMouseHover = function() { this.onMouseHover(); }
+        // this.rect.onMouseOut = function() { this.onMouseOut(); }
+        // this.rect.onMouseClick = function() { this.onMouseClick(); }
+        this.add(rect);
+        
+        this.text = new HourMesh(config.HOURS.GEOMETRY[currentHour], textMaterial);
+        this.text.position.x = -cellSize / 2;
+        this.text.position.y = -cellSize / 2 +  (config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding - fontSize / 2;
+    
+        // this.text.onMouseHover = function() { this.onMouseHover(); }
+        // this.text.onMouseOut = function() { this.onMouseOut(); }
+        // this.text.onMouseClick = function() { this.onMouseClick(); }
+        this.add(text);
+        
+        // this.onMouseHover = function() {
+        //     if (!this.selected) {
+        //         rect.material = rect.material.clone();
+        //         rect.material.color = new THREE.Color(0x00ff00);
+        //     }
+        // }
+        
+        // this.onMouseOut = function() {
+        //     // this.rect.material = this.rect.defaultMaterial;
+        // }
+        
+        // this.onMouseClick = function() {
+        //     this.selected = !this.selected;
+            
+        //     console.log("Hour clicked:");
+        //     console.log(this.date);
+        //     console.log("############################");
+            
+        //     if (this.selected) {
+        //         rect.material = rect.material.clone();
+        //         this.rect.material.color = new THREE.Color(0x0000ff);
+        //     } else {
+        //         this.rect.material = rect.defaultMaterial;
+        //     }
+        // }
+        
+        config.HOURS.INSTANCES[date] = this;
+    }
+}
+
+class Day extends THREE.Mesh {
         margin: number = 0.1;
         cellSize: number = 30;
-        x: number;
-        weekOfMonth: number;
-        y: number;
+        material: THREE.MeshBasicMaterial = rectMaterial;
+        geometry: THREE.BoxGeometry = rectGeom;
         
         constructor(date: moment.Moment) {
-            this.x = date.day() * this.cellSize + date.day() * this.margin;
-            this.weekOfMonth = date.week();
-            this.y = -this.weekOfMonth * this.cellSize + -this.weekOfMonth * this.margin;
+            super(this.geometry, this.material);
+            
+            var weekOfMonth: number = date.week();
+            var dayOfMonth: number = date.day();
+            this.position.x = dayOfMonth * this.cellSize + dayOfMonth * this.margin;
+            this.position.y = -weekOfMonth * this.cellSize + -weekOfMonth * this.margin;
+            this.name = "day";
+            
+            draw();
         }
 
         draw() {
-            var rectMesh = new THREE.Mesh(rectGeom, rectMaterial);
-            rectMesh.position.x = x;
-            rectMesh.position.y = y;
-            rectMesh.defaultMaterial = rectMaterial
-            rectMesh.name = "day";
-            rectMesh.onMouseHover = function() {
+            // var rectMesh = new THREE.Mesh(rectGeom, rectMaterial);
+            this.position.x = x;
+            this.position.y = y;
+            
+            // this.name = "day";
+            this.onMouseHover = function() {
                 // rectMesh.material = rectMesh.material.clone();
                 // rectMesh.material.color = new THREE.Color( 0xff0000 );
             }
             
-            rectMesh.onMouseOut = function() {
+            this.onMouseOut = function() {
                 // rectMesh.material = rectMesh.defaultMaterial;
             }
             
-            rectMesh.onMouseClick = function() { }
+            this.onMouseClick = function() { }
             
             var day = date.date() - 1,
                 month = date.month();
@@ -110,7 +136,7 @@ class Day {
             bb.setFromObject(textMesh);
             textMesh.position.x = -cellSize / 4;
             textMesh.position.y = cellSize / 2 - bb.max.y - padding;
-            rectMesh.add(textMesh);
+            this.add(textMesh);
             
             for (var i = date.clone().startOf("day"); +i < +date.clone().endOf("day"); i.add(1, "hours")) {
                 // console.log("Creating hour:");
@@ -122,10 +148,8 @@ class Day {
                 // console.log(startDate);
                 // console.log(startDate.isBefore(date.endOf("day")));
                 
-                rectMesh.add(hour(i));
+                this.add(hour(i));
             }
-
-            return rectMesh;
         }
     
     //     my.cellSize = function(value) {

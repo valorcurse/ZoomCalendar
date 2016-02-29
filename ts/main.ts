@@ -144,7 +144,6 @@ var draw = function() {
     camera.updateProjectionMatrix();
 };
 
-declare module THREE { export var FontLoader }
 var loader = new THREE.FontLoader();
 loader.load('fonts/helvetiker_regular.typeface.js', function (f) {
     font = f;
