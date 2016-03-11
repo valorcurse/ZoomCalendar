@@ -1,6 +1,8 @@
 ///<reference path="../typings/main/ambient/three/three.d.ts"/>
 ///<reference path="../typings/main/ambient/d3/d3.d.ts"/>
+///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
 ///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
+
 
 /// <reference path="config.ts"/>
 /// <reference path="day.ts"/>
@@ -37,10 +39,11 @@ camera.updateProjectionMatrix();
 document.addEventListener('mousemove', onMouseMove, false );
 var raycaster = new THREE.Raycaster();
 var intersects: THREE.Intersection[] = [];
-var intersected: THREE.Intersection[] = [];
+// var oldIntersects: THREE.Intersection[] = [];
+var oldIntersects: Hour[] = [];
 interface DateSelection {
-    start?: Date,
-    end?: Date
+    start?: Hour,
+    end?: Hour
 }
 var selection: DateSelection = { start: null, end: null };
 function onMouseMove(event: MouseEvent) {
@@ -52,44 +55,48 @@ function onMouseMove(event: MouseEvent) {
 
     raycaster.setFromCamera(mouse, camera);
 	intersects = raycaster.intersectObjects(scene.children, true);
-	
-	for (var j = 0; j < intersected.length; j++) {
-        if (intersects.indexOf(intersected[j]) <= 0) {
-            // intersected[j].onMouseOut();
-            intersected.splice(j, 1);
+    
+    // Unhover hours which are no longer being hovered
+	for (var j = 0; j < oldIntersects.length; j++) {
+        var oldIntersect = oldIntersects[j];
+
+        // if (intersects.indexOf(intersect) <= 0) {
+        //     var objectsParent = intersect.object.parent;
+        //     if (objectsParent instanceof Hour) {
+        //         var hour: Hour = objectsParent as Hour;
+        //         hour.onMouseOut();
+        //     }
+
+        //     oldIntersects.splice(j, 1);
+        // }
+        // console.log(oldIntersect);
+        
+        if (!oldIntersect.date.isBefore(selection.end.date)) {
+            // var objectsParent = intersect.object.parent;
+            var hour: Hour = oldIntersect as Hour;
+            hour.onMouseOut();
+            oldIntersects.splice(j, 1);
         }
 	}
 	
+	// Select last hour for selection
 	for (var i = 0; i < intersects.length; i++) {
-        var intersect = intersects[i].object;
-        // intersect.onMouseHover();
-        // intersected.push(intersect);
-	}
-// 	console.log(intersects[0].object.parent.date)
-	
-// 	if (selection.start && intersects[0].object.date) {
-//         var intersectedHour = intersects[0].object.date.clone();
-//         console.log(selection.start.clone());
-//         console.log(intersectedHour);
-//         // console.log(selection.start.clone().toDate() <= hour);
-//         console.log(intersectedHour.isAfter(selection.start));
-//         console.log("--------------------------------------");
-        // for (var h = selection.start.clone(); intersectedHour.isAfter(h); h.add(1, "hours")) {
-        //     console.log(h.toDate());
-        //     // console.log(intersectedHour);
-        //     // console.log(h <= intersectedHour);
-        //     console.log("--------------------------------------");
-        //     config.HOURS.INSTANCES[h].onMouseHover();
-        // }
+        var intersect = intersects[i];
         
-        // if (+selection.start.clone() <= +hour) {
-        //   // && hour <= intersect.parent.date.toDate()) {
-        //     console.log(selection.start);
-        //     config.HOURS.INSTANCES[hour].onMouseHover();
-        // } else {
-        //     config.HOURS.INSTANCES[hour].onMouseOut();
-        // }
-// 	}
+        if (intersect.object.hoverable) {
+            if (intersect.object.parent instanceof Hour) {
+                var hour: Hour = intersect.object.parent as Hour;
+                selection.end = hour;
+            }
+        }
+	}
+    
+    // Hover over all hour between start and end
+    for (var d = selection.start.date.clone(); d.isBefore(selection.end.date); d.add(1, "hour")) {
+        var selectedHour = Config.HOURS.INSTANCES[+d];
+        selectedHour.onMouseHover();
+        oldIntersects.push(selectedHour);
+    }
 
     render();
 }
@@ -99,8 +106,13 @@ function onClick(event: MouseEvent) {
     if (intersects.length <= 0)
         return
         
-    var intersect = intersects[0].object;
-    // intersect.onMouseClick();
+    var intersect = intersects[0];
+    var objectsParent = intersect.object.parent;
+    if (objectsParent instanceof Hour) {
+        var hour: Hour = objectsParent as Hour;
+        selection.start = hour;
+        hour.onMouseClick();
+    }
     // console.log(intersect.parent.date);
     // if (intersect.parent.date) {
         // console.log(intersect.parent.date);
@@ -136,7 +148,7 @@ var dates = d3.time.days(moment(currentDate).startOf("year").toDate(), moment(cu
 var draw = function() {
     for (var i = 0; i < dates.length; i++) {
         var date = moment(dates[i]);
-        
+        // console.log(date);
         var newDay = new Day(date);
         scene.add(newDay);
     }
@@ -148,21 +160,25 @@ var draw = function() {
     camera.updateProjectionMatrix();
 };
 
+view = d3.select(renderer.domElement);
+var zoom = d3.behavior.zoom()
+    .scaleExtent([0.06, 0.45])
+    .scale(0.06)
+    .translate([-975, 100])
+;
+
 var loader = new THREE.FontLoader();
 loader.load('fonts/helvetiker_regular.typeface.js', function (f: THREE.Font) {
     font = f;
     generateTextGeometry();
     draw();
+    
     render();
     zoomed();
 });
 
 
-view = d3.select(renderer.domElement);
-var zoom = d3.behavior.zoom()
-    .scaleExtent([0.115, 0.45])
-    .scale(0.115)
-;
+
 
 function translate(x: number, y: number, z: number) {
     x = x - sceneSize.width / 2;
@@ -178,12 +194,12 @@ var zoomed = function() {
     var x = zoom.translate()[0],
         y = zoom.translate()[1],
         z = zoom.scale();
-
+    
     return requestAnimationFrame(function() {
         translate(x, y, z);
         return render();
     });
-}
+};
 
 zoom.on('zoom', zoomed);
 view.call(zoom)

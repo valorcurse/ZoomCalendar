@@ -22,7 +22,6 @@ declare module THREE {
         constructor(font: any);
     }
     export class TextGeometry extends Geometry {
-        // constructor(font?: THREE.Font, size?: number, height?: number, curveSegments?: number, bevelEnabled?: boolean, bevelThickness?: number, bevelSize?: number);
         constructor(font: THREE.Font, parameters?: any);
     }
 }
@@ -31,6 +30,7 @@ module Config {
     export module HOURS {
         export const NUMBER_OF: number = 24;
         export var  GEOMETRY: THREE.TextGeometry[] = [];
+        export var INSTANCES: { [date: number]: Hour; } = { };
     }
     
     export module DAYS {
