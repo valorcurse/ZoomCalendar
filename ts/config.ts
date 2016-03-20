@@ -23,7 +23,7 @@ declare module THREE {
     }
     export class TextGeometry extends Geometry {
         constructor(font: THREE.Font, parameters?: any);
-    }
+    }k
 }
 
 module Config {
@@ -60,40 +60,6 @@ const textMaterial = new THREE.MeshBasicMaterial({
     shading: THREE.FlatShading
 });
 
-var generateTextGeometry = function() {
-    for (var h = 1; h <= Config.HOURS.NUMBER_OF; h++) {
-        var hourGeom = new THREE.TextGeometry(h, {
-            font: font,
-            size: fontSize,
-            dynamic: false
-        });
-        
-        Config.HOURS.GEOMETRY.push(hourGeom)
-    }
-    
-    for (var d = 1; d <= Config.DAYS.NUMBER_OF; d++) {
-        var dayGeom = new THREE.TextGeometry(d, {
-            font: font,
-            size: dateSize,
-            dynamic: false
-        });
-        
-        Config.DAYS.GEOMETRY.push(dayGeom)
-    }
-    
-    var dates = d3.time.months(moment(currentDate).startOf("year").toDate(), moment(currentDate).endOf("year").toDate());
-    // console.log(dates);
-    for (var m = 0; m < dates.length; m++) {
-        var date = moment(dates[m]);
-        var monthGeom = new THREE.TextGeometry(date.format("MMM"), {
-            font: font,
-            size: dateSize,
-            dynamic: false
-        });
-        
-        Config.MONTHS.GEOMETRY.push(monthGeom);
-    }
-}
 
 const hourMaterial = new THREE.MeshBasicMaterial({ color: 0xdddddd });
 const hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
@@ -101,3 +67,8 @@ const hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fon
 var days: Day[] = [];
 
 var shiftPressed = false;
+
+interface Point {
+    x?: number;
+    y?: number;
+}

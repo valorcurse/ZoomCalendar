@@ -34,7 +34,7 @@ gulp.task('typescript', function () {
 	return gulp.src('./ts/*.ts')
 		.pipe(ts({
 			noImplicitAny: true,
-			out: 'output.js'
+			out: 'main.js'
 		}))
 		.pipe(gulp.dest('js/'));
 });
