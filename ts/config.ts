@@ -1,21 +1,6 @@
-// const config = {
-//     "HOURS": {
-//         "NUMBER_OF": 24,
-//         "GEOMETRY": [],
-//         "INSTANCES": {}
-//     },
-//     "DAYS": {
-//         "NUMBER_OF": 31,
-//         "GEOMETRY": []
-//     },
-//     "MONTHS": {
-//         "NUMBER_OF": 12,
-//         "GEOMETRY": []
-//     }
-// };
-
 ///<reference path="../typings/main/ambient/three/three.d.ts"/>
 ///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
+
 declare module THREE { 
     export var FontLoader: any;
     export class Font {
@@ -23,7 +8,7 @@ declare module THREE {
     }
     export class TextGeometry extends Geometry {
         constructor(font: THREE.Font, parameters?: any);
-    }k
+    }
 }
 
 module Config {
@@ -44,7 +29,7 @@ module Config {
     }
 }
 
-var font: THREE.Font;
+// var font: THREE.Font;
 
 const cellSize = 30;
 const dateSize = cellSize / 16;

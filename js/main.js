@@ -1,188 +1,347 @@
-// var calendar = freetimeCalendar()
-//     .margin(10)
-// ;
-
-// d3.select("body")
-//     .call(calendar)
-// ;
-
-
-var stats = new Stats();
-stats.setMode( 1 ); // 0: fps, 1: ms, 2: mb
-
-var mouse = new THREE.Vector2();
-
-// align top-left
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.left = '0px';
-stats.domElement.style.top = '0px';
-document.body.appendChild( stats.domElement );
-
-var view;
-var DZOOM = 5;
-// var font;
-
-var scene = new THREE.Scene();
-scene.updateMatrixWorld(true);
-
-var sceneSize = {"width": window.innerWidth * 0.98, "height": window.innerHeight * 0.97};
-var aspect = sceneSize.width / sceneSize.height;
-// var camera = new THREE.OrthographicCamera(0, 2 * DZOOM * aspect, 0, -2 * DZOOM, -1000, 1000);
-var camera = new THREE.OrthographicCamera(0, sceneSize.width, 0, sceneSize.width, -1000, 1000);
-camera.updateProjectionMatrix();
-// camera.position.set(-50, 50, 0);
-// camera.position.set(scene.position);
-
-document.addEventListener('mousemove', onMouseMove, false );
-var raycaster = new THREE.Raycaster();
-var intersects;
-var selection = { start: null, end: null };
-function onMouseMove(event) {
-	event.preventDefault();
-
-	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-	intersects = raycaster.intersectObjects(scene.children, true);
-	
-	for (var j = 0; j < intersected.length; j++) {
-        if (intersects.indexOf(intersected[j]) <= 0 && typeof intersected[j].defaultMaterial !== 'undefined') {
-            intersected[j].onMouseOut();
-            intersected.splice(j, 1);
-        }
-	}
-	
-	for (var i = 0; i < intersects.length; i++) {
-        var intersect = intersects[i].object;
-        intersect.onMouseHover();
-        intersected.push(intersect);
-	}
-// 	console.log(intersects[0].object.parent.date)
-// 	if (selection.start && intersects[0].object.date) {
-//         var intersectedHour = intersects[0].object.date.clone();
-//         console.log(selection.start.clone());
-//         console.log(intersectedHour);
-//         // console.log(selection.start.clone().toDate() <= hour);
-//         console.log(intersectedHour.isAfter(selection.start));
-//         console.log("--------------------------------------");
-        // for (var h = selection.start.clone(); intersectedHour.isAfter(h); h.add(1, "hours")) {
-        //     console.log(h.toDate());
-        //     // console.log(intersectedHour);
-        //     // console.log(h <= intersectedHour);
-        //     console.log("--------------------------------------");
-        //     config.HOURS.INSTANCES[h].onMouseHover();
-        // }
-        
-        // if (+selection.start.clone() <= +hour) {
-        //   // && hour <= intersect.parent.date.toDate()) {
-        //     console.log(selection.start);
-        //     config.HOURS.INSTANCES[hour].onMouseHover();
-        // } else {
-        //     config.HOURS.INSTANCES[hour].onMouseOut();
-        // }
-// 	}
-
-    render();
-}
-
-document.addEventListener('click', onKeyPressed, false);
-function onKeyPressed(event) {
-    if (intersects.length <= 0)
-        return
-        
-    var intersect = intersects[0].object;
-    intersect.onMouseClick();
-    // console.log(intersect.parent.date);
-    if (intersect.parent.date) {
-        // console.log(intersect.parent.date);
-        if (!selection.start) {
-            console.log("Setting start date:")
-            console.log(intersect.parent.date.toDate());
-            console.log("#############################")
-            selection.start = intersect.parent.date;
-        } else {
-            console.log("Setting end date: " + intersect.parent.date)
-            selection.end = intersect.parent.date;
-        }
-    }
-}
-
-var renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(sceneSize.width, sceneSize.height);
-renderer.setClearColor(0xcccccc, 1);
-document.body.appendChild(renderer.domElement);
-
-var intersected = [];
-var render = function() {
-    
-	
-	return renderer.render(scene, camera);
-}
-
-var year = 2016,
-	month = 1,
-	currentDate = new Date(year, month);
-
-// var dates = d3.time.days(moment(currentDate).startOf("month"), moment(currentDate).add(1, "month").endOf("month"))
-var dates = d3.time.days(moment(currentDate).startOf("year"), moment(currentDate).endOf("month"))
-// var dates = d3.time.days(moment(currentDate).startOf("year"), moment(currentDate).endOf("year"))
-
-var draw = function() {
-    for (var i = 0; i < dates.length; i++) {
-        var date = moment(dates[i]);
-        
-        var newDay = day(date).create();
-        scene.add(newDay);
-    }
-
-    var cameraBB = new THREE.Box3();
-    cameraBB.setFromObject(scene);
-    camera.position.set(-cameraBB.max.x, cameraBB.max.y * 2, 0); // TODO: Find out the correct values
-    
-    camera.updateProjectionMatrix();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-
-var loader = new THREE.FontLoader();
-loader.load('fonts/helvetiker_regular.typeface.js', function (f) {
-    font = f;
-    generateTextGeometry();
-    draw();
-    render();
-    zoomed();
+///<reference path="../typings/main/ambient/three/three.d.ts"/>
+///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
+var Config;
+(function (Config) {
+    var HOURS;
+    (function (HOURS) {
+        HOURS.NUMBER_OF = 24;
+        HOURS.GEOMETRY = [];
+        HOURS.INSTANCES = {};
+    })(HOURS = Config.HOURS || (Config.HOURS = {}));
+    var DAYS;
+    (function (DAYS) {
+        DAYS.NUMBER_OF = 31;
+        DAYS.GEOMETRY = [];
+    })(DAYS = Config.DAYS || (Config.DAYS = {}));
+    var MONTHS;
+    (function (MONTHS) {
+        MONTHS.NUMBER_OF = 12;
+        MONTHS.GEOMETRY = [];
+    })(MONTHS = Config.MONTHS || (Config.MONTHS = {}));
+})(Config || (Config = {}));
+// var font: THREE.Font;
+var cellSize = 30;
+var dateSize = cellSize / 16;
+var padding = 0.5;
+var hoursArea = cellSize - padding * 2 - dateSize * 3;
+var fontSize = hoursArea / 24;
+var rectMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+var rectGeom = new THREE.BoxGeometry(cellSize, cellSize, 0);
+var textMaterial = new THREE.MeshBasicMaterial({
+    color: 0x00000,
+    shading: THREE.FlatShading
 });
-
-
-view = d3.select(renderer.domElement);
-zoom = d3.behavior.zoom()
-    .scaleExtent([0.115, 0.45])
-    .scale(0.115)
-;
-
-function translate(x, y, z) {
-    x = x - sceneSize.width / 2;
-    y = y - sceneSize.height / 2;
-    camera.left = -DZOOM / z * aspect - x / sceneSize.width * DZOOM / z * 2 * aspect;
-    camera.right = DZOOM / z * aspect - x / sceneSize.width * DZOOM / z * 2 * aspect;
-    camera.top = DZOOM / z + y / sceneSize.height * DZOOM / z * 2;
-    camera.bottom = -DZOOM / z + y / sceneSize.height * DZOOM / z * 2;
-    camera.updateProjectionMatrix();
-}
-
-var aspectRatio = sceneSize.width / sceneSize.height;
-var previousTranslation = null;
-var zoomed = function() {
-    var x = zoom.translate()[0],
-        y = zoom.translate()[1],
-        z = zoom.scale();
-
-    return requestAnimationFrame(function() {
-        translate(x, y, z);
-        return render();
-    });
-}
-
-zoom.on('zoom', zoomed);
-view.call(zoom)
-    .on("dblclick.zoom", null) // disable zoom in on double-click
-;
+var hourMaterial = new THREE.MeshBasicMaterial({ color: 0xdddddd });
+var hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
+var days = [];
+var shiftPressed = false;
+///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
+///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
+///<reference path="config.ts"/>
+var HourMesh = (function (_super) {
+    __extends(HourMesh, _super);
+    function HourMesh(geometry, material) {
+        _super.call(this, geometry, material);
+        this.hoverable = true;
+        this.selectable = true;
+        this.defaultGeometry = geometry;
+        this.defaultMaterial = material;
+    }
+    return HourMesh;
+}(THREE.Mesh));
+var Hour = (function (_super) {
+    __extends(Hour, _super);
+    function Hour(date) {
+        _super.call(this);
+        this.selected = false;
+        this.hoverable = true;
+        this.date = date.clone();
+        this.name = "hour";
+        this.draw();
+    }
+    Hour.prototype.draw = function () {
+        var currentHour = this.date.hour();
+        this.rect = new HourMesh(hourBoxGeom, hourMaterial);
+        // this.rect.geometry.center();
+        this.rect.position.y = -(cellSize / 2) + (Config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding;
+        this.rect.position.x = fontSize / 2;
+        this.rect.position.z = 5;
+        this.add(this.rect);
+        this.text = new HourMesh(Config.HOURS.GEOMETRY[currentHour], textMaterial);
+        this.text.geometry.center();
+        var textBB = new THREE.Box3();
+        textBB.setFromObject(this.text);
+        // this.text.position.x = textBB.max.x; 
+        this.text.position.x = -cellSize / 2 + textBB.max.x;
+        this.text.position.y = -cellSize / 2 + (Config.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding - fontSize / 2 + textBB.max.y;
+        this.add(this.text);
+        // this.onMouseHover = function() {
+        //     if (!this.selected) {
+        //         rect.material = rect.material.clone();
+        //         rect.material.color = new THREE.Color(0x00ff00);
+        //     }
+        // }
+        // this.onMouseOut = function() {
+        //     // this.rect.material = this.rect.defaultMaterial;
+        // }
+        Config.HOURS.INSTANCES[+this.date] = this;
+    };
+    Hour.prototype.onMouseClick = function () {
+        this.selected = !this.selected;
+        console.log("Hour clicked:");
+        console.log(this.date.format("DD MMM HH:mm"));
+        console.log(this.selected);
+        if (this.selected) {
+            this.rect.material = this.rect.defaultMaterial.clone();
+            this.rect.material.color = new THREE.Color(0x0000ff);
+        }
+        else {
+            this.rect.material = this.rect.defaultMaterial;
+        }
+        // console.log(this.date.format("DD MMM HH:mm"));    
+    };
+    Hour.prototype.onMouseHover = function () {
+        if (!this.selected && this.rect.material === this.rect.defaultMaterial) {
+            this.rect.material = this.rect.defaultMaterial.clone();
+            this.rect.material.color = new THREE.Color(0x00ff00);
+        }
+        // console.log(this.date.format("DD MMM HH:mm"));
+        // console.log(this.date);
+    };
+    Hour.prototype.onMouseOut = function () {
+        if (!this.selected) {
+            this.rect.material = this.rect.defaultMaterial;
+        }
+    };
+    return Hour;
+}(THREE.Object3D));
+var Day = (function (_super) {
+    __extends(Day, _super);
+    function Day(date) {
+        _super.call(this, rectGeom, rectMaterial);
+        this.margin = 0.1;
+        this.padding = 0.5;
+        this.cellSize = 30;
+        this.material = rectMaterial;
+        this.geometry = rectGeom;
+        this.hoverable = false;
+        this.selectable = true;
+        this.date = date;
+        this.draw();
+    }
+    Day.prototype.draw = function () {
+        this.name = "day";
+        var weekOfMonth = this.date.week();
+        var dayOfMonth = this.date.day();
+        this.position.x = dayOfMonth * this.cellSize + dayOfMonth * this.margin;
+        this.position.y = -weekOfMonth * this.cellSize + -weekOfMonth * this.margin;
+        var day = this.date.date() - 1, month = this.date.month();
+        var dayText = new THREE.Mesh(Config.DAYS.GEOMETRY[day], textMaterial), monthText = new THREE.Mesh(Config.MONTHS.GEOMETRY[month], textMaterial);
+        var dateText = new THREE.Object3D();
+        dateText.add(dayText);
+        dateText.add(monthText);
+        dayText.geometry.center();
+        monthText.geometry.center();
+        var dayBB = new THREE.Box3();
+        dayBB.setFromObject(dayText);
+        dayText.position.x = -dayBB.max.x - this.padding / 2;
+        var monthBB = new THREE.Box3();
+        monthBB.setFromObject(monthText);
+        monthText.position.x = monthBB.max.x + this.padding / 2;
+        var dateBB = new THREE.Box3();
+        dateBB.setFromObject(dateText);
+        dateText.position.y = cellSize / 2 - dateBB.max.y - this.padding;
+        this.add(dateText);
+        for (var i = this.date.clone().startOf("day"); i.isBefore(this.date.clone().endOf("day")); i.add(1, "hours")) {
+            this.add(new Hour(i));
+        }
+    };
+    return Day;
+}(THREE.Mesh));
+///<reference path="../typings/main/ambient/three/three.d.ts"/>
+///<reference path="../typings/main/ambient/d3/d3.d.ts"/>
+///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
+/// <reference path="config.ts"/>
+/// <reference path="day.ts"/>
+var Mouse;
+(function (Mouse) {
+    Mouse.position = new THREE.Vector2();
+    var click;
+    (function (click) {
+        click.selection = { start: null, end: null };
+    })(click = Mouse.click || (Mouse.click = {}));
+    var hover;
+    (function (hover) {
+        hover.raycaster = new THREE.Raycaster();
+        hover.intersects = [];
+        hover.oldIntersects = [];
+    })(hover = Mouse.hover || (Mouse.hover = {}));
+})(Mouse || (Mouse = {}));
+var ZoomCalendar = (function (_super) {
+    __extends(ZoomCalendar, _super);
+    function ZoomCalendar() {
+        _super.call(this, { antialias: true });
+        this.scene = new THREE.Scene();
+        this.sceneSize = { "width": window.innerWidth * 0.98, "height": window.innerHeight * 0.97 };
+        this.aspect = this.sceneSize.width / this.sceneSize.height;
+        this.year = 2016;
+        this.month = 1;
+        this.DZOOM = 5;
+        this.zoom = d3.behavior.zoom()
+            .scaleExtent([0.06, 0.45])
+            .scale(0.06)
+            .translate([-975, 100]);
+        console.log(Mouse);
+        // this.scene = new THREE.Scene();
+        this.scene.updateMatrixWorld(true);
+        // var aspect = this.sceneSize.width / this.sceneSize.height;
+        this.camera = new THREE.OrthographicCamera(0, 2 * this.DZOOM * this.aspect, 0, -2 * this.DZOOM, -1000, 1000);
+        this.camera.updateProjectionMatrix();
+        this.setSize(this.sceneSize.width, this.sceneSize.height);
+        this.setClearColor(0xcccccc, 1);
+        this.draw();
+        document.addEventListener('mousemove', this.onMouseMove, false);
+        document.addEventListener('click', this.onClick, false);
+        document.addEventListener('mousedown', this.onMouseDown, false);
+        var currentDate = new Date(this.year, this.month);
+        this.dates = d3.time.days(moment(currentDate).startOf("year").toDate(), moment(currentDate).endOf("month").toDate());
+        this.view = d3.select(this.domElement);
+        var loader = new THREE.FontLoader();
+        loader.load('fonts/helvetiker_regular.typeface.js', function (f) {
+            this.font = f;
+            this.init();
+        });
+        this.zoom.on('zoom', this.zoomed);
+        this.view.call(this.zoom)
+            .on("dblclick.zoom", null) // disable zoom in on double-click
+        ;
+    }
+    ZoomCalendar.prototype.init = function () {
+        this.generateTextGeometry();
+        this.createComponents();
+        this.draw();
+        this.zoomed();
+    };
+    ZoomCalendar.prototype.zoomed = function () {
+        var x = this.zoom.translate()[0], y = this.zoom.translate()[1], z = this.zoom.scale();
+        this.translate(x, y, z);
+    };
+    ;
+    ZoomCalendar.prototype.translate = function (x, y, z) {
+        x = x - this.sceneSize.width / 2;
+        y = y - this.sceneSize.height / 2;
+        this.camera.left = -this.DZOOM / z * this.aspect - x / this.sceneSize.width * this.DZOOM / z * 2 * this.aspect;
+        this.camera.right = this.DZOOM / z * this.aspect - x / this.sceneSize.width * this.DZOOM / z * 2 * this.aspect;
+        this.camera.top = this.DZOOM / z + y / this.sceneSize.height * this.DZOOM / z * 2;
+        this.camera.bottom = -this.DZOOM / z + y / this.sceneSize.height * this.DZOOM / z * 2;
+        this.camera.updateProjectionMatrix();
+    };
+    ZoomCalendar.prototype.onClick = function (event) {
+        if (Mouse.hover.intersects.length <= 0)
+            return;
+        var mouseDeltaMovement = Mouse.click.position.x - event.clientX +
+            Mouse.click.position.y - event.clientY;
+        // Ignore click if mouse moved
+        if (mouseDeltaMovement !== 0)
+            return;
+        var intersect = Mouse.hover.intersects[0];
+        var objectsParent = intersect.object.parent;
+        if (objectsParent instanceof Hour) {
+            var hour = objectsParent;
+            Mouse.click.selection.start = hour;
+            hour.onMouseClick();
+        }
+    };
+    ZoomCalendar.prototype.onMouseMove = function (event) {
+        event.preventDefault();
+        Mouse.position.x = (event.clientX / window.innerWidth) * 2 - 1;
+        Mouse.position.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        Mouse.hover.raycaster.setFromCamera(Mouse.position, this.camera);
+        Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(this.scene.children, true);
+        // Unhover hours which are no longer being hovered
+        for (var index = 0; index < Mouse.hover.oldIntersects.length; index++) {
+            var oldIntersect = Mouse.hover.oldIntersects[index];
+            if (oldIntersect.date.isAfter(Mouse.click.selection.end.date)) {
+                var hour = oldIntersect;
+                hour.onMouseOut();
+                Mouse.hover.oldIntersects.splice(index, 1);
+            }
+        }
+        if (!Mouse.click.selection.start)
+            return;
+        // Select last hour for selection
+        for (var i = 0; i < Mouse.hover.intersects.length; i++) {
+            var intersect = Mouse.hover.intersects[i];
+            if (intersect.object.parent instanceof Hour) {
+                var hour = intersect.object.parent;
+                Mouse.click.selection.end = hour;
+            }
+        }
+        // Hover over all hour between start and end
+        for (var d = Mouse.click.selection.start.date.clone(); d.isSameOrBefore(Mouse.click.selection.end.date); d.add(1, "hour")) {
+            var selectedHour = Config.HOURS.INSTANCES[+d];
+            selectedHour.onMouseHover();
+            if (Mouse.hover.oldIntersects.indexOf(selectedHour) < 0) {
+                Mouse.hover.oldIntersects.push(selectedHour);
+            }
+        }
+    };
+    ZoomCalendar.prototype.onMouseDown = function (event) {
+        console.log("Mouse is down.");
+        Mouse.click.position = { x: event.clientX, y: event.clientY };
+    };
+    ZoomCalendar.prototype.draw = function () {
+        requestAnimationFrame(this.renderCallback);
+        this.renderCallback();
+    };
+    ZoomCalendar.prototype.renderCallback = function () {
+        return this.render(this.scene, this.camera);
+    };
+    ZoomCalendar.prototype.createComponents = function () {
+        for (var i = 0; i < this.dates.length; i++) {
+            var date = moment(this.dates[i]);
+            var newDay = new Day(date);
+            this.scene.add(newDay);
+        }
+        var cameraBB = new THREE.Box3();
+        cameraBB.setFromObject(this.scene);
+        this.camera.position.set(-cameraBB.max.x, cameraBB.max.y * 2, 0); // TODO: Find out the correct values
+        this.camera.updateProjectionMatrix();
+    };
+    ;
+    ZoomCalendar.prototype.generateTextGeometry = function () {
+        for (var h = 0; h < Config.HOURS.NUMBER_OF; h++) {
+            var hourGeom = new THREE.TextGeometry(h, {
+                font: this.font,
+                size: fontSize,
+                dynamic: false
+            });
+            Config.HOURS.GEOMETRY.push(hourGeom);
+        }
+        for (var d = 1; d <= Config.DAYS.NUMBER_OF; d++) {
+            var dayGeom = new THREE.TextGeometry(d, {
+                font: this.font,
+                size: dateSize,
+                dynamic: false
+            });
+            Config.DAYS.GEOMETRY.push(dayGeom);
+        }
+        for (var m = 0; m < this.dates.length; m++) {
+            var date = moment(this.dates[m]);
+            var monthGeom = new THREE.TextGeometry(date.format("MMM"), {
+                font: this.font,
+                size: dateSize,
+                dynamic: false
+            });
+            Config.MONTHS.GEOMETRY.push(monthGeom);
+        }
+    };
+    return ZoomCalendar;
+}(THREE.WebGLRenderer));
+/// <reference path="zoomcalendar.ts"/>
+document.body.appendChild(new ZoomCalendar().domElement);
