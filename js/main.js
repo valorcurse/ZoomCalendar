@@ -1,8 +1,3 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 ///<reference path="../typings/main/ambient/three/three.d.ts"/>
 ///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
 var Config;
@@ -43,6 +38,11 @@ var shiftPressed = false;
 ///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
 ///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
 ///<reference path="config.ts"/>
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var HourMesh = (function (_super) {
     __extends(HourMesh, _super);
     function HourMesh(geometry, material) {
@@ -184,7 +184,9 @@ var Mouse;
 })(Mouse || (Mouse = {}));
 var ZoomCalendar = (function (_super) {
     __extends(ZoomCalendar, _super);
+    // removeRow: () => void;
     function ZoomCalendar() {
+        var _this = this;
         _super.call(this, { antialias: true });
         this.scene = new THREE.Scene();
         this.sceneSize = { "width": window.innerWidth * 0.98, "height": window.innerHeight * 0.97 };
@@ -196,6 +198,57 @@ var ZoomCalendar = (function (_super) {
             .scaleExtent([0.06, 0.45])
             .scale(0.06)
             .translate([-975, 100]);
+        this.zoomed = function () {
+            var x = _this.zoom.translate()[0], y = _this.zoom.translate()[1], z = _this.zoom.scale();
+            _this.translate(x, y, z);
+        };
+        this.translate = function (x, y, z) {
+            x = x - _this.sceneSize.width / 2;
+            y = y - _this.sceneSize.height / 2;
+            _this.camera.left = -_this.DZOOM / z * _this.aspect - x / _this.sceneSize.width * _this.DZOOM / z * 2 * _this.aspect;
+            _this.camera.right = _this.DZOOM / z * _this.aspect - x / _this.sceneSize.width * _this.DZOOM / z * 2 * _this.aspect;
+            _this.camera.top = _this.DZOOM / z + y / _this.sceneSize.height * _this.DZOOM / z * 2;
+            _this.camera.bottom = -_this.DZOOM / z + y / _this.sceneSize.height * _this.DZOOM / z * 2;
+            _this.camera.updateProjectionMatrix();
+        };
+        this.onMouseMove = function (event) {
+            event.preventDefault();
+            Mouse.position.x = (event.clientX / window.innerWidth) * 2 - 1;
+            Mouse.position.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            Mouse.hover.raycaster.setFromCamera(Mouse.position, _this.camera);
+            Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(_this.scene.children, true);
+            // Unhover hours which are no longer being hovered
+            for (var index = 0; index < Mouse.hover.oldIntersects.length; index++) {
+                var oldIntersect = Mouse.hover.oldIntersects[index];
+                if (oldIntersect.date.isAfter(Mouse.click.selection.end.date)) {
+                    var hour = oldIntersect;
+                    hour.onMouseOut();
+                    Mouse.hover.oldIntersects.splice(index, 1);
+                }
+            }
+            if (!Mouse.click.selection.start)
+                return;
+            // Select last hour for selection
+            for (var i = 0; i < Mouse.hover.intersects.length; i++) {
+                var intersect = Mouse.hover.intersects[i];
+                if (intersect.object.parent instanceof Hour) {
+                    var hour = intersect.object.parent;
+                    Mouse.click.selection.end = hour;
+                }
+            }
+            // Hover over all hour between start and end
+            for (var d = Mouse.click.selection.start.date.clone(); d.isSameOrBefore(Mouse.click.selection.end.date); d.add(1, "hour")) {
+                var selectedHour = Config.HOURS.INSTANCES[+d];
+                selectedHour.onMouseHover();
+                if (Mouse.hover.oldIntersects.indexOf(selectedHour) < 0) {
+                    Mouse.hover.oldIntersects.push(selectedHour);
+                }
+            }
+        };
+        this.draw = function () {
+            requestAnimationFrame(_this.draw);
+            _this.render(_this.scene, _this.camera);
+        };
         console.log(Mouse);
         // this.scene = new THREE.Scene();
         this.scene.updateMatrixWorld(true);
@@ -213,33 +266,23 @@ var ZoomCalendar = (function (_super) {
         this.view = d3.select(this.domElement);
         var loader = new THREE.FontLoader();
         loader.load('fonts/helvetiker_regular.typeface.js', function (f) {
-            this.font = f;
-            this.init();
+            _this.font = f;
+            _this.init();
         });
-        this.zoom.on('zoom', this.zoomed);
-        this.view.call(this.zoom)
-            .on("dblclick.zoom", null) // disable zoom in on double-click
-        ;
+        // 		this.zoom.on('zoom', this.zoomed);
+        // 		this.view.call(this.zoom)
+        // 			.on("dblclick.zoom", null) // disable zoom in on double-click
+        // 		;
     }
     ZoomCalendar.prototype.init = function () {
         this.generateTextGeometry();
         this.createComponents();
         this.draw();
+        this.zoom.on('zoom', this.zoomed);
+        this.view.call(this.zoom)
+            .on("dblclick.zoom", null) // disable zoom in on double-click
+        ;
         this.zoomed();
-    };
-    ZoomCalendar.prototype.zoomed = function () {
-        var x = this.zoom.translate()[0], y = this.zoom.translate()[1], z = this.zoom.scale();
-        this.translate(x, y, z);
-    };
-    ;
-    ZoomCalendar.prototype.translate = function (x, y, z) {
-        x = x - this.sceneSize.width / 2;
-        y = y - this.sceneSize.height / 2;
-        this.camera.left = -this.DZOOM / z * this.aspect - x / this.sceneSize.width * this.DZOOM / z * 2 * this.aspect;
-        this.camera.right = this.DZOOM / z * this.aspect - x / this.sceneSize.width * this.DZOOM / z * 2 * this.aspect;
-        this.camera.top = this.DZOOM / z + y / this.sceneSize.height * this.DZOOM / z * 2;
-        this.camera.bottom = -this.DZOOM / z + y / this.sceneSize.height * this.DZOOM / z * 2;
-        this.camera.updateProjectionMatrix();
     };
     ZoomCalendar.prototype.onClick = function (event) {
         if (Mouse.hover.intersects.length <= 0)
@@ -257,50 +300,9 @@ var ZoomCalendar = (function (_super) {
             hour.onMouseClick();
         }
     };
-    ZoomCalendar.prototype.onMouseMove = function (event) {
-        event.preventDefault();
-        Mouse.position.x = (event.clientX / window.innerWidth) * 2 - 1;
-        Mouse.position.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        Mouse.hover.raycaster.setFromCamera(Mouse.position, this.camera);
-        Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(this.scene.children, true);
-        // Unhover hours which are no longer being hovered
-        for (var index = 0; index < Mouse.hover.oldIntersects.length; index++) {
-            var oldIntersect = Mouse.hover.oldIntersects[index];
-            if (oldIntersect.date.isAfter(Mouse.click.selection.end.date)) {
-                var hour = oldIntersect;
-                hour.onMouseOut();
-                Mouse.hover.oldIntersects.splice(index, 1);
-            }
-        }
-        if (!Mouse.click.selection.start)
-            return;
-        // Select last hour for selection
-        for (var i = 0; i < Mouse.hover.intersects.length; i++) {
-            var intersect = Mouse.hover.intersects[i];
-            if (intersect.object.parent instanceof Hour) {
-                var hour = intersect.object.parent;
-                Mouse.click.selection.end = hour;
-            }
-        }
-        // Hover over all hour between start and end
-        for (var d = Mouse.click.selection.start.date.clone(); d.isSameOrBefore(Mouse.click.selection.end.date); d.add(1, "hour")) {
-            var selectedHour = Config.HOURS.INSTANCES[+d];
-            selectedHour.onMouseHover();
-            if (Mouse.hover.oldIntersects.indexOf(selectedHour) < 0) {
-                Mouse.hover.oldIntersects.push(selectedHour);
-            }
-        }
-    };
     ZoomCalendar.prototype.onMouseDown = function (event) {
         console.log("Mouse is down.");
         Mouse.click.position = { x: event.clientX, y: event.clientY };
-    };
-    ZoomCalendar.prototype.draw = function () {
-        requestAnimationFrame(this.renderCallback);
-        this.renderCallback();
-    };
-    ZoomCalendar.prototype.renderCallback = function () {
-        return this.render(this.scene, this.camera);
     };
     ZoomCalendar.prototype.createComponents = function () {
         for (var i = 0; i < this.dates.length; i++) {
@@ -313,7 +315,6 @@ var ZoomCalendar = (function (_super) {
         this.camera.position.set(-cameraBB.max.x, cameraBB.max.y * 2, 0); // TODO: Find out the correct values
         this.camera.updateProjectionMatrix();
     };
-    ;
     ZoomCalendar.prototype.generateTextGeometry = function () {
         for (var h = 0; h < Config.HOURS.NUMBER_OF; h++) {
             var hourGeom = new THREE.TextGeometry(h, {

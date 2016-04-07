@@ -43,12 +43,13 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 	font: THREE.Font;
 
 	DZOOM: number = 5;
-	zoom = d3.behavior.zoom()
-		.scaleExtent([0.06, 0.45])
-		.scale(0.06)
-		.translate([-975, 100])
-	;
+	zoom: any = d3.behavior.zoom()
+                .scaleExtent([0.06, 0.45])
+    		    .scale(0.06)
+    		    .translate([-975, 100]);
 
+
+    // removeRow: () => void;
 
 	constructor() {
 		super({ antialias: true });
@@ -83,26 +84,31 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 		this.view = d3.select(this.domElement);
 
 		var loader = new THREE.FontLoader();
-		loader.load('fonts/helvetiker_regular.typeface.js', function(f: THREE.Font) {
+		loader.load('fonts/helvetiker_regular.typeface.js', (f: THREE.Font) => {
 			this.font = f;
 			this.init();
 		});
 
-		this.zoom.on('zoom', this.zoomed);
-		this.view.call(this.zoom)
-			.on("dblclick.zoom", null) // disable zoom in on double-click
-		;
+// 		this.zoom.on('zoom', this.zoomed);
+// 		this.view.call(this.zoom)
+// 			.on("dblclick.zoom", null) // disable zoom in on double-click
+// 		;
 	}
-
+    
 	init() {
 		this.generateTextGeometry();
 		this.createComponents();
 
 		this.draw();
+
+	    this.zoom.on('zoom', this.zoomed);
+		this.view.call(this.zoom)
+			.on("dblclick.zoom", null) // disable zoom in on double-click
+		;
 		this.zoomed();
 	}
 
-	zoomed() {
+	zoomed = () => {
 		var x = this.zoom.translate()[0],
 			y = this.zoom.translate()[1],
 			z = this.zoom.scale();
@@ -111,7 +117,7 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 	};
 
 
-	translate(x: number, y: number, z: number) {
+	translate = (x: number, y: number, z: number) => {
 		x = x - this.sceneSize.width / 2;
 		y = y - this.sceneSize.height / 2;
 		this.camera.left = -this.DZOOM / z * this.aspect - x / this.sceneSize.width * this.DZOOM / z * 2 * this.aspect;
@@ -142,7 +148,7 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 		}
 	}
 
-	onMouseMove(event: MouseEvent) {
+	onMouseMove = (event: MouseEvent) => {
 		event.preventDefault();
 
 		Mouse.position.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -191,16 +197,10 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 		Mouse.click.position = { x: event.clientX, y: event.clientY };
 	}
 
-	draw() {
-		requestAnimationFrame(this.renderCallback);
-		this.renderCallback();
+	draw = () => {
+		requestAnimationFrame(this.draw);
+		this.render(this.scene, this.camera);
 	}
-
-	renderCallback() {
-		return this.render(this.scene, this.camera)
-	}
-
-
 
 	createComponents() {
 		for (var i = 0; i < this.dates.length; i++) {
@@ -219,7 +219,7 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 		this.camera.position.set(-cameraBB.max.x, cameraBB.max.y * 2, 0); // TODO: Find out the correct values
 
 		this.camera.updateProjectionMatrix();
-	};
+	}
 
 	generateTextGeometry() {
 	    for (var h = 0; h < Config.HOURS.NUMBER_OF; h++) {
