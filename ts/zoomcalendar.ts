@@ -54,10 +54,6 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 	constructor() {
 		super({ antialias: true });
 
-		console.log(Mouse);
-
-		
-
 		// this.scene = new THREE.Scene();
 		this.scene.updateMatrixWorld(true);
 
@@ -88,11 +84,6 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 			this.font = f;
 			this.init();
 		});
-
-// 		this.zoom.on('zoom', this.zoomed);
-// 		this.view.call(this.zoom)
-// 			.on("dblclick.zoom", null) // disable zoom in on double-click
-// 		;
 	}
     
 	init() {
@@ -127,13 +118,14 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 		this.camera.updateProjectionMatrix();
 	}
 
-	onClick(event: MouseEvent) {
+	onClick = (event: MouseEvent) => {
 		if (Mouse.hover.intersects.length <= 0)
 			return;
 
 		var mouseDeltaMovement =
 			Mouse.click.position.x - event.clientX +
 			Mouse.click.position.y - event.clientY;
+		
 
 		// Ignore click if mouse moved
 		if (mouseDeltaMovement !== 0)
@@ -143,9 +135,19 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 		var objectsParent = intersect.object.parent;
 		if (objectsParent instanceof Hour) {
 			var hour: Hour = objectsParent as Hour;
-			Mouse.click.selection.start = hour;
-			hour.onMouseClick();
+			
+			let previousSelection = Mouse.click.selection.start;
+			if (previousSelection)
+				previousSelection.select(false);
+			
+			if (hour !== previousSelection) {
+				Mouse.click.selection.start = hour;
+				Mouse.click.selection.start.select(true);
+			}
+
 		}
+		
+		this.refreshSelection();
 	}
 
 	onMouseMove = (event: MouseEvent) => {
@@ -157,16 +159,6 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 		Mouse.hover.raycaster.setFromCamera(Mouse.position, this.camera);
 		Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(this.scene.children, true);
 
-		// Unhover hours which are no longer being hovered
-		for (var index = 0; index < Mouse.hover.oldIntersects.length; index++) {
-			var oldIntersect = Mouse.hover.oldIntersects[index];
-
-			if (oldIntersect.date.isAfter(Mouse.click.selection.end.date)) {
-				var hour: Hour = oldIntersect as Hour;
-				hour.onMouseOut();
-				Mouse.hover.oldIntersects.splice(index, 1);
-			}
-		}
 
 		if (!Mouse.click.selection.start)
 			return;
@@ -181,8 +173,13 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 			}
 		}
 
+		// Choose the first date in chronological order
+		let dates: Moment[] = [Mouse.click.selection.start.date.clone(), 
+			Mouse.click.selection.end.date.clone()];
+		dates.sort();
+
 		// Hover over all hour between start and end
-		for (var d = Mouse.click.selection.start.date.clone(); d.isSameOrBefore(Mouse.click.selection.end.date); d.add(1, "hour")) {
+		for (var d = dates[0]; d.isSameOrBefore(dates[1]); d.add(1, "hour")) {
 			var selectedHour = Config.HOURS.INSTANCES[+d];
 			selectedHour.onMouseHover();
 
@@ -190,11 +187,41 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 				Mouse.hover.oldIntersects.push(selectedHour);
 			}
 		}
+
+		this.refreshSelection();
 	}
 
 	onMouseDown(event: MouseEvent) {
 		console.log("Mouse is down.");
 		Mouse.click.position = { x: event.clientX, y: event.clientY };
+	}
+
+	isInBetween = (date: Moment, start: Moment, end: Moment) => {
+		return date.isBetween(start, end) || date.isBetween(end, start);
+	}
+
+	refreshSelection = () => {
+		// Unhover hours which are no longer being hovered
+		for (let index = 0; index < Mouse.hover.oldIntersects.length; index++) {
+			let notInBetween = (intersect: Hour) => { 
+				let inBetween = this.isInBetween(intersect.date, 
+					Mouse.click.selection.start.date, 
+					Mouse.click.selection.end.date) 
+				
+				// intersect.date.isAfter(Mouse.click.selection.end.date) ||
+					// intersect.date.isBefore(Mouse.click.selection.start.date);
+
+			// 	let inBetween = intersect.date.isBetween(Mouse.click.selection.start.date,
+			// 		Mouse.click.selection.end.date);
+
+				if (!inBetween)
+					intersect.onMouseOut();
+
+				return inBetween;
+			}
+
+			Mouse.hover.oldIntersects = Mouse.hover.oldIntersects.filter(notInBetween);
+		}
 	}
 
 	draw = () => {

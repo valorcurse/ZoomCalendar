@@ -1,3 +1,8 @@
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 ///<reference path="../typings/main/ambient/three/three.d.ts"/>
 ///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
 var Config;
@@ -38,11 +43,6 @@ var shiftPressed = false;
 ///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
 ///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
 ///<reference path="config.ts"/>
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 var HourMesh = (function (_super) {
     __extends(HourMesh, _super);
     function HourMesh(geometry, material) {
@@ -91,8 +91,9 @@ var Hour = (function (_super) {
         // }
         Config.HOURS.INSTANCES[+this.date] = this;
     };
-    Hour.prototype.onMouseClick = function () {
-        this.selected = !this.selected;
+    // onMouseClick() {
+    Hour.prototype.select = function (selection) {
+        this.selected = selection;
         console.log("Hour clicked:");
         console.log(this.date.format("DD MMM HH:mm"));
         console.log(this.selected);
@@ -108,7 +109,7 @@ var Hour = (function (_super) {
     Hour.prototype.onMouseHover = function () {
         if (!this.selected && this.rect.material === this.rect.defaultMaterial) {
             this.rect.material = this.rect.defaultMaterial.clone();
-            this.rect.material.color = new THREE.Color(0x00ff00);
+            this.rect.material.color = new THREE.Color(0xaaaaaa);
         }
         // console.log(this.date.format("DD MMM HH:mm"));
         // console.log(this.date);
@@ -211,21 +212,34 @@ var ZoomCalendar = (function (_super) {
             _this.camera.bottom = -_this.DZOOM / z + y / _this.sceneSize.height * _this.DZOOM / z * 2;
             _this.camera.updateProjectionMatrix();
         };
+        this.onClick = function (event) {
+            if (Mouse.hover.intersects.length <= 0)
+                return;
+            var mouseDeltaMovement = Mouse.click.position.x - event.clientX +
+                Mouse.click.position.y - event.clientY;
+            // Ignore click if mouse moved
+            if (mouseDeltaMovement !== 0)
+                return;
+            var intersect = Mouse.hover.intersects[0];
+            var objectsParent = intersect.object.parent;
+            if (objectsParent instanceof Hour) {
+                var hour = objectsParent;
+                var previousSelection = Mouse.click.selection.start;
+                if (previousSelection)
+                    previousSelection.select(false);
+                if (hour !== previousSelection) {
+                    Mouse.click.selection.start = hour;
+                    Mouse.click.selection.start.select(true);
+                }
+            }
+            _this.refreshSelection();
+        };
         this.onMouseMove = function (event) {
             event.preventDefault();
             Mouse.position.x = (event.clientX / window.innerWidth) * 2 - 1;
             Mouse.position.y = -(event.clientY / window.innerHeight) * 2 + 1;
             Mouse.hover.raycaster.setFromCamera(Mouse.position, _this.camera);
             Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(_this.scene.children, true);
-            // Unhover hours which are no longer being hovered
-            for (var index = 0; index < Mouse.hover.oldIntersects.length; index++) {
-                var oldIntersect = Mouse.hover.oldIntersects[index];
-                if (oldIntersect.date.isAfter(Mouse.click.selection.end.date)) {
-                    var hour = oldIntersect;
-                    hour.onMouseOut();
-                    Mouse.hover.oldIntersects.splice(index, 1);
-                }
-            }
             if (!Mouse.click.selection.start)
                 return;
             // Select last hour for selection
@@ -236,20 +250,43 @@ var ZoomCalendar = (function (_super) {
                     Mouse.click.selection.end = hour;
                 }
             }
+            // Choose the first date in chronological order
+            var dates = [Mouse.click.selection.start.date.clone(),
+                Mouse.click.selection.end.date.clone()];
+            dates.sort();
             // Hover over all hour between start and end
-            for (var d = Mouse.click.selection.start.date.clone(); d.isSameOrBefore(Mouse.click.selection.end.date); d.add(1, "hour")) {
+            for (var d = dates[0]; d.isSameOrBefore(dates[1]); d.add(1, "hour")) {
                 var selectedHour = Config.HOURS.INSTANCES[+d];
                 selectedHour.onMouseHover();
                 if (Mouse.hover.oldIntersects.indexOf(selectedHour) < 0) {
                     Mouse.hover.oldIntersects.push(selectedHour);
                 }
             }
+            _this.refreshSelection();
+        };
+        this.isInBetween = function (date, start, end) {
+            return date.isBetween(start, end) || date.isBetween(end, start);
+        };
+        this.refreshSelection = function () {
+            // Unhover hours which are no longer being hovered
+            for (var index = 0; index < Mouse.hover.oldIntersects.length; index++) {
+                var notInBetween = function (intersect) {
+                    var inBetween = _this.isInBetween(intersect.date, Mouse.click.selection.start.date, Mouse.click.selection.end.date);
+                    // intersect.date.isAfter(Mouse.click.selection.end.date) ||
+                    // intersect.date.isBefore(Mouse.click.selection.start.date);
+                    // 	let inBetween = intersect.date.isBetween(Mouse.click.selection.start.date,
+                    // 		Mouse.click.selection.end.date);
+                    if (!inBetween)
+                        intersect.onMouseOut();
+                    return inBetween;
+                };
+                Mouse.hover.oldIntersects = Mouse.hover.oldIntersects.filter(notInBetween);
+            }
         };
         this.draw = function () {
             requestAnimationFrame(_this.draw);
             _this.render(_this.scene, _this.camera);
         };
-        console.log(Mouse);
         // this.scene = new THREE.Scene();
         this.scene.updateMatrixWorld(true);
         // var aspect = this.sceneSize.width / this.sceneSize.height;
@@ -269,10 +306,6 @@ var ZoomCalendar = (function (_super) {
             _this.font = f;
             _this.init();
         });
-        // 		this.zoom.on('zoom', this.zoomed);
-        // 		this.view.call(this.zoom)
-        // 			.on("dblclick.zoom", null) // disable zoom in on double-click
-        // 		;
     }
     ZoomCalendar.prototype.init = function () {
         this.generateTextGeometry();
@@ -283,22 +316,6 @@ var ZoomCalendar = (function (_super) {
             .on("dblclick.zoom", null) // disable zoom in on double-click
         ;
         this.zoomed();
-    };
-    ZoomCalendar.prototype.onClick = function (event) {
-        if (Mouse.hover.intersects.length <= 0)
-            return;
-        var mouseDeltaMovement = Mouse.click.position.x - event.clientX +
-            Mouse.click.position.y - event.clientY;
-        // Ignore click if mouse moved
-        if (mouseDeltaMovement !== 0)
-            return;
-        var intersect = Mouse.hover.intersects[0];
-        var objectsParent = intersect.object.parent;
-        if (objectsParent instanceof Hour) {
-            var hour = objectsParent;
-            Mouse.click.selection.start = hour;
-            hour.onMouseClick();
-        }
     };
     ZoomCalendar.prototype.onMouseDown = function (event) {
         console.log("Mouse is down.");
