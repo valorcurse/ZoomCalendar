@@ -72,8 +72,9 @@ class Hour extends THREE.Object3D implements BasicInterface {
         Config.HOURS.INSTANCES[+this.date] = this;
     }
     
-    onMouseClick() {
-            this.selected = !this.selected;
+    // onMouseClick() {
+    select(selection: boolean) {
+            this.selected = selection;
             
             console.log("Hour clicked:");
             console.log(this.date.format("DD MMM HH:mm"));
@@ -94,7 +95,7 @@ class Hour extends THREE.Object3D implements BasicInterface {
     onMouseHover() {
         if (!this.selected && this.rect.material === this.rect.defaultMaterial) {
             this.rect.material = this.rect.defaultMaterial.clone();
-            this.rect.material.color = new THREE.Color(0x00ff00);
+            this.rect.material.color = new THREE.Color(0xaaaaaa);
         }
         // console.log(this.date.format("DD MMM HH:mm"));
         // console.log(this.date);

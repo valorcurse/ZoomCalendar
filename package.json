@@ -16,9 +16,14 @@
   "devDependencies": {
     "gulp": "~3.9.1",
     "gulp-typescript": "~2.12.0",
+<<<<<<< HEAD
     "tsd": "~0.6.5",
     "moment": "~2.11.2",
     "typings": "~0.7.12"
+=======
+    "typings": "~0.7.12",
+    "moment": "~2.11.2"
+>>>>>>> b78a1d5fe042beff9892309964c400e95eeb2f6f
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
