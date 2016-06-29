@@ -1,5 +1,13 @@
-///<reference path="../typings/main/ambient/three/three.d.ts"/>
-///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
+///<reference path="../typings/index.d.ts"/>
+// declare module THREE { 
+//     export var FontLoader: any;
+//     export class Font {
+//         constructor(font: any);
+//     }
+//     export class TextGeometry extends Geometry {
+//         constructor(font: THREE.Font, parameters?: any);
+//     }
+// }
 var Config;
 (function (Config) {
     var HOURS;
@@ -35,8 +43,7 @@ var hourMaterial = new THREE.MeshBasicMaterial({ color: 0xdddddd });
 var hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
 var days = [];
 var shiftPressed = false;
-///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
-///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
+///<reference path="../typings/index.d.ts"/>
 ///<reference path="config.ts"/>
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -163,9 +170,7 @@ var Day = (function (_super) {
     };
     return Day;
 }(THREE.Mesh));
-///<reference path="../typings/main/ambient/three/three.d.ts"/>
-///<reference path="../typings/main/ambient/d3/d3.d.ts"/>
-///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
+///<reference path="../typings/index.d.ts"/>
 /// <reference path="config.ts"/>
 /// <reference path="day.ts"/>
 var Mouse;
@@ -184,7 +189,6 @@ var Mouse;
 })(Mouse || (Mouse = {}));
 var ZoomCalendar = (function (_super) {
     __extends(ZoomCalendar, _super);
-    // removeRow: () => void;
     function ZoomCalendar() {
         var _this = this;
         _super.call(this, { antialias: true });
@@ -199,8 +203,14 @@ var ZoomCalendar = (function (_super) {
             .scale(0.06)
             .translate([-975, 100]);
         this.zoomed = function () {
-            var x = _this.zoom.translate()[0], y = _this.zoom.translate()[1], z = _this.zoom.scale();
-            _this.translate(x, y, z);
+            if (d3.event && (d3.event.sourceEvent.ctrlKey || d3.event.sourceEvent.button == 1) || d3.event.sourceEvent instanceof WheelEvent) {
+                var x = _this.zoom.translate()[0], y = _this.zoom.translate()[1], z = _this.zoom.scale();
+                _this.translate(x, y, z);
+                _this.lastTranslation = [x, y];
+            }
+            else {
+                _this.zoom.translate(_this.lastTranslation);
+            }
         };
         this.translate = function (x, y, z) {
             x = x - _this.sceneSize.width / 2;
@@ -264,15 +274,12 @@ var ZoomCalendar = (function (_super) {
         var currentDate = new Date(this.year, this.month);
         this.dates = d3.time.days(moment(currentDate).startOf("year").toDate(), moment(currentDate).endOf("month").toDate());
         this.view = d3.select(this.domElement);
-        var loader = new THREE.FontLoader();
-        loader.load('fonts/helvetiker_regular.typeface.js', function (f) {
-            _this.font = f;
+        var loader = new THREE.FontLoader(new THREE.LoadingManager());
+        loader.load('fonts/helvetiker_regular.typeface.js', function (responseText) {
+            _this.font = responseText;
             _this.init();
         });
-        // 		this.zoom.on('zoom', this.zoomed);
-        // 		this.view.call(this.zoom)
-        // 			.on("dblclick.zoom", null) // disable zoom in on double-click
-        // 		;
+        this.lastTranslation = this.zoom.translate();
     }
     ZoomCalendar.prototype.init = function () {
         this.generateTextGeometry();
@@ -282,6 +289,7 @@ var ZoomCalendar = (function (_super) {
         this.view.call(this.zoom)
             .on("dblclick.zoom", null) // disable zoom in on double-click
         ;
+        console.log("lalal");
         this.zoomed();
     };
     ZoomCalendar.prototype.onClick = function (event) {
@@ -317,18 +325,26 @@ var ZoomCalendar = (function (_super) {
     };
     ZoomCalendar.prototype.generateTextGeometry = function () {
         for (var h = 0; h < Config.HOURS.NUMBER_OF; h++) {
-            var hourGeom = new THREE.TextGeometry(h, {
+            var hourGeom = new THREE.TextGeometry(String(h), {
                 font: this.font,
                 size: fontSize,
-                dynamic: false
+                height: 50,
+                curveSegments: 12,
+                bevelEnabled: false,
+                bevelThickness: 10,
+                bevelSize: 8
             });
             Config.HOURS.GEOMETRY.push(hourGeom);
         }
         for (var d = 1; d <= Config.DAYS.NUMBER_OF; d++) {
-            var dayGeom = new THREE.TextGeometry(d, {
+            var dayGeom = new THREE.TextGeometry(String(d), {
                 font: this.font,
                 size: dateSize,
-                dynamic: false
+                height: 50,
+                curveSegments: 12,
+                bevelEnabled: false,
+                bevelThickness: 10,
+                bevelSize: 8
             });
             Config.DAYS.GEOMETRY.push(dayGeom);
         }
@@ -337,7 +353,11 @@ var ZoomCalendar = (function (_super) {
             var monthGeom = new THREE.TextGeometry(date.format("MMM"), {
                 font: this.font,
                 size: dateSize,
-                dynamic: false
+                height: 50,
+                curveSegments: 12,
+                bevelEnabled: false,
+                bevelThickness: 10,
+                bevelSize: 8
             });
             Config.MONTHS.GEOMETRY.push(monthGeom);
         }

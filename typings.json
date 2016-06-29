@@ -1,7 +1,7 @@
 {
-  "ambientDependencies": {
-    "d3": "github:DefinitelyTyped/DefinitelyTyped/d3/d3.d.ts#c09bd959175c3ca80ef4a92bcbac93307f266c12",
-    "moment": "github:DefinitelyTyped/DefinitelyTyped/moment/moment.d.ts#b090bcf9ba9f756ec8ff53e7707269729172a325",
-    "three": "github:DefinitelyTyped/DefinitelyTyped/threejs/three.d.ts#c6c3d3e65dd2d7035428f9c7b371ec911ff28542"
+  "globalDependencies": {
+    "d3": "registry:dt/d3#0.0.0+20160628065019",
+    "moment": "registry:dt/moment#2.8.0+20160316155526",
+    "three": "registry:dt/three#0.0.0+20160627210315"
   }
 }

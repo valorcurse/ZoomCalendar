@@ -1,5 +1,4 @@
-///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
-///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
+///<reference path="../typings/index.d.ts"/>
 ///<reference path="config.ts"/>
 
 interface BasicInterface {
@@ -36,7 +35,7 @@ class Hour extends THREE.Object3D implements BasicInterface {
         this.name = "hour";
         
         this.draw();
-    }
+    } 
     
     draw() {
         var currentHour: number = this.date.hour();

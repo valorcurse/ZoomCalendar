@@ -1,15 +1,14 @@
-///<reference path="../typings/main/ambient/three/three.d.ts"/>
-///<reference path="../typings/main/ambient/moment/moment.d.ts"/>
+///<reference path="../typings/index.d.ts"/>
 
-declare module THREE { 
-    export var FontLoader: any;
-    export class Font {
-        constructor(font: any);
-    }
-    export class TextGeometry extends Geometry {
-        constructor(font: THREE.Font, parameters?: any);
-    }
-}
+// declare module THREE { 
+//     export var FontLoader: any;
+//     export class Font {
+//         constructor(font: any);
+//     }
+//     export class TextGeometry extends Geometry {
+//         constructor(font: THREE.Font, parameters?: any);
+//     }
+// }
 
 module Config {
     export module HOURS {

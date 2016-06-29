@@ -1,10 +1,8 @@
-///<reference path="../typings/main/ambient/three/three.d.ts"/>
-///<reference path="../typings/main/ambient/d3/d3.d.ts"/>
-///<reference path="../typings/main/ambient/moment-node/moment-node.d.ts"/>
+///<reference path="../typings/index.d.ts"/>
 /// <reference path="config.ts"/>
 /// <reference path="day.ts"/>
 
-import Moment = moment.Moment;
+import Moment = moment;
 
 namespace Mouse {
 	export var position: THREE.Vector2 = new THREE.Vector2();
@@ -20,7 +18,7 @@ namespace Mouse {
 		export var oldIntersects: Hour[] = [];
     }
 }
-
+ 
 interface DateSelection {
 	start?: Hour,
 	end?: Hour
@@ -49,14 +47,12 @@ class ZoomCalendar extends THREE.WebGLRenderer {
     		    .translate([-975, 100]);
 
 
-    // removeRow: () => void;
+	lastTranslation: number[];
 
 	constructor() {
 		super({ antialias: true });
 
 		console.log(Mouse);
-
-		
 
 		// this.scene = new THREE.Scene();
 		this.scene.updateMatrixWorld(true);
@@ -69,7 +65,6 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 		this.setClearColor(0xcccccc, 1);
 		this.draw();
 
-		
 
 		document.addEventListener('mousemove', this.onMouseMove, false);
 		document.addEventListener('click', this.onClick, false);
@@ -83,16 +78,13 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 
 		this.view = d3.select(this.domElement);
 
-		var loader = new THREE.FontLoader();
-		loader.load('fonts/helvetiker_regular.typeface.js', (f: THREE.Font) => {
-			this.font = f;
+		var loader = new THREE.FontLoader(new THREE.LoadingManager());
+		loader.load('fonts/helvetiker_regular.typeface.js', (responseText: string) => {
+			this.font = responseText;
 			this.init();
 		});
-
-// 		this.zoom.on('zoom', this.zoomed);
-// 		this.view.call(this.zoom)
-// 			.on("dblclick.zoom", null) // disable zoom in on double-click
-// 		;
+		
+		this.lastTranslation = this.zoom.translate();
 	}
     
 	init() {
@@ -105,15 +97,24 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 		this.view.call(this.zoom)
 			.on("dblclick.zoom", null) // disable zoom in on double-click
 		;
+		
+		console.log("lalal");
+		
 		this.zoomed();
 	}
 
 	zoomed = () => {
-		var x = this.zoom.translate()[0],
-			y = this.zoom.translate()[1],
-			z = this.zoom.scale();
-
-		this.translate(x, y, z);
+		if (d3.event && (d3.event.sourceEvent.ctrlKey || d3.event.sourceEvent.button == 1) || d3.event.sourceEvent instanceof WheelEvent) {
+			var x = this.zoom.translate()[0],
+				y = this.zoom.translate()[1],
+				z = this.zoom.scale();
+			
+			this.translate(x, y, z);
+			
+			this.lastTranslation = [x, y];
+		} else {
+			this.zoom.translate(this.lastTranslation);
+		}
 	};
 
 
@@ -223,20 +224,30 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 
 	generateTextGeometry() {
 	    for (var h = 0; h < Config.HOURS.NUMBER_OF; h++) {
-	        var hourGeom = new THREE.TextGeometry(h, {
+	        var hourGeom = new THREE.TextGeometry(String(h), {
 	            font: this.font,
 	            size: fontSize,
-	            dynamic: false
+	            height: 50,
+	            curveSegments: 12,
+	            bevelEnabled: false,
+	            bevelThickness: 10,
+	            bevelSize: 8
+	            // dynamic: false
 	        });
 
 	        Config.HOURS.GEOMETRY.push(hourGeom)
 	    }
 
 	    for (var d = 1; d <= Config.DAYS.NUMBER_OF; d++) {
-	        var dayGeom = new THREE.TextGeometry(d, {
+	        var dayGeom = new THREE.TextGeometry(String(d), {
 	            font: this.font,
 	            size: dateSize,
-	            dynamic: false
+				height: 50,
+				curveSegments: 12,
+				bevelEnabled: false,
+	            bevelThickness: 10,
+	            bevelSize: 8
+	            // dynamic: false
 	        });
 
 	        Config.DAYS.GEOMETRY.push(dayGeom)
@@ -247,7 +258,13 @@ class ZoomCalendar extends THREE.WebGLRenderer {
 	        var monthGeom = new THREE.TextGeometry(date.format("MMM"), {
 	            font: this.font,
 	            size: dateSize,
-	            dynamic: false
+	            height: 50,
+	            curveSegments: 12,
+	            bevelEnabled: false,
+	            bevelThickness: 10,
+	            bevelSize: 8
+	            // ,
+	            // dynamic: false
 	        });
 
 	        Config.MONTHS.GEOMETRY.push(monthGeom);
