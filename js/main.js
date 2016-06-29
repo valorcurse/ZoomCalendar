@@ -98,8 +98,9 @@ var Hour = (function (_super) {
         // }
         Config.HOURS.INSTANCES[+this.date] = this;
     };
-    Hour.prototype.onMouseClick = function () {
-        this.selected = !this.selected;
+    // onMouseClick() {
+    Hour.prototype.select = function (selection) {
+        this.selected = selection;
         console.log("Hour clicked:");
         console.log(this.date.format("DD MMM HH:mm"));
         console.log(this.selected);
@@ -115,7 +116,7 @@ var Hour = (function (_super) {
     Hour.prototype.onMouseHover = function () {
         if (!this.selected && this.rect.material === this.rect.defaultMaterial) {
             this.rect.material = this.rect.defaultMaterial.clone();
-            this.rect.material.color = new THREE.Color(0x00ff00);
+            this.rect.material.color = new THREE.Color(0xaaaaaa);
         }
         // console.log(this.date.format("DD MMM HH:mm"));
         // console.log(this.date);

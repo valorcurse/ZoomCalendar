@@ -23,7 +23,7 @@ interface DateSelection {
 	start?: Hour,
 	end?: Hour
 }
-
+ 
 class ZoomCalendar extends THREE.WebGLRenderer {
 
 	scene: THREE.Scene = new THREE.Scene();
