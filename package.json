@@ -4,29 +4,28 @@
   "description": "",
   "main": "gulpfile.js",
   "dependencies": {
-    "browser-sync": "~2.11.1",
-    "gulp": "~3.9.1",
-    "gulp-sass": "~2.2.0",
-    "glob": "~7.0.0",
-    "calendar": "~0.1.0",
-    "browserify": "~13.0.0",
-    "vinyl-source-stream": "~1.1.0",
-    "gulp-util": "~3.0.7"
+    "browser-sync": "*",
+    "browserify": "*",
+    "calendar": "*",
+    "glob": "*",
+    "gulp": "*",
+    "gulp-sass": "*",
+    "gulp-typescript": "^2.13.6",
+    "gulp-util": "*",
+    "moment": "^2.14.1",
+    "typings": "*",
+    "vinyl-source-stream": "*"
   },
   "devDependencies": {
-    "gulp": "~3.9.1",
-    "gulp-typescript": "~2.12.0",
-<<<<<<< HEAD
-    "tsd": "~0.6.5",
-    "moment": "~2.11.2",
-    "typings": "~0.7.12"
-=======
-    "typings": "~0.7.12",
-    "moment": "~2.11.2"
->>>>>>> b78a1d5fe042beff9892309964c400e95eeb2f6f
+    "gulp": "*",
+    "gulp-typescript": "*",
+    "tsd": "*",
+    "moment": "*",
+    "typings": "*"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "typings install"
   },
   "repository": {
     "type": "git",

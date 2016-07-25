@@ -1,6 +1,8 @@
 {   
     "compilerOptions": {
-        "target": "ES6"
+        "target": "ES6",
+        // "watch": true,
+        "sourceMap": true
     },
 	"filesGlob": [
         	"ts/*.ts"
@@ -9,6 +11,9 @@
 		"node_modules"
 	],
 	"files": [
-		"main.ts"
+		"main.ts",
+		"zoomcalendar.ts",
+		"day.ts",
+		"config.ts"
 	]
 }
