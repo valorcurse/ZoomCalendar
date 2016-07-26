@@ -5,23 +5,27 @@
   "main": "gulpfile.js",
   "dependencies": {
     "browser-sync": "*",
-    "browserify": "*",
-    "calendar": "*",
+    "browserify": "^13.1.0",
     "glob": "*",
     "gulp": "*",
+    "gulp-browserify": "^0.5.1",
     "gulp-sass": "*",
     "gulp-typescript": "^2.13.6",
     "gulp-util": "*",
     "moment": "^2.14.1",
-    "typings": "*",
-    "vinyl-source-stream": "*"
+    "typings": "*"
   },
   "devDependencies": {
-    "gulp": "*",
-    "gulp-typescript": "*",
-    "tsd": "*",
+    "browserify": "^13.1.0",
+    "gulp-debug": "^2.1.2",
+    "gulp-sourcemaps": "^1.6.0",
     "moment": "*",
-    "typings": "*"
+    "systemjs": "^0.19.32",
+    "three": "^0.79.0",
+    "tsify": "^1.0.1",
+    "typescript": "^2.1.0-dev.20160726",
+    "typings": "*",
+    "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

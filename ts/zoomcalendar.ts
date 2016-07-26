@@ -1,11 +1,8 @@
-///<reference path="../typings/index.d.ts"/>
-
-import d3 = require('d3');
-import moment = require("moment");
-type Moment = moment.Moment;
+import * as d3 from 'd3';
+import * as moment from 'moment';
+import * as THREE from 'three';
 
 import {Day, Hour} from "./day.ts";
-
 import * as Globals from "./globals.ts";
 
 
@@ -46,10 +43,10 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	font: THREE.Font;
 
 	DZOOM: number = 5;
-	zoom: any = d3.behavior.zoom()
-                .scaleExtent([0.06, 0.45])
-    		    .scale(0.06)
-    		    .translate([-975, 100]);
+	// zoom: any = d3.zoom();
+                // .scaleExtent([0.06, 0.45])
+    		    // .scale(0.06)
+    		    // .translate([-975, 100]);
 
 
 	lastTranslation: number[];
@@ -58,6 +55,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 		super({ antialias: true });
 
 		console.log(Mouse);
+		console.log(d3);
 
 		// this.scene = new THREE.Scene();
 		this.scene.updateMatrixWorld(true);
@@ -77,7 +75,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 		var currentDate = new Date(this.year, this.month);
 
-		this.dates = d3.time.days(
+		this.dates = d3.timeDays(
 			moment(currentDate).startOf("year").toDate(),
 			moment(currentDate).endOf("month").toDate());
 
@@ -98,7 +96,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 		this.draw();
 
-	    this.zoom.on('zoom', this.zoomed);
+	    d3.zoom().on('zoom', this.zoomed);
 		this.view.call(this.zoom)
 			.on("dblclick.zoom", null) // disable zoom in on double-click
 		;

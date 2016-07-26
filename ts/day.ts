@@ -1,9 +1,9 @@
-///<reference path="../typings/index.d.ts"/>
-
-import moment = require("moment");
+import * as moment from 'moment';
 type Moment = moment.Moment;
 
-import * as Globals from "./globals.ts";
+import * as THREE from 'three';
+
+import * as Globals from './globals.ts';
 
 interface BasicInterface {
     hoverable: boolean;

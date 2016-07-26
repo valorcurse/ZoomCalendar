@@ -1,19 +1,21 @@
 {   
     "compilerOptions": {
         "target": "ES6",
-        // "watch": true,
+        "noImplicitAny": true,
+        "moduleResolution": "node",
         "sourceMap": true
+        // "watch": true,
     },
-	"filesGlob": [
-        	"ts/*.ts"
-	],
+	// "filesGlob": [
+ //        	"ts/*.ts"
+	// ],
 	"exclude": [
 		"node_modules"
 	],
 	"files": [
-		"main.ts",
-		"zoomcalendar.ts",
-		"day.ts",
-		"config.ts"
+		"ts/main.ts",
+		"ts/zoomcalendar.ts",
+		"ts/day.ts",
+		"ts/globals.ts"
 	]
 }
