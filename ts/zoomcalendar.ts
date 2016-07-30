@@ -1,4 +1,6 @@
-import * as d3 from 'd3';
+/// <reference path="../typings/index.d.ts" />
+
+import * as d3 from 'd3-zoom';
 import * as moment from 'moment';
 import * as THREE from 'three';
 
@@ -86,6 +88,8 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 			this.font = new THREE.Font(responseText);
 			this.init();
 		});
+		
+		console.log(d3.zoomTransform());
 		
 		this.lastTranslation = this.zoom.translate();
 	}

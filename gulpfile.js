@@ -12,8 +12,6 @@ var browserSync = require('browser-sync').create();
 // var sass        = require('gulp-sass');
 
 var ts	 	    = require('gulp-typescript');
-var merge       = require('merge2');
-
 var project     = ts.createProject("tsconfig.json");
 
 

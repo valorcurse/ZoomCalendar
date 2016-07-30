@@ -4,15 +4,12 @@
         "noImplicitAny": true,
         "moduleResolution": "node",
         "sourceMap": true
-        // "watch": true,
     },
-	// "filesGlob": [
- //        	"ts/*.ts"
-	// ],
 	"exclude": [
 		"node_modules"
 	],
 	"files": [
+		"typings/index.d.ts",
 		"ts/main.ts",
 		"ts/zoomcalendar.ts",
 		"ts/day.ts",
