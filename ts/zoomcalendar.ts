@@ -1,6 +1,4 @@
-/// <reference path="../typings/index.d.ts" />
-
-import * as d3 from 'd3-zoom';
+import * as d3 from 'd3';
 import * as moment from 'moment';
 import * as THREE from 'three';
 
@@ -49,16 +47,17 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
                 // .scaleExtent([0.06, 0.45])
     		    // .scale(0.06)
     		    // .translate([-975, 100]);
+	zoom: any = d3.zoom();
+		// .on("zoom", zoomed); 
 
-
-	lastTranslation: number[];
+	lastTranslation: any;
 
 	constructor() {
 		super({ antialias: true });
 
 		console.log(Mouse);
 		console.log(d3);
-
+ 
 		// this.scene = new THREE.Scene();
 		this.scene.updateMatrixWorld(true);
 
@@ -84,14 +83,15 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 		this.view = d3.select(this.domElement);
 
 		var loader = new THREE.FontLoader(new THREE.LoadingManager());
-		loader.load('fonts/helvetiker_regular.typeface.js', (responseText: string) => {
+		loader.load('fonts/helvetiker_regular.typeface.json', (responseText: string) => {
 			this.font = new THREE.Font(responseText);
 			this.init();
 		});
 		
-		console.log(d3.zoomTransform());
+		// console.log(d3.zoom());
+		// console.log(d3);
 		
-		this.lastTranslation = this.zoom.translate();
+		// this.lastTranslation = d3.event.transform(this.view);
 	}
     
 	init() {
@@ -100,7 +100,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 		this.draw();
 
-	    d3.zoom().on('zoom', this.zoomed);
+	    this.zoom.on('zoom', this.zoomed);
 		this.view.call(this.zoom)
 			.on("dblclick.zoom", null) // disable zoom in on double-click
 		;
@@ -111,18 +111,27 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	}
 
 	zoomed = () => {
-		console.log(d3.event);
-		// if (d3.event && (d3.event.sourceEvent.ctrlKey || d3.event.sourceEvent.button == 1) || d3.event.sourceEvent instanceof WheelEvent) {
-		// 	var x = this.zoom.translate()[0],
-		// 		y = this.zoom.translate()[1],
-		// 		z = this.zoom.scale();
+		// console.log("d3.event:");
+		// console.log(d3.zoomTransform(this.view));
+			console.log(d3.event);
+		if (d3.event !== null && 
+			(d3.event.sourceEvent.ctrlKey || d3.event.sourceEvent.button == 1) || 
+			d3.event.sourceEvent instanceof WheelEvent) 
+		{
+			var x = d3.event.transform.x,
+				y = d3.event.transform.y,
+				z = d3.event.transform.k;
 			
-		// 	this.translate(x, y, z);
+			console.log(d3.event.transform.constructor.name);
+			this.translate(x, y, z);
 			
-		// 	this.lastTranslation = [x, y];
-		// } else {
-		// 	this.zoom.translate(this.lastTranslation);
-		// }
+			this.lastTranslation = [x, y];
+		} else {
+			if (!this.lastTranslation)
+				return;
+				
+			this.zoom.translateBy(this.view, this.lastTranslation.x, this.lastTranslation.y);
+		}
 	};
 
 
@@ -231,9 +240,10 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	}
 
 	generateTextGeometry() {
+		console.log(this.font);
 	    for (var h = 0; h < Globals.HOURS.NUMBER_OF; h++) {
 	        var hourGeom = new THREE.TextGeometry(String(h), {
-	            font: this.font,
+	            font: this.font.data,
 	            size: Globals.fontSize,
 	            height: 50,
 	            curveSegments: 12,
@@ -248,7 +258,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 	    for (var d = 1; d <= Globals.DAYS.NUMBER_OF; d++) {
 	        var dayGeom = new THREE.TextGeometry(String(d), {
-	            font: this.font,
+	            font: this.font.data,
 	            size: Globals.dateSize,
 				height: 50,
 				curveSegments: 12,
@@ -264,7 +274,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	    for (var m = 0; m < this.dates.length; m++) {
 	        var date = moment(this.dates[m]);
 	        var monthGeom = new THREE.TextGeometry(date.format("MMM"), {
-	            font: this.font,
+	            font: this.font.data,
 	            size: Globals.dateSize,
 	            height: 50,
 	            curveSegments: 12,

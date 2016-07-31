@@ -130,19 +130,21 @@ export class Day extends THREE.Mesh implements BasicInterface {
 
     constructor(date: Moment) {
         super(Globals.rectGeom, Globals.rectMaterial);
+        this.name = "day";
         this.date = date;
         this.draw();
 
         var currentDate = new Date(2016, 0, 10, 16, 14);
 
-        this.addEvent(moment(new Date(2016, 0, 10, 16, 14)), moment(new Date(2016, 0, 10, 18, 48)))
+        // this.addEvent(moment(new Date(2016, 0, 10, 16, 14)), moment(new Date(2016, 0, 10, 18, 48)))
     }
 
     addEvent(start: Moment, end: Moment) {
         var yPosition = this.minutesInDay / moment.duration(start).asMinutes() * this.box.size().y;
         var height = moment.duration(end).asMinutes() * this.box.size().y - yPosition;
 
-        var eventGeometry: THREE.BoxGeometry = new THREE.BoxGeometry(this.box.size().x, height, 0);
+        var eventGeometry: THREE.BoxGeometry = 
+            new THREE.BoxGeometry(this.box.size().x, height, 0);
         
         var rect: HourMesh = new HourMesh(eventGeometry, Globals.hourMaterial);
         rect.position.y = yPosition;
@@ -152,7 +154,6 @@ export class Day extends THREE.Mesh implements BasicInterface {
     }
 
     draw() {
-        this.name = "day";
         
         var weekOfMonth: number = this.date.week();
         var dayOfMonth: number = this.date.day();
