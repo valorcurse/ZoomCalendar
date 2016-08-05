@@ -51,7 +51,7 @@ gulp.task("typescript", function() {
 gulp.task("bundle", ['typescript'], function() {
 
     var libraryName = "ZoomCalendar";
-    var mainTsFilePath = "js/tmp/main.js";
+    var mainTsFilePath = "js/main.js";
     var outputFolder   = "js/";
     var outputFileName = libraryName + ".min.js";
 
@@ -63,7 +63,7 @@ gulp.task("bundle", ['typescript'], function() {
     return bundler.add(mainTsFilePath)
         .plugin("tsify")
         .transform("babelify", {extensions: [".js",".ts"]})
-        .bundle(function(err, buf) { if (err != 'undefined') console.log(err.stack) })
+        .bundle()
         .pipe(source(outputFileName))
         .pipe(buffer())
         .pipe(sourcemaps.init({ loadMaps: true }))
