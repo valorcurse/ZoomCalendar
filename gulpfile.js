@@ -3,6 +3,7 @@ var debug       = require("gulp-debug");
 var sourcemaps  = require('gulp-sourcemaps');
 
 var source      = require('vinyl-source-stream');
+var buffer      = require('vinyl-buffer');
 var browserify  = require('browserify');
 var tsify       = require('tsify');
 
@@ -12,7 +13,7 @@ var browserSync = require('browser-sync').create();
 // var sass        = require('gulp-sass');
 
 var ts	 	    = require('gulp-typescript');
-var project     = ts.createProject("tsconfig.json");
+var tsProject   = ts.createProject("tsconfig.json");
 
 
 
@@ -37,23 +38,37 @@ gulp.task('serve', ['typescript'], function() {
 //         .pipe(browserSync.stream());
 // });
 
-gulp.task('typescript', function () {
-    var bundler = browserify({
-      debug: true
-    }).add('ts/main.ts');
 
-   walkSync('typings').forEach(function(file) {
-    if (file.match(/\.d\.ts$/)) {
-      bundler.add("typings/" + file);
-    }
-  });
-
-  bundler.plugin('tsify');
-
-  return bundler.bundle()
-    .on('error', function (error) { console.error(error.toString()); })
-    .pipe(source('main.js'))
-    .pipe(gulp.dest('js'));
+gulp.task("typescript", function() {
+    return gulp.src([
+            "ts/**.ts",
+            "typings/index.d.ts"
+        ])
+        .pipe(ts(tsProject))
+        .js.pipe(gulp.dest("js/"));
 });
 
-gulp.task('default', ['serve']);
+gulp.task("bundle", ['typescript'], function() {
+
+    var libraryName = "ZoomCalendar";
+    var mainTsFilePath = "js/main.js";
+    var outputFolder   = "dist/";
+    var outputFileName = libraryName + ".min.js";
+
+    var bundler = browserify({
+        debug: true,
+        standalone : libraryName
+    });
+
+    return bundler.add(mainTsFilePath)
+        .plugin("tsify")
+        .transform("babelify", {extensions: [".js",".ts"]})
+        .bundle(function(err, buf) {  })
+        .pipe(source(outputFileName))
+        .pipe(buffer())
+        .pipe(sourcemaps.init({ loadMaps: true }))
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest(outputFolder));
+});
+
+gulp.task('default', ['bundle']);

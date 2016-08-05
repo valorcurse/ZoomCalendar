@@ -4,28 +4,28 @@
   "description": "",
   "main": "gulpfile.js",
   "dependencies": {
-    "browser-sync": "*",
-    "browserify": "^13.1.0",
-    "glob": "*",
-    "gulp": "*",
-    "gulp-browserify": "^0.5.1",
-    "gulp-sass": "*",
-    "gulp-typescript": "^2.13.6",
-    "gulp-util": "*",
-    "moment": "^2.14.1",
-    "typings": "*"
+    "typescript": "*",
+    "moment": "*",
+    "d3": "*",
+    "three": "*"
   },
   "devDependencies": {
+    "@types/d3": "0.0.31",
+    "@types/moment": "^2.11.29",
+    "@types/three": "0.0.18",
+    "babel-preset-es2015": "^6.13.1",
+    "babelify": "^7.3.0",
+    "browser-sync": "*",
     "browserify": "^13.1.0",
-    "d3": "^4.1.1",
+    "gulp": "*",
+    "gulp-babel": "^6.1.2",
     "gulp-debug": "^2.1.2",
     "gulp-sourcemaps": "^1.6.0",
-    "moment": "*",
+    "gulp-typescript": "*",
     "systemjs": "^0.19.32",
-    "three": "^0.79.0",
     "tsify": "^1.0.1",
-    "typescript": "^2.1.0-dev.20160726",
     "typings": "*",
+    "vinyl-buffer": "*",
     "vinyl-source-stream": "^1.1.0",
     "walk-sync": "^0.2.7"
   },
@@ -35,7 +35,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@valorcur.se:valorcurse/freetimecalendar.git"
+    "url": "git@github.com:valorcurse/ZoomCalendar.git"
   },
   "author": "valorcurse",
   "license": "BSD-2-Clause"

@@ -3,16 +3,10 @@
         "target": "ES6",
         "noImplicitAny": true,
         "moduleResolution": "node",
+        "module": "commonjs",
         "sourceMap": true
     },
 	"exclude": [
 		"node_modules"
-	],
-	"files": [
-		"typings/index.d.ts",
-		"ts/main.ts",
-		"ts/zoomcalendar.ts",
-		"ts/day.ts",
-		"ts/globals.ts"
 	]
 }

@@ -1,25 +1,11 @@
+// import * as d3 from '../typings/modules/d3/index.d.ts';
+// var d3 = require('d3');
 import * as d3 from 'd3';
 import * as moment from 'moment';
 import * as THREE from 'three';
 
 import {Day, Hour} from "./day.ts";
 import * as Globals from "./globals.ts";
-
-
-namespace Mouse {
-	export var position: THREE.Vector2 = new THREE.Vector2();
-
-    export module click {
-        export var position: Globals.Point;
-        export var selection: DateSelection = { start: null, end: null };
-    }
-
-    export module hover {
-		export var raycaster: THREE.Raycaster = new THREE.Raycaster();
-    	export var intersects: THREE.Intersection[] = [];
-		export var oldIntersects: Hour[] = [];
-    }
-}
  
 interface DateSelection {
 	start?: Hour,
@@ -52,7 +38,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 	lastTranslation: any;
 
-	constructor() {
+	public constructor() {
 		super({ antialias: true });
 
 		console.log(Mouse);
@@ -288,4 +274,20 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	        Globals.MONTHS.GEOMETRY.push(monthGeom);
 	    }
 	}
+}
+
+namespace Mouse {
+	export var position: THREE.Vector2 = new THREE.Vector2();
+
+    export module click {
+        export var position: Globals.Point;
+        export var selection: DateSelection = { start: null, end: null };
+    }
+    
+
+    export module hover {
+		export var raycaster: THREE.Raycaster = new THREE.Raycaster();
+    	export var intersects: THREE.Intersection[] = [];
+		export var oldIntersects: Hour[] = [];
+    }
 }

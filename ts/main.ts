@@ -1,3 +1,6 @@
-import {ZoomCalendar} from "./zoomcalendar.ts";
+import {ZoomCalendar} from "../ts/zoomcalendar.ts";
+// import * as ZoomCalendar from "../ts/zoomcalendar.ts";
 
-document.body.appendChild(new ZoomCalendar().domElement);
+var calendar: ZoomCalendar = new ZoomCalendar();
+
+document.body.appendChild(calendar.domElement);
