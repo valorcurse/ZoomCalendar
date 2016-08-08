@@ -5,6 +5,8 @@ module.exports = function(grunt) {
             src: ["./ts/main.ts"], // Put src files in require browserifyOptions because there are multiple files exposed
             dest: 'js/output.js',
             options: {
+              watch: true,
+              keepAlive: true,
               require: [
                 "./ts/day.ts",
                 "./ts/globals.ts",
@@ -21,10 +23,11 @@ module.exports = function(grunt) {
               }
             }
           }
-        } 
+        }
     });
     
     grunt.loadNpmTasks("grunt-ts");
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.registerTask("default", ["browserify"]);
 };

@@ -16,9 +16,11 @@
     "browserify": "^13.1.0",
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
+    "grunt-contrib-watch": "^1.0.0",
     "grunt-ts": "^6.0.0-beta.3",
     "tsify": "^1.0.1",
-    "typescript": "^2.0.0"
+    "typescript": "^2.0.0",
+    "watchify": "^3.7.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
