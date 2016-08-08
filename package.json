@@ -4,31 +4,26 @@
   "description": "",
   "main": "gulpfile.js",
   "dependencies": {
-    "typescript": "*",
     "moment": "*",
     "d3": "*",
     "three": "*"
   },
   "devDependencies": {
-    "@types/d3": "0.0.31",
     "@types/moment": "^2.11.29",
     "@types/three": "0.0.18",
     "babelify": "^7.3.0",
     "browser-sync": "*",
     "browserify": "^13.1.0",
-    "gulp": "*",
-    "gulp-debug": "^2.1.2",
-    "gulp-sourcemaps": "^1.6.0",
-    "gulp-typescript": "*",
-    "systemjs": "^0.19.32",
+    "grunt": "^1.0.1",
+    "grunt-browserify": "^5.0.0",
+    "grunt-ts": "^6.0.0-beta.3",
     "tsify": "^1.0.1",
-    "typings": "*",
+    "typescript": "2.0.0",
     "vinyl-buffer": "*",
     "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "typings install"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
