@@ -13,6 +13,7 @@ module.exports = function(grunt) {
                 "./ts/zoomcalendar.ts"
               ],
               browserifyOptions: {
+                debug: true,
                 plugin: [
                   [
                     'tsify', {
