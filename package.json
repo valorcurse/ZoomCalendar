@@ -4,11 +4,12 @@
   "description": "",
   "main": "ts/main.ts",
   "dependencies": {
-    "moment": "*",
     "d3": "*",
+    "moment": "*",
     "three": "*"
   },
   "devDependencies": {
+    "@types/d3": "0.0.31",
     "@types/moment": "^2.11.29",
     "@types/three": "0.0.18",
     "babelify": "^7.3.0",
