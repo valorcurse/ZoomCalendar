@@ -25,7 +25,7 @@ class HourMesh extends THREE.Mesh implements BasicInterface {
 }
 
 export class Hour extends THREE.Object3D implements BasicInterface {
-    date: Moment;
+    hour: number;
     selected: boolean = false;
     
     // rect: HourMesh;
@@ -33,48 +33,28 @@ export class Hour extends THREE.Object3D implements BasicInterface {
     
     hoverable: boolean = true;
     
-    constructor(date: Moment) {
+    constructor(hour: number) {
         super();
-        this.date = date.clone();
+        this.hour = hour;
         this.name = "hour";
         
         this.draw();
     } 
     
     draw() {
-        var currentHour: number = this.date.hour();
-        
-        // this.rect = new HourMesh(hourBoxGeom, Globals.hourMaterial);
-        // this.rect.position.y = -(cellSize / 2) + (Globals.HOURS.NUMBER_OF - currentHour) * fontSize * 1.1 + padding;
-        // this.rect.position.x = fontSize / 2;
-        // this.rect.position.z = 5;
-        // this.add(this.rect);
-        
-        this.text = new HourMesh(Globals.HOURS.GEOMETRY[currentHour], Globals.textMaterial);
+        this.text = new HourMesh(Globals.HOURS.GEOMETRY[this.hour], Globals.textMaterial);
         this.text.geometry.center();
         
         var textBB = new THREE.Box3();
         textBB.setFromObject(this.text);
-        // this.text.position.x = textBB.max.x; 
-
-        this.text.position.x = -Globals.cellSize / 2 + textBB.max.x + 0.5;
-        this.text.position.y = -Globals.cellSize / 2 + 
-            (Globals.HOURS.NUMBER_OF - currentHour) * Globals.fontSize * 1.1 + 
-            Globals.padding - Globals.fontSize / 2 + textBB.max.y;
         this.add(this.text);
         
-        // this.onMouseHover = function() {
-        //     if (!this.selected) {
-        //         rect.material = rect.material.clone();
-        //         rect.material.color = new THREE.Color(0x00ff00);
-        //     }
-        // }
+        var bbox = new THREE.BoundingBoxHelper( this.text, 0x0000ff);
+        bbox.update();
+		this.add(bbox);
+
         
-        // this.onMouseOut = function() {
-        //     // this.rect.material = this.rect.defaultMaterial;
-        // }
-        
-        Globals.HOURS.INSTANCES[+this.date] = this;
+        Globals.HOURS.INSTANCES[this.hour] = this;
     }
     
     // onMouseClick() {
@@ -128,33 +108,52 @@ export class Day extends THREE.Mesh implements BasicInterface {
     
     minutesInDay: number = 1440; // (24 * 60)
 
+    dateTitle: THREE.Object3D;
+    eventArea: THREE.Mesh;
+
     constructor(date: Moment) {
         super(Globals.rectGeom, Globals.rectMaterial);
         this.name = "day";
         this.date = date;
         this.draw();
-
-        var currentDate = new Date(2016, 0, 10, 16, 14);
-
-        // this.addEvent(moment(new Date(2016, 0, 10, 16, 14)), moment(new Date(2016, 0, 10, 18, 48)))
+        
+        var start: any = this.date.clone();
+        start.add(7, 'hours');
+        var end: any = this.date.clone();
+        end.add(17, 'hours');
+        
+        this.addEvent(
+            start, 
+            end
+        );
     }
 
     addEvent(start: Moment, end: Moment) {
-        var yPosition = this.minutesInDay / moment.duration(start).asMinutes() * this.box.size().y;
-        var height = moment.duration(end).asMinutes() * this.box.size().y - yPosition;
+        var startOfDay: Moment = start.clone().startOf('day');
+        // console.log(start.startOf('day').toDate());
+        var minutesElapsed = moment.duration(start.diff(startOfDay)).asMinutes();
+        var minutesDuration = moment.duration(end.diff(start)).asMinutes();
+        // console.log("minutes: " + minutesElapsed);
+        
+        var box = new THREE.Box3().setFromObject(this.dateTitle);
+        // console.log(box.size());
+        var height = minutesDuration / this.minutesInDay * (this.cellSize - box.size().y);
+        var yPosition = height/2 - minutesElapsed / this.minutesInDay * this.cellSize;
+
+        
+        // console.log(yPosition + ": " + this.box.size().y);
 
         var eventGeometry: THREE.BoxGeometry = 
-            new THREE.BoxGeometry(this.box.size().x, height, 0);
-        
+            new THREE.BoxGeometry(10, height, 0);
+
         var rect: HourMesh = new HourMesh(eventGeometry, Globals.hourMaterial);
         rect.position.y = yPosition;
         rect.position.x = 0;
         rect.position.z = 5;
-        this.add(rect);
+        this.eventArea.add(rect);
     }
 
     draw() {
-        
         var weekOfMonth: number = this.date.week();
         var dayOfMonth: number = this.date.day();
         this.position.x = dayOfMonth * this.cellSize + dayOfMonth * this.margin;
@@ -166,9 +165,10 @@ export class Day extends THREE.Mesh implements BasicInterface {
         var dayText = new THREE.Mesh(Globals.DAYS.GEOMETRY[day], Globals.textMaterial),
             monthText = new THREE.Mesh(Globals.MONTHS.GEOMETRY[month], Globals.textMaterial);
         
-        var dateText = new THREE.Object3D()
-        dateText.add(dayText);
-        dateText.add(monthText);
+        this.dateTitle = new THREE.Object3D()
+        // console.log(this.dateTitle.position);
+        this.dateTitle.add(dayText);
+        this.dateTitle.add(monthText);
 
         dayText.geometry.center();
         monthText.geometry.center();
@@ -182,12 +182,44 @@ export class Day extends THREE.Mesh implements BasicInterface {
         monthText.position.x = monthBB.max.x + this.padding / 2;
 
         var dateBB = new THREE.Box3();
-        dateBB.setFromObject(dateText);
-        dateText.position.y = this.cellSize / 2 - dateBB.max.y - this.padding;
-        this.add(dateText);
+        dateBB.setFromObject(this.dateTitle);
+        this.dateTitle.position.y = this.cellSize / 2 - dateBB.max.y - this.padding;
+        this.add(this.dateTitle);
+        
+        var dateBbox = new THREE.BoundingBoxHelper( this.dateTitle, 0x00ff00);
+        dateBbox.update();
+		this.add(dateBbox);
+		
+		
+		
+        // console.log(dateBB.max.y);
+        var dateHeight = dateBB.size().y + this.padding;
+        
+        this.eventArea = new THREE.Mesh( 
+            new THREE.BoxGeometry( this.cellSize, this.cellSize - dateHeight, 0)
+        );
+        this.eventArea.position.y =  -dateHeight/2;
+        this.add(this.eventArea);
+     
+        var eventAreaBox = new THREE.Box3();
+        eventAreaBox.setFromObject(this.eventArea);
+     
+//         var bbox = new THREE.BoundingBoxHelper( this.eventArea, 0xff0000);
+//         bbox.update();
+// 		this.add(bbox);
 
-        for (var i = this.date.clone().startOf("day"); i.isBefore(this.date.clone().endOf("day")); i.add(1, "hours")) {
-            this.add(new Hour(i));
+        for (var h = 0; h <= 23; h++) {
+            var hour: Hour = new Hour(h);
+                    
+            var hourBB = new THREE.Box3();
+            hourBB.setFromObject(hour);
+            var padding = (eventAreaBox.size().y - (Globals.fontSize * 24)) / 23;
+            hour.position.x = -eventAreaBox.size().x / 2 + hourBB.size().x / 2;
+            hour.position.y = eventAreaBox.size().y / 2 - 
+                                hourBB.size().y / 2 -
+                                h * Globals.fontSize -
+                                h * padding;
+            this.eventArea.add(hour);
         }
     }
 }

@@ -16,7 +16,7 @@ import * as THREE from 'three';
     export module HOURS {
         export const NUMBER_OF: number = 24;
         export var  GEOMETRY: THREE.TextGeometry[] = [];
-        export var INSTANCES: { [date: number]: Hour; } = { };
+        export var INSTANCES: { [hour: number]: Hour; } = { };
     }
     
     export module DAYS {

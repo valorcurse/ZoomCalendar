@@ -149,38 +149,38 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 		Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(this.scene.children, true);
 
 		// Unhover hours which are no longer being hovered
-		for (var index = 0; index < Mouse.hover.oldIntersects.length; index++) {
-			var oldIntersect = Mouse.hover.oldIntersects[index];
+		// for (var index = 0; index < Mouse.hover.oldIntersects.length; index++) {
+		// 	var oldIntersect = Mouse.hover.oldIntersects[index];
 
-			if (oldIntersect.date.isAfter(Mouse.click.selection.end.date)) {
-				var hour: Hour = oldIntersect as Hour;
-				// hour.onMouseOut();
-				Mouse.hover.oldIntersects.splice(index, 1);
-			}
-		}
+		// 	if (oldIntersect.hour.isAfter(Mouse.click.selection.end.hour)) {
+		// 		var hour: Hour = oldIntersect as Hour;
+		// 		// hour.onMouseOut();
+		// 		Mouse.hover.oldIntersects.splice(index, 1);
+		// 	}
+		// }
 
-		if (!Mouse.click.selection.start)
-			return;
+		// if (!Mouse.click.selection.start)
+		// 	return;
 
-		// Select last hour for selection
-		for (var i = 0; i < Mouse.hover.intersects.length; i++) {
-			var intersect = Mouse.hover.intersects[i];
+		// // Select last hour for selection
+		// for (var i = 0; i < Mouse.hover.intersects.length; i++) {
+		// 	var intersect = Mouse.hover.intersects[i];
 
-			if (intersect.object.parent instanceof Hour) {
-				var hour: Hour = intersect.object.parent as Hour;
-				Mouse.click.selection.end = hour;
-			}
-		}
+		// 	if (intersect.object.parent instanceof Hour) {
+		// 		var hour: Hour = intersect.object.parent as Hour;
+		// 		Mouse.click.selection.end = hour;
+		// 	}
+		// }
 
 		// Hover over all hour between start and end
-		for (var d = Mouse.click.selection.start.date.clone(); d.isSameOrBefore(Mouse.click.selection.end.date); d.add(1, "hour")) {
-			var selectedHour = Globals.HOURS.INSTANCES[+d];
-			// selectedHour.onMouseHover();
+		// for (var d = Mouse.click.selection.start.date.clone(); d.isSameOrBefore(Mouse.click.selection.end.hour); d.add(1, "hour")) {
+		// 	var selectedHour = Globals.HOURS.INSTANCES[+d];
+		// 	// selectedHour.onMouseHover();
 
-			if (Mouse.hover.oldIntersects.indexOf(selectedHour) < 0) {
-				Mouse.hover.oldIntersects.push(selectedHour);
-			}
-		}
+		// 	if (Mouse.hover.oldIntersects.indexOf(selectedHour) < 0) {
+		// 		Mouse.hover.oldIntersects.push(selectedHour);
+		// 	}
+		// }
 	}
 
 	onMouseDown(event: MouseEvent) {
