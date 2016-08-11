@@ -88,7 +88,14 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 		this.draw();
 
-	    this.zoom.on('zoom', this.zoomed);
+	    this.zoom
+	    	.on('zoom', this.zoomed)
+	    	.filter(function() {
+	    		console.log(d3.event);
+				return (d3.event.button === 0 ||
+					d3.event.button === 1);
+			});
+			
 		this.view.call(this.zoom)
 			.on("dblclick.zoom", null) // disable zoom in on double-click
 		;
@@ -196,8 +203,8 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	}
 	
 	mousedowned() {
-		var stop = !d3.event.ctrlKey;
-		if (stop) d3.event.stopImmediatePropagation(); // stop zoom
+		var allowPan = d3.event.ctrlKey || d3.event.button === 1;
+		if (!allowPan) d3.event.stopImmediatePropagation(); // stop zoom
 	}
 
 	draw = () => {
