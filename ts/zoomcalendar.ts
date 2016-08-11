@@ -28,21 +28,14 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	font: THREE.Font;
 
 	DZOOM: number = 5;
-	// zoom: any = d3.zoom();
-                // .scaleExtent([0.06, 0.45])
-    		    // .scale(0.06)
-    		    // .translate([-975, 100]);
+
 	zoom: any = d3.zoom();
-		// .on("zoom", zoomed); 
 
 	lastTranslation: any;
 
 	public constructor() {
 		super({ antialias: true });
 
-		console.log(Mouse);
-		console.log(d3);
- 
 		// this.scene = new THREE.Scene();
 		this.scene.updateMatrixWorld(true);
 
@@ -66,8 +59,6 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 			moment(currentDate).endOf("month").toDate());
 
 		this.view = d3.select(this.domElement);
-		this.view.on("mousedown", this.mousedowned);
-		// this.context = this.context;
 
 		this.zoom(this.view);
 
@@ -91,8 +82,8 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	    this.zoom
 	    	.on('zoom', this.zoomed)
 	    	.filter(function() {
-	    		console.log(d3.event);
-				return (d3.event.button === 0 ||
+	    		// Allow for zoom/pan with left or middle mouse button
+				return ((d3.event.button === 0 && d3.event.ctrlKey) ||
 					d3.event.button === 1);
 			});
 			
@@ -110,13 +101,8 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 				y = transform.y,
 				z = transform.k;
 				
-			// if ((d3.event.sourceEvent.ctrlKey || d3.event.sourceEvent.button == 1) || 
-			// 	d3.event.sourceEvent instanceof WheelEvent)
-			// {
-				
-			// 	console.log(transform);
+
 				this.translate(x, y, z);
-			// }
 		}
 	};
 
@@ -200,11 +186,6 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	onMouseDown(event: MouseEvent) {
 		console.log("Mouse is down.");
 		Mouse.click.position = { x: event.clientX, y: event.clientY };
-	}
-	
-	mousedowned() {
-		var allowPan = d3.event.ctrlKey || d3.event.button === 1;
-		if (!allowPan) d3.event.stopImmediatePropagation(); // stop zoom
 	}
 
 	draw = () => {
