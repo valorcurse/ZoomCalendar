@@ -82,9 +82,9 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	    this.zoom
 	    	.on('zoom', this.zoomed)
 	    	.filter(function() {
-	    		// Allow for zoom/pan with left or middle mouse button
+	    		// Allow for zoom/pan with left/middle mouse button or mouse wheel
 				return ((d3.event.button === 0 && d3.event.ctrlKey) ||
-					d3.event.button === 1);
+					d3.event.button === 1 || d3.event instanceof WheelEvent);
 			});
 			
 		this.view.call(this.zoom)
