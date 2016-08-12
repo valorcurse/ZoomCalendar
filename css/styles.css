@@ -11,6 +11,7 @@ body {
   shape-rendering: crispEdges;
   background-color: white;
   overflow: hidden;
+  margin: 0;
 }
 
 .container {

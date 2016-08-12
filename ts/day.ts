@@ -49,49 +49,13 @@ export class Hour extends THREE.Object3D implements BasicInterface {
         textBB.setFromObject(this.text);
         this.add(this.text);
         
-        var bbox = new THREE.BoundingBoxHelper( this.text, 0x0000ff);
-        bbox.update();
-		this.add(bbox);
+//         var bbox = new THREE.BoundingBoxHelper( this.text, 0x0000ff);
+//         bbox.update();
+// 		this.add(bbox);
 
         
         Globals.HOURS.INSTANCES[this.hour] = this;
     }
-    
-    // onMouseClick() {
-    // select(selection: boolean) {
-    //         this.selected = selection;
-            
-    //         console.log("Hour clicked:");
-    //         console.log(this.date.format("DD MMM HH:mm"));
-    //         console.log(this.selected);
-            
-    //         if (this.selected) {
-    //             this.rect.material = this.rect.defaultMaterial.clone();
-    //             this.rect.material.color = new THREE.Color(0x0000ff);
-    //         } else {
-    //             this.rect.material = this.rect.defaultMaterial;
-    //         }
-        
-        
-    
-    //     // console.log(this.date.format("DD MMM HH:mm"));    
-    // }
-    
-    // onMouseHover() {
-    //     if (!this.selected && this.rect.material === this.rect.defaultMaterial) {
-    //         this.rect.material = this.rect.defaultMaterial.clone();
-    //         this.rect.material.color = new THREE.Color(0xaaaaaa);
-    //     }
-    //     // console.log(this.date.format("DD MMM HH:mm"));
-    //     // console.log(this.date);
-        
-    // }
-        
-    // onMouseOut() {
-    //     if (!this.selected) {
-    //         this.rect.material = this.rect.defaultMaterial;
-    //     }
-    // }
 }
 
 export class Day extends THREE.Mesh implements BasicInterface {
@@ -106,10 +70,13 @@ export class Day extends THREE.Mesh implements BasicInterface {
     hoverable: boolean = false;
     selectable: boolean = true;
     
-    minutesInDay: number = 1440; // (24 * 60)
+    minutesInDay: number = 1440; // (24 hours * 60 minutes)
 
     dateTitle: THREE.Object3D;
     eventArea: THREE.Mesh;
+    hourPadding: number;
+
+    hoveringHighlight: THREE.Mesh;
 
     constructor(date: Moment) {
         super(Globals.rectGeom, Globals.rectMaterial);
@@ -122,26 +89,23 @@ export class Day extends THREE.Mesh implements BasicInterface {
         var end: any = this.date.clone();
         end.add(17, 'hours');
         
-        this.addEvent(
-            start, 
-            end
-        );
+        // this.addEvent(
+        //     start, 
+        //     end
+        // );
     }
 
     addEvent(start: Moment, end: Moment) {
         var startOfDay: Moment = start.clone().startOf('day');
-        // console.log(start.startOf('day').toDate());
         var minutesElapsed = moment.duration(start.diff(startOfDay)).asMinutes();
         var minutesDuration = moment.duration(end.diff(start)).asMinutes();
-        // console.log("minutes: " + minutesElapsed);
         
-        var box = new THREE.Box3().setFromObject(this.dateTitle);
-        // console.log(box.size());
-        var height = minutesDuration / this.minutesInDay * (this.cellSize - box.size().y);
-        var yPosition = height/2 - minutesElapsed / this.minutesInDay * this.cellSize;
-
-        
-        // console.log(yPosition + ": " + this.box.size().y);
+        var eventAreaBox = new THREE.Box3().setFromObject(this.eventArea);
+        var minuteToPixelRatio = eventAreaBox.size().y / this.minutesInDay;
+        var height = minutesDuration * minuteToPixelRatio;
+        var yPosition = (eventAreaBox.size().y / 2) -           // Move to top of parent
+                        (height / 2) -                         // Move to top of event
+                        (minutesElapsed * minuteToPixelRatio);  // Move to correct position
 
         var eventGeometry: THREE.BoxGeometry = 
             new THREE.BoxGeometry(10, height, 0);
@@ -186,9 +150,9 @@ export class Day extends THREE.Mesh implements BasicInterface {
         this.dateTitle.position.y = this.cellSize / 2 - dateBB.max.y - this.padding;
         this.add(this.dateTitle);
         
-        var dateBbox = new THREE.BoundingBoxHelper( this.dateTitle, 0x00ff00);
-        dateBbox.update();
-		this.add(dateBbox);
+//         var dateBbox = new THREE.BoundingBoxHelper( this.dateTitle, 0x00ff00);
+//         dateBbox.update();
+// 		this.add(dateBbox);
 		
 		
 		
@@ -196,8 +160,10 @@ export class Day extends THREE.Mesh implements BasicInterface {
         var dateHeight = dateBB.size().y + this.padding;
         
         this.eventArea = new THREE.Mesh( 
-            new THREE.BoxGeometry( this.cellSize, this.cellSize - dateHeight, 0)
+            new THREE.BoxGeometry( this.cellSize, this.cellSize - dateHeight, 0),
+            Globals.rectMaterial
         );
+        this.eventArea.name = "eventArea";
         this.eventArea.position.y =  -dateHeight/2;
         this.add(this.eventArea);
      
@@ -210,16 +176,68 @@ export class Day extends THREE.Mesh implements BasicInterface {
 
         for (var h = 0; h <= 23; h++) {
             var hour: Hour = new Hour(h);
+         
+            this.hourPadding = (eventAreaBox.size().y -         // Size of area
+                                (Globals.fontSize * 24)) / 24;  // Size of all letters / number of padding spots
+         
+            var hourToPixelRatio = eventAreaBox.size().y / (this.minutesInDay / 60);
+         
+            var eventGeometry: THREE.BoxGeometry = 
+                new THREE.BoxGeometry(eventAreaBox.size().x, hourToPixelRatio, 0);
+            var eventMaterial = h % 2 !== 0 ? 
+                                new THREE.MeshBasicMaterial({ color: 0xeeeeee }) :
+                                new THREE.MeshBasicMaterial({ color: 0xffffff });
+    
+            var rect: THREE.Mesh = new THREE.Mesh(eventGeometry, eventMaterial);
+            rect.position.y = eventAreaBox.size().y / 2 -
+                                hourToPixelRatio / 2 -
+                                hourToPixelRatio * h;
+            rect.position.z = 3;
+            this.eventArea.add(rect);
                     
             var hourBB = new THREE.Box3();
             hourBB.setFromObject(hour);
-            var padding = (eventAreaBox.size().y - (Globals.fontSize * 24)) / 23;
+           
+            var padding = this.hourPadding + (hourBB.size().y - Globals.fontSize);
             hour.position.x = -eventAreaBox.size().x / 2 + hourBB.size().x / 2;
-            hour.position.y = eventAreaBox.size().y / 2 - 
+            hour.position.y = eventAreaBox.size().y / 2 -
                                 hourBB.size().y / 2 -
-                                h * Globals.fontSize -
-                                h * padding;
+                                h * hourToPixelRatio -
+                                (hourToPixelRatio - hourBB.size().y) / 2; 
             this.eventArea.add(hour);
         }
+    }
+    
+    mouseover(uv: THREE.Vector2) {
+        // console.log(uv.y.toFixed(2));
+        // var roundedUV = {x: uv.x.toFixed(2), y: uv.y.toFixed(2)};
+        if (this.hoveringHighlight)
+            this.eventArea.remove(this.hoveringHighlight);
+        
+        var minuteStep = 1;
+        
+        var minutes = Math.floor((1 - uv.y) * (this.minutesInDay/minuteStep));
+        console.log(moment.utc(moment.duration(minutes * minuteStep, "minutes").asMilliseconds()).format("HH:mm"));
+        
+        var eventAreaBox = new THREE.Box3().setFromObject(this.eventArea);
+        var minuteToPixelRatio = eventAreaBox.size().y / (this.minutesInDay / minuteStep);
+        
+        var eventGeometry: THREE.BoxGeometry = 
+            new THREE.BoxGeometry(eventAreaBox.size().x, minuteToPixelRatio, 0);
+        var eventMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
+
+        var rect: THREE.Mesh = new THREE.Mesh(eventGeometry, eventMaterial);
+        rect.position.x = -eventAreaBox.size().x / 2 + eventAreaBox.size().x / 2;
+        rect.position.y = eventAreaBox.size().y / 2 -               // Move to top of area
+                            // minuteToPixelRatio / 2 -                // Move to top of component
+                            eventAreaBox.size().y * (1 - uv.y);     // Move to position based on coordinate
+                            // ;                   // Add padding
+        rect.position.z = 5;
+        
+        this.hoveringHighlight = rect;
+                                   
+        this.eventArea.add(this.hoveringHighlight);
+        // console.log(minuteToPixelRatio);
+        // console.log(rect.position.y);
     }
 }

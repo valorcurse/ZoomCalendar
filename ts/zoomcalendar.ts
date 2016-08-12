@@ -13,7 +13,7 @@ interface DateSelection {
 export class ZoomCalendar extends THREE.WebGLRenderer {
 
 	scene: THREE.Scene = new THREE.Scene();
-	sceneSize = { "width": window.innerWidth * 0.98, "height": window.innerHeight * 0.97 };
+	sceneSize = { "width": window.innerWidth, "height": window.innerHeight};
 	aspect: number = this.sceneSize.width / this.sceneSize.height;
 	
 	camera: THREE.OrthographicCamera;
@@ -162,15 +162,22 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 		// if (!Mouse.click.selection.start)
 		// 	return;
 
-		// // Select last hour for selection
-		// for (var i = 0; i < Mouse.hover.intersects.length; i++) {
-		// 	var intersect = Mouse.hover.intersects[i];
-
-		// 	if (intersect.object.parent instanceof Hour) {
-		// 		var hour: Hour = intersect.object.parent as Hour;
-		// 		Mouse.click.selection.end = hour;
-		// 	}
-		// }
+		// Select last hour for selection
+		
+		for (var i = 0; i < Mouse.hover.intersects.length; i++) {
+			var intersect: any = Mouse.hover.intersects[i];
+			
+			
+			if (intersect.object.parent instanceof Day &&
+				intersect.object.name === "eventArea") 
+			{
+				var day: Day = intersect.object.parent as Day;
+				var uv: THREE.Vector2 = intersect.uv;
+				// console.log(intersect.uv);
+				day.mouseover(uv);
+				// Mouse.click.selection.end = hour;
+			}
+		}
 
 		// Hover over all hour between start and end
 		// for (var d = Mouse.click.selection.start.date.clone(); d.isSameOrBefore(Mouse.click.selection.end.hour); d.add(1, "hour")) {
