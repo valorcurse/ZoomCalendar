@@ -62,7 +62,7 @@ export class Day extends THREE.Mesh implements BasicInterface {
     margin: number = 0.1;
     padding: number = 0.5;
     cellSize: number = 30;
-    material: THREE.MeshBasicMaterial = Globals.rectMaterial;
+    // material: THREE.MeshBasicMaterial = Globals.rectMaterial;
     geometry: THREE.BoxGeometry = Globals.rectGeom;
     box: THREE.Box3 = new THREE.Box3().setFromObject(this);
     date: Moment;
@@ -78,11 +78,24 @@ export class Day extends THREE.Mesh implements BasicInterface {
 
     hoveringHighlight: THREE.Mesh;
 
+    uniforms: any = {  
+			transform: { type: "f", value: 0 },
+		};
+
+	shaderMaterial: THREE.ShaderMaterial = new THREE.ShaderMaterial({  
+            uniforms: this.uniforms,
+			vertexShader: document.getElementById('vertexShader').textContent
+		});
+
     constructor(date: Moment) {
         super(Globals.rectGeom, Globals.rectMaterial);
+        
+        // super(Globals.rectGeom);
+        // this.material = this.shaderMaterial;
+        
         this.name = "day";
         this.date = date;
-        this.draw();
+        
         
         var start: any = this.date.clone();
         start.add(7, 'hours');
@@ -93,6 +106,20 @@ export class Day extends THREE.Mesh implements BasicInterface {
         //     start, 
         //     end
         // );
+        
+//         var uniforms: any = {  
+// 			myColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+// 		};
+// 		var attributes: any = {  
+// 			size: { type: 'f', value: [] },
+// 		};
+// 		this.shaderMaterial = new THREE.ShaderMaterial({  
+// 			uniforms: uniforms,
+// 			// attributes: attributes,
+// 			vertexShader: document.getElementById('vertexShader').textContent
+// 		});
+		
+		this.draw();
     }
 
     addEvent(start: Moment, end: Moment) {
@@ -209,14 +236,15 @@ export class Day extends THREE.Mesh implements BasicInterface {
     }
     
     mouseover(uv: THREE.Vector2) {
-        // console.log(uv.y.toFixed(2));
-        // var roundedUV = {x: uv.x.toFixed(2), y: uv.y.toFixed(2)};
         if (this.hoveringHighlight)
             this.eventArea.remove(this.hoveringHighlight);
         
-        var minuteStep = 1;
+        this.uniforms.transform.value = uv.y * 10;
         
-        var minutes = Math.floor((1 - uv.y) * (this.minutesInDay/minuteStep));
+        
+        var minuteStep = 5;
+        
+        var minutes = Math.floor((1 - uv.y) * (this.minutesInDay / minuteStep));
         console.log(moment.utc(moment.duration(minutes * minuteStep, "minutes").asMilliseconds()).format("HH:mm"));
         
         var eventAreaBox = new THREE.Box3().setFromObject(this.eventArea);
@@ -224,20 +252,16 @@ export class Day extends THREE.Mesh implements BasicInterface {
         
         var eventGeometry: THREE.BoxGeometry = 
             new THREE.BoxGeometry(eventAreaBox.size().x, minuteToPixelRatio, 0);
-        var eventMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 })
+        var eventMaterial = new THREE.MeshBasicMaterial({ color: 0xb3ecff })
 
         var rect: THREE.Mesh = new THREE.Mesh(eventGeometry, eventMaterial);
         rect.position.x = -eventAreaBox.size().x / 2 + eventAreaBox.size().x / 2;
         rect.position.y = eventAreaBox.size().y / 2 -               // Move to top of area
-                            // minuteToPixelRatio / 2 -                // Move to top of component
                             eventAreaBox.size().y * (1 - uv.y);     // Move to position based on coordinate
-                            // ;                   // Add padding
         rect.position.z = 5;
         
         this.hoveringHighlight = rect;
                                    
         this.eventArea.add(this.hoveringHighlight);
-        // console.log(minuteToPixelRatio);
-        // console.log(rect.position.y);
     }
 }

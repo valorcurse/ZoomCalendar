@@ -6,10 +6,19 @@
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
 <body>
-	<!-- <script src="js/three.js"></script> -->
-	<!-- <script src="https://rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script> -->
-	<!-- <script src="js/moment.min.js"></script> -->
-	 <!--<script src="js/d3.min.js"></script> -->
+	<script type="x-shader/x-vertex" id="vertexShader">   
+		
+		uniform float transform;
+
+		void main() {
+			vec3 newPos = position;
+			newPos.x += transform;
+			
+			gl_Position = projectionMatrix *
+                modelViewMatrix *
+                vec4(newPos, 1.0);
+		}
+	</script>
 	<script src="js/output.js"></script>
 </body>
 </html>
