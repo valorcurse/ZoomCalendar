@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import * as moment from 'moment';
 import * as THREE from 'three';
 
-import {Day, Hour} from "./day.ts";
+import {Day, DailyHours, Hour} from "./day.ts";
 import * as Globals from "./globals.ts";
  
 interface DateSelection {
@@ -33,6 +33,8 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 	lastTranslation: any;
 
+	dailyTexture: THREE.Texture;
+
 	public constructor() {
 		super({ antialias: true });
 
@@ -40,12 +42,18 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 		this.scene.updateMatrixWorld(true);
 
 		// var aspect = this.sceneSize.width / this.sceneSize.height;
-		this.camera = new THREE.OrthographicCamera(0, 2 * this.DZOOM * this.aspect, 0, -2 * this.DZOOM, -1000, 1000);
+		// this.camera = new THREE.OrthographicCamera(0, 2 * this.DZOOM * this.aspect, 0, -2 * this.DZOOM, -1000, 1000);
+			this.camera = new THREE.OrthographicCamera( 
+            window.innerWidth / -2, 
+            window.innerWidth / 2, 
+            window.innerHeight / 2, 
+            window.innerHeight / -2, 
+            -1000, 1000 );
 		this.camera.updateProjectionMatrix();
 
 		this.setSize(this.sceneSize.width, this.sceneSize.height);
 		this.setClearColor(0xcccccc, 1);
-		this.draw();
+		// this.draw();
 
 
 		document.addEventListener('mousemove', this.onMouseMove, false);
@@ -77,6 +85,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
     
 	init() {
 		this.generateTextGeometry();
+		this.generateDayTexture();
 		this.createComponents();
 
 		this.draw();
@@ -93,7 +102,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 			.on("dblclick.zoom", null) // disable zoom in on double-click
 		;
 		
-		this.zoomed();
+		// this.zoomed();
 	}
 
 	zoomed = () => {
@@ -161,7 +170,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	createComponents() {
 		for (var i = 0; i < this.dates.length; i++) {
 			var date = moment(this.dates[i]);
-			var newDay = new Day(date);
+			var newDay = new Day(date, this.dailyTexture);
 			this.scene.add(newDay);
 
 			// var bbox = new THREE.BoundingBoxHelper(newDay, 0x0000ff);
@@ -172,9 +181,9 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 		var cameraBB = new THREE.Box3();
 		cameraBB.setFromObject(this.scene);
-		this.camera.position.set(-cameraBB.max.x, cameraBB.max.y * 2, 0); // TODO: Find out the correct values
+		// this.camera.position.set(-cameraBB.max.x, cameraBB.max.y * 2, 0); // TODO: Find out the correct values
 
-		this.camera.updateProjectionMatrix();
+		// this.camera.updateProjectionMatrix();
 	}
 
 	generateTextGeometry() {
@@ -182,7 +191,8 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	    for (var h = 0; h < Globals.HOURS.NUMBER_OF; h++) {
 	        var hourGeom = new THREE.TextGeometry(String(h), {
 	            font: this.font.data,
-	            size: Globals.fontSize,
+	            // size: Globals.fontSize,
+	            size: (window.innerHeight / 24),
 	            height: 50,
 	            curveSegments: 4,
 	            bevelEnabled: false,
@@ -225,6 +235,40 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 	        Globals.MONTHS.GEOMETRY.push(monthGeom);
 	    }
+	}
+	
+	generateDayTexture() {
+		var width = window.innerWidth,
+			height = window.innerHeight;
+		
+		var camera = new THREE.OrthographicCamera( 
+            width / -2, 
+            width / 2, 
+            height / 2, 
+            height / -2, 
+            -10000, 10000 );
+        
+        camera.position.z = 50;
+        var bufferScene = new THREE.Scene();
+
+        
+        var bufferTexture =new THREE.WebGLRenderTarget( 
+        	4096, 
+        	4096, 
+        	{ minFilter: THREE.LinearMipMapLinearFilter  , magFilter: THREE.NearestMipMapLinearFilter  } 
+        );
+        
+        bufferScene.add(new DailyHours());
+        
+        var plane = new THREE.PlaneBufferGeometry( width/2, height/2 );
+        var blueMaterial = new THREE.MeshBasicMaterial({color:0x7074FF})
+        var planeObject = new THREE.Mesh(plane,blueMaterial);
+        planeObject.position.z = 10;
+        bufferScene.add(planeObject);
+
+        this.render(bufferScene, camera, bufferTexture);
+        this.dailyTexture = bufferTexture.texture;
+
 	}
 }
 

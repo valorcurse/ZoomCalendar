@@ -24,11 +24,18 @@ module.exports = function(grunt) {
               }
             }
           }
+        },
+        uglify: {
+           build: {
+            src: 'js/output.js',
+            dest: 'js/output.min.js'
+          }
         }
     });
     
     grunt.loadNpmTasks("grunt-ts");
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.registerTask("default", ["browserify"]);
+    grunt.registerTask("default", ["browserify", "uglify"]);
 };
