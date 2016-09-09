@@ -1,22 +1,46 @@
-import * as d3 from 'd3';
-import * as moment from 'moment';
-import * as THREE from 'three';
+// import * as d3 from 'd3';
+// import * as zoom from 'd3-zoom';
+import * as d3Zoom from 'd3-zoom';
+import * as d3Time from 'd3-time';
+import * as d3Selection from 'd3-selection';
 
-import {Day, DailyHours, Hour} from "./day.ts";
-import * as Globals from "./globals.ts";
+import * as moment from 'moment';
+
+import {WebGLRenderer,
+		Scene,
+		OrthographicCamera,
+		Font,
+		Texture,
+		LoadingManager,
+		Vector2,
+		Box3,
+		FontLoader,
+		TextGeometry,
+		WebGLRenderTarget,
+		LinearMipMapLinearFilter,
+		NearestMipMapLinearFilter,
+		PlaneBufferGeometry,
+		MeshBasicMaterial,
+		Mesh,
+		Raycaster,
+		Intersection
+} from 'three';
+
+import {Day, DailyHours, Hour} from "./day";
+import * as Globals from "./globals";
  
 interface DateSelection {
 	start?: Hour,
 	end?: Hour
 }
  
-export class ZoomCalendar extends THREE.WebGLRenderer {
+export class ZoomCalendar extends WebGLRenderer {
 
-	scene: THREE.Scene = new THREE.Scene();
+	scene: Scene = new Scene();
 	sceneSize = { "width": window.innerWidth, "height": window.innerHeight};
 	aspect: number = this.sceneSize.width / this.sceneSize.height;
 	
-	camera: THREE.OrthographicCamera;
+	camera: OrthographicCamera;
 
 	year: number = 2016;
 	month: number = 1;
@@ -25,25 +49,25 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	view: any;
 	context: any;
 
-	font: THREE.Font;
+	font: Font;
 
 	DZOOM: number = 5;
 
-	zoom: any = d3.zoom();
+	zoom: any = d3Zoom.zoom();
 
 	lastTranslation: any;
 
-	dailyTexture: THREE.Texture;
+	dailyTexture: Texture;
 
 	public constructor() {
 		super({ antialias: true });
 
-		// this.scene = new THREE.Scene();
+		// this.scene = new Scene();
 		this.scene.updateMatrixWorld(true);
 
 		// var aspect = this.sceneSize.width / this.sceneSize.height;
-		// this.camera = new THREE.OrthographicCamera(0, 2 * this.DZOOM * this.aspect, 0, -2 * this.DZOOM, -1000, 1000);
-			this.camera = new THREE.OrthographicCamera( 
+		// this.camera = new OrthographicCamera(0, 2 * this.DZOOM * this.aspect, 0, -2 * this.DZOOM, -1000, 1000);
+			this.camera = new OrthographicCamera( 
             window.innerWidth / -2, 
             window.innerWidth / 2, 
             window.innerHeight / 2, 
@@ -62,21 +86,21 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 		var currentDate = new Date(this.year, this.month);
 
-		this.dates = d3.timeDays(
+		this.dates = d3Time.timeDays(
 			moment(currentDate).startOf("year").toDate(),
 			moment(currentDate).endOf("month").toDate());
 
-		this.view = d3.select(this.domElement);
+		this.view = d3Selection.select(this.domElement);
 
 		this.zoom(this.view);
 
-		var loader = new THREE.FontLoader(new THREE.LoadingManager());
+		var loader = new FontLoader(new LoadingManager());
 		loader.load('fonts/helvetiker_regular.typeface.json', (responseText: string) => {
-			this.font = new THREE.Font(responseText);
+			this.font = new Font(responseText);
 			this.init();
 		});
 		
-		var t = d3.zoomIdentity.translate(0, 0).scale(0.03);
+		var t = d3Zoom.zoomIdentity.translate(0, 0).scale(0.03);
 		this.zoom.transform(this.view, t);
 		this.translate(t.x, t.y, t.k);
 		
@@ -94,8 +118,8 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	    	.on('zoom', this.zoomed)
 	    	.filter(function() {
 	    		// Allow for zoom/pan with left/middle mouse button or mouse wheel
-				return ((d3.event.button === 0 && d3.event.ctrlKey) ||
-					d3.event.button === 1 || d3.event instanceof WheelEvent);
+				return ((d3Selection.event.button === 0 && d3Selection.event.ctrlKey) ||
+					d3Selection.event.button === 1 || d3Selection.event instanceof WheelEvent);
 			});
 			
 		this.view.call(this.zoom)
@@ -106,8 +130,8 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	}
 
 	zoomed = () => {
-		if (d3.event != null) {
-			var transform: any = d3.event.transform;
+		if (d3Selection.event != null) {
+			var transform: any = d3Selection.event.transform;
 			var x = transform.x,
 				y = transform.y,
 				z = transform.k;
@@ -151,7 +175,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 				intersect.object.name === "eventArea") 
 			{
 				var day: Day = intersect.object.parent as Day;
-				var uv: THREE.Vector2 = intersect.uv;
+				var uv: Vector2 = intersect.uv;
 				day.mouseover(uv);
 			}
 		}
@@ -173,13 +197,13 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 			var newDay = new Day(date, this.dailyTexture);
 			this.scene.add(newDay);
 
-			// var bbox = new THREE.BoundingBoxHelper(newDay, 0x0000ff);
+			// var bbox = new BoundingBoxHelper(newDay, 0x0000ff);
 			// bbox.update();
 			// this.scene.add(bbox);
 
 		}
 
-		var cameraBB = new THREE.Box3();
+		var cameraBB = new Box3();
 		cameraBB.setFromObject(this.scene);
 		// this.camera.position.set(-cameraBB.max.x, cameraBB.max.y * 2, 0); // TODO: Find out the correct values
 
@@ -189,7 +213,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	generateTextGeometry() {
 		console.log(this.font);
 	    for (var h = 0; h < Globals.HOURS.NUMBER_OF; h++) {
-	        var hourGeom = new THREE.TextGeometry(String(h), {
+	        var hourGeom = new TextGeometry(String(h), {
 	            font: this.font.data,
 	            // size: Globals.fontSize,
 	            size: (window.innerHeight / 24),
@@ -205,7 +229,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 	    }
 
 	    for (var d = 1; d <= Globals.DAYS.NUMBER_OF; d++) {
-	        var dayGeom = new THREE.TextGeometry(String(d), {
+	        var dayGeom = new TextGeometry(String(d), {
 	            font: this.font.data,
 	            size: Globals.dateSize,
 				height: 50,
@@ -221,7 +245,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 
 	    for (var m = 0; m < this.dates.length; m++) {
 	        var date = moment(this.dates[m]);
-	        var monthGeom = new THREE.TextGeometry(date.format("MMM"), {
+	        var monthGeom = new TextGeometry(date.format("MMM"), {
 	            font: this.font.data,
 	            size: Globals.dateSize,
 	            height: 50,
@@ -241,7 +265,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 		var width = window.innerWidth,
 			height = window.innerHeight;
 		
-		var camera = new THREE.OrthographicCamera( 
+		var camera = new OrthographicCamera( 
             width / -2, 
             width / 2, 
             height / 2, 
@@ -249,20 +273,20 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
             -10000, 10000 );
         
         camera.position.z = 50;
-        var bufferScene = new THREE.Scene();
+        var bufferScene = new Scene();
 
         
-        var bufferTexture =new THREE.WebGLRenderTarget( 
-        	4096, 
-        	4096, 
-        	{ minFilter: THREE.LinearMipMapLinearFilter  , magFilter: THREE.NearestMipMapLinearFilter  } 
+        var bufferTexture =new WebGLRenderTarget( 
+        	2048, 
+        	2048, 
+        	{ minFilter: LinearMipMapLinearFilter  , magFilter: NearestMipMapLinearFilter  } 
         );
         
         bufferScene.add(new DailyHours());
         
-        var plane = new THREE.PlaneBufferGeometry( width/2, height/2 );
-        var blueMaterial = new THREE.MeshBasicMaterial({color:0x7074FF})
-        var planeObject = new THREE.Mesh(plane,blueMaterial);
+        var plane = new PlaneBufferGeometry( width/2, height/2 );
+        var blueMaterial = new MeshBasicMaterial({color:0x7074FF})
+        var planeObject = new Mesh(plane,blueMaterial);
         planeObject.position.z = 10;
         bufferScene.add(planeObject);
 
@@ -273,7 +297,7 @@ export class ZoomCalendar extends THREE.WebGLRenderer {
 }
 
 namespace Mouse {
-	export var position: THREE.Vector2 = new THREE.Vector2();
+	export var position: Vector2 = new Vector2();
 
     export module click {
         export var position: Globals.Point;
@@ -282,8 +306,8 @@ namespace Mouse {
     
 
     export module hover {
-		export var raycaster: THREE.Raycaster = new THREE.Raycaster();
-    	export var intersects: THREE.Intersection[] = [];
+		export var raycaster: Raycaster = new Raycaster();
+    	export var intersects: Intersection[] = [];
 		export var oldIntersects: Hour[] = [];
     }
 }

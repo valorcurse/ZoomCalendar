@@ -1,4 +1,4 @@
-import {ZoomCalendar} from "../ts/zoomcalendar.ts";
+import {ZoomCalendar} from "../ts/zoomcalendar";
 // import * as ZoomCalendar from "../ts/zoomcalendar.ts";
 
 var calendar: ZoomCalendar = new ZoomCalendar();

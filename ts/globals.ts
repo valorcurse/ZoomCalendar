@@ -1,6 +1,10 @@
-import {Day, Hour} from "./day.ts";
+import {Day, Hour} from "./day";
 
-import * as THREE from 'three';
+import {TextGeometry,
+        MeshBasicMaterial,
+        BoxGeometry,
+        FlatShading
+} from 'three';
 
 // declare module THREE { 
 //     export var FontLoader: any;
@@ -8,28 +12,28 @@ import * as THREE from 'three';
 //         constructor(font: any);
 //     }
 //     export class TextGeometry extends Geometry {
-//         constructor(font: THREE.Font, parameters?: any);
+//         constructor(font: Font, parameters?: any);
 //     }
 // }
 
 // export module Config {
     export module HOURS {
         export const NUMBER_OF: number = 24;
-        export var  GEOMETRY: THREE.TextGeometry[] = [];
+        export var  GEOMETRY: TextGeometry[] = [];
         export var INSTANCES: { [hour: number]: Hour; } = { };
     }
     
     export module DAYS {
         export const NUMBER_OF: number = 31;
-        export var GEOMETRY: THREE.TextGeometry[] = [];
+        export var GEOMETRY: TextGeometry[] = [];
     }
     
     export module MONTHS {
         export const NUMBER_OF: number = 12;
-        export var GEOMETRY: THREE.TextGeometry[] = [];
+        export var GEOMETRY: TextGeometry[] = [];
     }
 
-// var font: THREE.Font;
+// var font: Font;
 
 export const cellSize = 30;
 export const dateSize = cellSize / 16;
@@ -37,17 +41,17 @@ export const padding = 0.5;
 export const hoursArea = cellSize - padding*2 - dateSize*3;
 export const fontSize = hoursArea / 24;
 
-export const rectMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-export const rectGeom = new THREE.BoxGeometry(cellSize, cellSize, 0);
+export const rectMaterial = new MeshBasicMaterial({ color: 0xffffff });
+export const rectGeom = new BoxGeometry(cellSize, cellSize, 0);
 
-export const textMaterial = new THREE.MeshBasicMaterial({
+export const textMaterial = new MeshBasicMaterial({
     color: 0x00000,
-    shading: THREE.FlatShading
+    shading: FlatShading
 });
 
 
-export const hourMaterial = new THREE.MeshBasicMaterial({ color: 0xdddddd });
-export const hourBoxGeom = new THREE.BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
+export const hourMaterial = new MeshBasicMaterial({ color: 0xdddddd });
+export const hourBoxGeom = new BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
 
 export var days: Day[] = [];
 

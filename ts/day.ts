@@ -1,30 +1,40 @@
 import * as moment from 'moment';
 type Moment = moment.Moment;
 
-import * as THREE from 'three';
+import {Mesh, 
+        Object3D, 
+        BoxGeometry, 
+        MeshBasicMaterial, 
+        Geometry, 
+        Box3,
+        ShaderMaterial,
+        Texture,
+        OrthographicCamera,
+        Vector2
+} from 'three';
 
-import * as Globals from './globals.ts';
+import * as Globals from './globals';
 
 interface BasicInterface {
     hoverable: boolean;
     // selectable: boolean;
 }
 
-class HourMesh extends THREE.Mesh implements BasicInterface {
-    defaultGeometry: THREE.Geometry;
-    defaultMaterial: THREE.MeshBasicMaterial;
+class HourMesh extends Mesh implements BasicInterface {
+    defaultGeometry: Geometry;
+    defaultMaterial: MeshBasicMaterial;
     
     hoverable: boolean = true;
     selectable: boolean = true;
     
-    constructor(geometry: THREE.Geometry, material: THREE.MeshBasicMaterial) {
+    constructor(geometry: Geometry, material: MeshBasicMaterial) {
         super(geometry, material);
         this.defaultGeometry = geometry;
         this.defaultMaterial = material;
     }
 }
 
-export class Hour extends THREE.Object3D implements BasicInterface {
+export class Hour extends Object3D implements BasicInterface {
     hour: number;
     selected: boolean = false;
     
@@ -45,11 +55,11 @@ export class Hour extends THREE.Object3D implements BasicInterface {
         this.text = new HourMesh(Globals.HOURS.GEOMETRY[this.hour], Globals.textMaterial);
         this.text.geometry.center();
         
-        var textBB = new THREE.Box3();
+        var textBB = new Box3();
         textBB.setFromObject(this.text);
         this.add(this.text);
         
-//         var bbox = new THREE.BoundingBoxHelper( this.text, 0x0000ff);
+//         var bbox = new BoundingBoxHelper( this.text, 0x0000ff);
 //         bbox.update();
 // 		this.add(bbox);
 
@@ -58,7 +68,7 @@ export class Hour extends THREE.Object3D implements BasicInterface {
     }
 }
 
-export class DailyHours extends THREE.Mesh {
+export class DailyHours extends Mesh {
     
     minutesInDay: number = 1440; // (24 hours * 60 minutes)
     
@@ -75,15 +85,15 @@ export class DailyHours extends THREE.Mesh {
             
             console.log("bar height: " + hourToPixelRatio);
             
-            // var eventGeometry: THREE.BoxGeometry = 
-            //     new THREE.BoxGeometry(eventAreaBox.size().x, hourToPixelRatio, 0);
-            var eventGeometry: THREE.BoxGeometry = 
-                new THREE.BoxGeometry(window.innerWidth, hourToPixelRatio, 0);
+            // var eventGeometry: BoxGeometry = 
+            //     new BoxGeometry(eventAreaBox.size().x, hourToPixelRatio, 0);
+            var eventGeometry: BoxGeometry = 
+                new BoxGeometry(window.innerWidth, hourToPixelRatio, 0);
             var eventMaterial = h % 2 !== 0 ? 
-                                new THREE.MeshBasicMaterial({ color: 0xeeeeee }) :
-                                new THREE.MeshBasicMaterial({ color: 0xffffff });
+                                new MeshBasicMaterial({ color: 0xeeeeee }) :
+                                new MeshBasicMaterial({ color: 0xffffff });
     
-            var rect: THREE.Mesh = new THREE.Mesh(eventGeometry, eventMaterial);
+            var rect: Mesh = new Mesh(eventGeometry, eventMaterial);
             rect.position.y = window.innerHeight / 2 - 
                                 hourToPixelRatio / 2 -
                                 hourToPixelRatio * h;
@@ -91,7 +101,7 @@ export class DailyHours extends THREE.Mesh {
             // this.eventArea.add(rect);
             this.add(rect);
                     
-            var hourBB = new THREE.Box3();
+            var hourBB = new Box3();
             hourBB.setFromObject(hour);
            
             var padding = hourPadding + (hourBB.size().y - Globals.fontSize);
@@ -112,30 +122,30 @@ export class DailyHours extends THREE.Mesh {
             
         }
         
-        var redMaterial = new THREE.MeshBasicMaterial({color:0xF06565});
-        var boxGeometry = new THREE.BoxGeometry( 50, 50, 50 );
-        var boxObject = new THREE.Mesh( boxGeometry, redMaterial );
+        var redMaterial = new MeshBasicMaterial({color:0xF06565});
+        var boxGeometry = new BoxGeometry( 50, 50, 50 );
+        var boxObject = new Mesh( boxGeometry, redMaterial );
         boxObject.position.z = 15;
         // boxObject.rotation.x = Math.floor(Math.random() * 10) + 1;
         // boxObject.rotation.y = Math.floor(Math.random() * 10) + 1;
         this.add(boxObject);//We add it to the bufferScene instead of the normal scene!
         
         ///And a blue plane behind it
-        // var blueMaterial = new THREE.MeshBasicMaterial({color:0x7074FF})
-        // var plane = new THREE.PlaneBufferGeometry( window.innerWidth, window.innerHeight );
-        // var planeObject = new THREE.Mesh(plane,blueMaterial);
+        // var blueMaterial = new MeshBasicMaterial({color:0x7074FF})
+        // var plane = new PlaneBufferGeometry( window.innerWidth, window.innerHeight );
+        // var planeObject = new Mesh(plane,blueMaterial);
         // planeObject.position.z = 10;
         // this.add(planeObject);
     }
 }
 
-export class Day extends THREE.Mesh implements BasicInterface {
+export class Day extends Mesh implements BasicInterface {
     margin: number = 0.1;
     padding: number = 0.5;
     cellSize: number = 30;
-    // material: THREE.MeshBasicMaterial = Globals.rectMaterial;
-    geometry: THREE.BoxGeometry = Globals.rectGeom;
-    box: THREE.Box3 = new THREE.Box3().setFromObject(this);
+    // material: MeshBasicMaterial = Globals.rectMaterial;
+    geometry: BoxGeometry = Globals.rectGeom;
+    box: Box3 = new Box3().setFromObject(this);
     date: Moment;
     
     hoverable: boolean = false;
@@ -143,17 +153,17 @@ export class Day extends THREE.Mesh implements BasicInterface {
     
     minutesInDay: number = 1440; // (24 hours * 60 minutes)
 
-    dateTitle: THREE.Object3D;
-    eventArea: THREE.Mesh;
+    dateTitle: Object3D;
+    eventArea: Mesh;
     hourPadding: number;
 
-    hoveringHighlight: THREE.Mesh;
+    hoveringHighlight: Mesh;
 
     uniforms: any = {  
 			transform: { type: "f", value: 0 },
 		};
 
-	shaderMaterial: THREE.ShaderMaterial = new THREE.ShaderMaterial({  
+	shaderMaterial: ShaderMaterial = new ShaderMaterial({  
             uniforms: this.uniforms,
 			vertexShader: document.getElementById('vertexShader').textContent
 		});
@@ -163,7 +173,7 @@ export class Day extends THREE.Mesh implements BasicInterface {
     // bufferScene: any;
 	texture:  any;
 
-    constructor(date: Moment, texture: THREE.Texture) {
+    constructor(date: Moment, texture: Texture) {
         super(Globals.rectGeom, Globals.rectMaterial);
         // super(Globals.rectGeom);
         
@@ -183,22 +193,22 @@ export class Day extends THREE.Mesh implements BasicInterface {
         // );
         
 //         var uniforms: any = {  
-// 			myColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+// 			myColor: { type: "c", value: new Color( 0xffffff ) },
 // 		};
 // 		var attributes: any = {  
 // 			size: { type: 'f', value: [] },
 // 		};
-// 		this.shaderMaterial = new THREE.ShaderMaterial({  
+// 		this.shaderMaterial = new ShaderMaterial({  
 // 			uniforms: uniforms,
 // 			// attributes: attributes,
 // 			vertexShader: document.getElementById('vertexShader').textContent
 // 		});
         
-        // this.camera = new THREE.PerspectiveCamera( 
+        // this.camera = new PerspectiveCamera( 
         //     30, window.innerWidth / window.innerHeight, 0.1, 50
         // );
         
-        this.camera = new THREE.OrthographicCamera( 
+        this.camera = new OrthographicCamera( 
             window.innerWidth / -2, 
             window.innerWidth / 2, 
             window.innerHeight / 2, 
@@ -222,15 +232,15 @@ export class Day extends THREE.Mesh implements BasicInterface {
         var minutesElapsed = moment.duration(start.diff(startOfDay)).asMinutes();
         var minutesDuration = moment.duration(end.diff(start)).asMinutes();
         
-        var eventAreaBox = new THREE.Box3().setFromObject(this.eventArea);
+        var eventAreaBox = new Box3().setFromObject(this.eventArea);
         var minuteToPixelRatio = eventAreaBox.size().y / this.minutesInDay;
         var height = minutesDuration * minuteToPixelRatio;
         var yPosition = (eventAreaBox.size().y / 2) -           // Move to top of parent
                         (height / 2) -                         // Move to top of event
                         (minutesElapsed * minuteToPixelRatio);  // Move to correct position
 
-        var eventGeometry: THREE.BoxGeometry = 
-            new THREE.BoxGeometry(10, height, 0);
+        var eventGeometry: BoxGeometry = 
+            new BoxGeometry(10, height, 0);
 
         var rect: HourMesh = new HourMesh(eventGeometry, Globals.hourMaterial);
         rect.position.y = yPosition;
@@ -248,10 +258,10 @@ export class Day extends THREE.Mesh implements BasicInterface {
         var day = this.date.date() - 1,
             month = this.date.month();
 
-        var dayText = new THREE.Mesh(Globals.DAYS.GEOMETRY[day], Globals.textMaterial),
-            monthText = new THREE.Mesh(Globals.MONTHS.GEOMETRY[month], Globals.textMaterial);
+        var dayText = new Mesh(Globals.DAYS.GEOMETRY[day], Globals.textMaterial),
+            monthText = new Mesh(Globals.MONTHS.GEOMETRY[month], Globals.textMaterial);
         
-        this.dateTitle = new THREE.Object3D()
+        this.dateTitle = new Object3D()
         // console.log(this.dateTitle.position);
         this.dateTitle.add(dayText);
         this.dateTitle.add(monthText);
@@ -259,35 +269,35 @@ export class Day extends THREE.Mesh implements BasicInterface {
         dayText.geometry.center();
         monthText.geometry.center();
         
-        var dayBB = new THREE.Box3();
+        var dayBB = new Box3();
         dayBB.setFromObject(dayText);
         dayText.position.x = -dayBB.max.x - this.padding/2; 
 
-        var monthBB = new THREE.Box3();
+        var monthBB = new Box3();
         monthBB.setFromObject(monthText);
         monthText.position.x = monthBB.max.x + this.padding / 2;
 
-        var dateBB = new THREE.Box3();
+        var dateBB = new Box3();
         dateBB.setFromObject(this.dateTitle);
         this.dateTitle.position.y = this.cellSize / 2 - dateBB.max.y - this.padding;
         this.add(this.dateTitle);
 
         var dateHeight = dateBB.size().y + this.padding;
         
-        this.eventArea = new THREE.Mesh( 
-            new THREE.BoxGeometry( this.cellSize, this.cellSize - dateHeight, 0)
+        this.eventArea = new Mesh( 
+            new BoxGeometry( this.cellSize, this.cellSize - dateHeight, 0)
         );
         this.eventArea.name = "eventArea";
         this.eventArea.position.y =  -dateHeight/2;
         this.add(this.eventArea);
      
-        var eventAreaBox = new THREE.Box3();
+        var eventAreaBox = new Box3();
         eventAreaBox.setFromObject(this.eventArea);
      
-        this.eventArea.material = new THREE.MeshBasicMaterial( { map: this.texture } );
+        this.eventArea.material = new MeshBasicMaterial( { map: this.texture } );
     }
     
-    mouseover(uv: THREE.Vector2) {
+    mouseover(uv: Vector2) {
         if (this.hoveringHighlight)
             this.eventArea.remove(this.hoveringHighlight);
         
@@ -299,14 +309,14 @@ export class Day extends THREE.Mesh implements BasicInterface {
         var minutes = Math.floor((1 - uv.y) * (this.minutesInDay / minuteStep));
         console.log(moment.utc(moment.duration(minutes * minuteStep, "minutes").asMilliseconds()).format("HH:mm"));
         
-        var eventAreaBox = new THREE.Box3().setFromObject(this.eventArea);
+        var eventAreaBox = new Box3().setFromObject(this.eventArea);
         var minuteToPixelRatio = eventAreaBox.size().y / (this.minutesInDay / minuteStep);
         
-        var eventGeometry: THREE.BoxGeometry = 
-            new THREE.BoxGeometry(eventAreaBox.size().x, minuteToPixelRatio, 0);
-        var eventMaterial = new THREE.MeshBasicMaterial({ color: 0xb3ecff })
+        var eventGeometry: BoxGeometry = 
+            new BoxGeometry(eventAreaBox.size().x, minuteToPixelRatio, 0);
+        var eventMaterial = new MeshBasicMaterial({ color: 0xb3ecff })
 
-        var rect: THREE.Mesh = new THREE.Mesh(eventGeometry, eventMaterial);
+        var rect: Mesh = new Mesh(eventGeometry, eventMaterial);
         rect.position.x = -eventAreaBox.size().x / 2 + eventAreaBox.size().x / 2;
         rect.position.y = eventAreaBox.size().y / 2 -               // Move to top of area
                             eventAreaBox.size().y * (1 - uv.y);     // Move to position based on coordinate
