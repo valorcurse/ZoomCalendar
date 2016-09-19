@@ -90,6 +90,7 @@ export class ZoomCalendar extends WebGLRenderer {
 			moment(currentDate).startOf("year").toDate(),
 			moment(currentDate).endOf("month").toDate());
 
+
 		this.view = d3Selection.select(this.domElement);
 
 		this.zoom(this.view);
@@ -136,8 +137,7 @@ export class ZoomCalendar extends WebGLRenderer {
 				y = transform.y,
 				z = transform.k;
 				
-
-				this.translate(x, y, z);
+			this.translate(x, y, z);
 		}
 	};
 
@@ -150,6 +150,22 @@ export class ZoomCalendar extends WebGLRenderer {
 		this.camera.top = this.DZOOM / z + y / this.sceneSize.height * this.DZOOM / z * 2;
 		this.camera.bottom = -this.DZOOM / z + y / this.sceneSize.height * this.DZOOM / z * 2;
 		this.camera.updateProjectionMatrix();
+	}
+
+	getHoveredDay(event: MouseEvent) {
+		for (var i = 0; i < Mouse.hover.intersects.length; i++) {
+			var intersect: any = Mouse.hover.intersects[i];
+			
+			
+			if (intersect.object.parent instanceof Day &&
+				intersect.object.name === "eventArea") 
+			{
+				var day: Day = intersect.object.parent as Day;
+				console.log(intersect);
+				var uv: Vector2 = intersect.uv;
+				day.mouseover(uv);
+			}
+		}
 	}
 
 	onClick(event: MouseEvent) {
@@ -166,19 +182,10 @@ export class ZoomCalendar extends WebGLRenderer {
 
 		Mouse.hover.raycaster.setFromCamera(Mouse.position, this.camera);
 		Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(this.scene.children, true);
-
-		for (var i = 0; i < Mouse.hover.intersects.length; i++) {
-			var intersect: any = Mouse.hover.intersects[i];
-			
-			
-			if (intersect.object.parent instanceof Day &&
-				intersect.object.name === "eventArea") 
-			{
-				var day: Day = intersect.object.parent as Day;
-				var uv: Vector2 = intersect.uv;
-				day.mouseover(uv);
-			}
-		}
+		
+		this.getHoveredDay(event);
+		// var uv: Vector2 = intersect.uv;
+		// day.mouseover(uv);
 	}
 
 	onMouseDown(event: MouseEvent) {
@@ -213,10 +220,9 @@ export class ZoomCalendar extends WebGLRenderer {
 	generateTextGeometry() {
 		console.log(this.font);
 	    for (var h = 0; h < Globals.HOURS.NUMBER_OF; h++) {
-	        var hourGeom = new TextGeometry(String(h), {
+	        var hourGeom = new TextGeometry(String(h + ":00"), {
 	            font: this.font.data,
-	            // size: Globals.fontSize,
-	            size: (window.innerHeight / 24),
+	            size: (window.innerHeight / 24 / 2),
 	            height: 50,
 	            curveSegments: 4,
 	            bevelEnabled: false,
@@ -274,21 +280,14 @@ export class ZoomCalendar extends WebGLRenderer {
         
         camera.position.z = 50;
         var bufferScene = new Scene();
-
+        bufferScene.add(new DailyHours());
         
-        var bufferTexture =new WebGLRenderTarget( 
-        	2048, 
-        	2048, 
+        var bufferTexture = new WebGLRenderTarget( 
+        	8192, 
+        	8192, 
         	{ minFilter: LinearMipMapLinearFilter  , magFilter: NearestMipMapLinearFilter  } 
         );
         
-        bufferScene.add(new DailyHours());
-        
-        var plane = new PlaneBufferGeometry( width/2, height/2 );
-        var blueMaterial = new MeshBasicMaterial({color:0x7074FF})
-        var planeObject = new Mesh(plane,blueMaterial);
-        planeObject.position.z = 10;
-        bufferScene.add(planeObject);
 
         this.render(bufferScene, camera, bufferTexture);
         this.dailyTexture = bufferTexture.texture;

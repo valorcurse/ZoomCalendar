@@ -80,13 +80,8 @@ export class DailyHours extends Mesh {
          
             var hourPadding = (Globals.fontSize * 24) / 24;  // Size of all letters / number of padding spots
          
-            // var hourToPixelRatio = eventAreaBox.size().y / (this.minutesInDay / 60);
             var hourToPixelRatio = window.innerHeight / (this.minutesInDay / 60);
             
-            console.log("bar height: " + hourToPixelRatio);
-            
-            // var eventGeometry: BoxGeometry = 
-            //     new BoxGeometry(eventAreaBox.size().x, hourToPixelRatio, 0);
             var eventGeometry: BoxGeometry = 
                 new BoxGeometry(window.innerWidth, hourToPixelRatio, 0);
             var eventMaterial = h % 2 !== 0 ? 
@@ -98,7 +93,6 @@ export class DailyHours extends Mesh {
                                 hourToPixelRatio / 2 -
                                 hourToPixelRatio * h;
             rect.position.z = 3;
-            // this.eventArea.add(rect);
             this.add(rect);
                     
             var hourBB = new Box3();
@@ -111,31 +105,11 @@ export class DailyHours extends Mesh {
                                 hourBB.size().y / 2 -
                                 h * hourToPixelRatio -
                                 (hourToPixelRatio - hourBB.size().y) / 2;
-            
-            // hour.position.y = hourBB.size().y / 2 -
-            //                     h * hourToPixelRatio -
-            //                     (hourToPixelRatio - hourBB.size().y) / 2; 
-            
-            // this.eventArea.add(hour);
+
             hour.position.z = 15;
             this.add(hour);
             
         }
-        
-        var redMaterial = new MeshBasicMaterial({color:0xF06565});
-        var boxGeometry = new BoxGeometry( 50, 50, 50 );
-        var boxObject = new Mesh( boxGeometry, redMaterial );
-        boxObject.position.z = 15;
-        // boxObject.rotation.x = Math.floor(Math.random() * 10) + 1;
-        // boxObject.rotation.y = Math.floor(Math.random() * 10) + 1;
-        this.add(boxObject);//We add it to the bufferScene instead of the normal scene!
-        
-        ///And a blue plane behind it
-        // var blueMaterial = new MeshBasicMaterial({color:0x7074FF})
-        // var plane = new PlaneBufferGeometry( window.innerWidth, window.innerHeight );
-        // var planeObject = new Mesh(plane,blueMaterial);
-        // planeObject.position.z = 10;
-        // this.add(planeObject);
     }
 }
 
@@ -182,15 +156,7 @@ export class Day extends Mesh implements BasicInterface {
         this.name = "day";
         this.date = date;
         
-        var start: any = this.date.clone();
-        start.add(7, 'hours');
-        var end: any = this.date.clone();
-        end.add(17, 'hours');
         
-        // this.addEvent(
-        //     start, 
-        //     end
-        // );
         
 //         var uniforms: any = {  
 // 			myColor: { type: "c", value: new Color( 0xffffff ) },
@@ -222,6 +188,14 @@ export class Day extends Mesh implements BasicInterface {
 		
 		this.draw();
 		
+		var start: any = this.date.clone();
+        start.add(8, 'hours');
+        start.add(17, 'minutes');
+        var end: any = this.date.clone();
+        end.add(12, 'hours');
+        end.add(47, 'minutes');
+        
+        this.addEvent(start, end);
 		
 		
 // 		console.log(this);
@@ -261,8 +235,7 @@ export class Day extends Mesh implements BasicInterface {
         var dayText = new Mesh(Globals.DAYS.GEOMETRY[day], Globals.textMaterial),
             monthText = new Mesh(Globals.MONTHS.GEOMETRY[month], Globals.textMaterial);
         
-        this.dateTitle = new Object3D()
-        // console.log(this.dateTitle.position);
+        this.dateTitle = new Object3D();
         this.dateTitle.add(dayText);
         this.dateTitle.add(monthText);
 
@@ -302,7 +275,6 @@ export class Day extends Mesh implements BasicInterface {
             this.eventArea.remove(this.hoveringHighlight);
         
         this.uniforms.transform.value = uv.y * 10;
-        
         
         var minuteStep = 5;
         

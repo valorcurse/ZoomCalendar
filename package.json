@@ -4,12 +4,16 @@
   "description": "",
   "main": "ts/main.ts",
   "dependencies": {
-    "d3": "*",
+    "d3-selection": "*",
+    "d3-time": "*",
+    "d3-zoom": "*",
     "moment": "*",
     "three": "*"
   },
   "devDependencies": {
-    "@types/d3": "0.0.31",
+    "@types/d3-selection": "*",
+    "@types/d3-time": "*",
+    "@types/d3-zoom": "*",
     "@types/moment": "^2.11.29",
     "@types/three": "0.0.18",
     "babelify": "^7.3.0",
