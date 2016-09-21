@@ -188,40 +188,40 @@ export class Day extends Mesh implements BasicInterface {
 		
 		this.draw();
 		
-		var start: any = this.date.clone();
-        start.add(8, 'hours');
-        start.add(17, 'minutes');
-        var end: any = this.date.clone();
-        end.add(12, 'hours');
-        end.add(47, 'minutes');
+// 		var start: any = this.date.clone();
+//         start.add(8, 'hours');
+//         start.add(17, 'minutes');
+//         var end: any = this.date.clone();
+//         end.add(12, 'hours');
+//         end.add(47, 'minutes');
         
-        this.addEvent(start, end);
+//         this.addEvent(start, end);
 		
 		
 // 		console.log(this);
     }
 
-    addEvent(start: Moment, end: Moment) {
-        var startOfDay: Moment = start.clone().startOf('day');
-        var minutesElapsed = moment.duration(start.diff(startOfDay)).asMinutes();
-        var minutesDuration = moment.duration(end.diff(start)).asMinutes();
+    // addEvent(start: Moment, end: Moment) {
+    //     var startOfDay: Moment = start.clone().startOf('day');
+    //     var minutesElapsed = moment.duration(start.diff(startOfDay)).asMinutes();
+    //     var minutesDuration = moment.duration(end.diff(start)).asMinutes();
         
-        var eventAreaBox = new Box3().setFromObject(this.eventArea);
-        var minuteToPixelRatio = eventAreaBox.size().y / this.minutesInDay;
-        var height = minutesDuration * minuteToPixelRatio;
-        var yPosition = (eventAreaBox.size().y / 2) -           // Move to top of parent
-                        (height / 2) -                         // Move to top of event
-                        (minutesElapsed * minuteToPixelRatio);  // Move to correct position
+    //     var eventAreaBox = new Box3().setFromObject(this.eventArea);
+    //     var minuteToPixelRatio = eventAreaBox.size().y / this.minutesInDay;
+    //     var height = minutesDuration * minuteToPixelRatio;
+    //     var yPosition = (eventAreaBox.size().y / 2) -           // Move to top of parent
+    //                     (height / 2) -                         // Move to top of event
+    //                     (minutesElapsed * minuteToPixelRatio);  // Move to correct position
 
-        var eventGeometry: BoxGeometry = 
-            new BoxGeometry(10, height, 0);
+    //     var eventGeometry: BoxGeometry = 
+    //         new BoxGeometry(10, height, 0);
 
-        var rect: HourMesh = new HourMesh(eventGeometry, Globals.hourMaterial);
-        rect.position.y = yPosition;
-        rect.position.x = 0;
-        rect.position.z = 5;
-        this.eventArea.add(rect);
-    }
+    //     var rect: HourMesh = new HourMesh(eventGeometry, Globals.hourMaterial);
+    //     rect.position.y = yPosition;
+    //     rect.position.x = 0;
+    //     rect.position.z = 5;
+    //     this.eventArea.add(rect);
+    // }
 
     draw() {
         var weekOfMonth: number = this.date.week();
@@ -231,6 +231,8 @@ export class Day extends Mesh implements BasicInterface {
         
         var day = this.date.date() - 1,
             month = this.date.month();
+            
+        console.log(Globals.MONTHS.GEOMETRY[month]);
 
         var dayText = new Mesh(Globals.DAYS.GEOMETRY[day], Globals.textMaterial),
             monthText = new Mesh(Globals.MONTHS.GEOMETRY[month], Globals.textMaterial);
