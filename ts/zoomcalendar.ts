@@ -139,9 +139,12 @@ export class ZoomCalendar extends WebGLRenderer {
 	    this.zoom
 	    	.on('zoom', this.zoomed)
 	    	.filter(function() {
+	    		console.log(d3Selection.event);
 	    		// Allow for zoom/pan with left/middle mouse button or mouse wheel
-				return ((d3Selection.event.button === 0 && d3Selection.event.ctrlKey) ||
-					d3Selection.event.button === 1 || d3Selection.event instanceof WheelEvent);
+				return ((d3Selection.event.button === 0 && d3Selection.event.ctrlKey)
+					|| d3Selection.event.button === 1 
+					|| d3Selection.event instanceof WheelEvent
+					|| d3Selection.event instanceof TouchEvent);
 			});
 			
 		this.view.call(this.zoom)
