@@ -48,7 +48,7 @@ export class ZoomCalendar extends WebGLRenderer {
 	month: number = 1;
 
 	// dates: Date[];
-	dates: Map<Moment, Day> = new Map<Moment, Day>();
+	dates: Map<Date, Day> = new Map<Date, Day>();
 	// dates: {date: Date, mesh: Day};
 	// dates: {};
 	view: any;
@@ -95,7 +95,7 @@ export class ZoomCalendar extends WebGLRenderer {
 			moment(currentDate).startOf("year").toDate(),
 			moment(currentDate).endOf("month").toDate()
 		).forEach((date) => {	
-			this.dates.set(moment(date), null);
+			this.dates.set(date, null);
 		});
 		
 		console.log(this.dates);
@@ -224,7 +224,7 @@ export class ZoomCalendar extends WebGLRenderer {
 
 	createComponents() {
 		for (let date of this.dates.keys()) {
-			var newDay = new Day(date, this.dailyTexture);
+			var newDay = new Day(moment(date), this.dailyTexture);
 			this.scene.add(newDay);
 			this.dates.set(date, newDay);
 
@@ -270,7 +270,7 @@ export class ZoomCalendar extends WebGLRenderer {
 	    }
 
 	    for (let date of this.dates.keys()) {
-	        var monthGeom = new TextGeometry(date.format("MMM"), {
+	        var monthGeom = new TextGeometry(moment(date).format("MMM"), {
 	            font: this.font,
 	            size: Globals.dateSize,
 	            height: 50,
@@ -322,7 +322,12 @@ export class ZoomCalendar extends WebGLRenderer {
 		
 		console.log("Dates are in same day");
 		var event: Event = new Event(momentStart, momentEnd);
+		
+		
 		// var eventDay = Day = this.dates()
+		console.log(this.dates);
+		console.log(momentStart.startOf('day').toDate());
+		console.log(this.dates.get(momentStart.startOf('day').toDate()));
     }
 }
 

@@ -232,7 +232,7 @@ export class Day extends Mesh implements BasicInterface {
         var day = this.date.date() - 1,
             month = this.date.month();
             
-        console.log(Globals.MONTHS.GEOMETRY[month]);
+        // console.log(Globals.MONTHS.GEOMETRY[month]);
 
         var dayText = new Mesh(Globals.DAYS.GEOMETRY[day], Globals.textMaterial),
             monthText = new Mesh(Globals.MONTHS.GEOMETRY[month], Globals.textMaterial);
@@ -281,7 +281,7 @@ export class Day extends Mesh implements BasicInterface {
         var minuteStep = 5;
         
         var minutes = Math.floor((1 - uv.y) * (this.minutesInDay / minuteStep));
-        console.log(moment.utc(moment.duration(minutes * minuteStep, "minutes").asMilliseconds()).format("HH:mm"));
+        // console.log(moment.utc(moment.duration(minutes * minuteStep, "minutes").asMilliseconds()).format("HH:mm"));
         
         var eventAreaBox = new Box3().setFromObject(this.eventArea);
         var minuteToPixelRatio = eventAreaBox.getSize().y / (this.minutesInDay / minuteStep);
