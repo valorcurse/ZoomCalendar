@@ -98,13 +98,13 @@ export class DailyHours extends Mesh {
             var hourBB = new Box3();
             hourBB.setFromObject(hour);
            
-            var padding = hourPadding + (hourBB.size().y - Globals.fontSize);
-            hour.position.x = -window.innerWidth / 2 + hourBB.size().x / 2;
+            var padding = hourPadding + (hourBB.getSize().y - Globals.fontSize);
+            hour.position.x = -window.innerWidth / 2 + hourBB.getSize().x / 2;
             
             hour.position.y = window.innerHeight / 2 - 
-                                hourBB.size().y / 2 -
+                                hourBB.getSize().y / 2 -
                                 h * hourToPixelRatio -
-                                (hourToPixelRatio - hourBB.size().y) / 2;
+                                (hourToPixelRatio - hourBB.getSize().y) / 2;
 
             hour.position.z = 15;
             this.add(hour);
@@ -207,9 +207,9 @@ export class Day extends Mesh implements BasicInterface {
     //     var minutesDuration = moment.duration(end.diff(start)).asMinutes();
         
     //     var eventAreaBox = new Box3().setFromObject(this.eventArea);
-    //     var minuteToPixelRatio = eventAreaBox.size().y / this.minutesInDay;
+    //     var minuteToPixelRatio = eventAreaBox.getSize().y / this.minutesInDay;
     //     var height = minutesDuration * minuteToPixelRatio;
-    //     var yPosition = (eventAreaBox.size().y / 2) -           // Move to top of parent
+    //     var yPosition = (eventAreaBox.getSize().y / 2) -           // Move to top of parent
     //                     (height / 2) -                         // Move to top of event
     //                     (minutesElapsed * minuteToPixelRatio);  // Move to correct position
 
@@ -257,7 +257,7 @@ export class Day extends Mesh implements BasicInterface {
         this.dateTitle.position.y = this.cellSize / 2 - dateBB.max.y - this.padding;
         this.add(this.dateTitle);
 
-        var dateHeight = dateBB.size().y + this.padding;
+        var dateHeight = dateBB.getSize().y + this.padding;
         
         this.eventArea = new Mesh( 
             new BoxGeometry( this.cellSize, this.cellSize - dateHeight, 0)
@@ -284,16 +284,16 @@ export class Day extends Mesh implements BasicInterface {
         console.log(moment.utc(moment.duration(minutes * minuteStep, "minutes").asMilliseconds()).format("HH:mm"));
         
         var eventAreaBox = new Box3().setFromObject(this.eventArea);
-        var minuteToPixelRatio = eventAreaBox.size().y / (this.minutesInDay / minuteStep);
+        var minuteToPixelRatio = eventAreaBox.getSize().y / (this.minutesInDay / minuteStep);
         
         var eventGeometry: BoxGeometry = 
-            new BoxGeometry(eventAreaBox.size().x, minuteToPixelRatio, 0);
+            new BoxGeometry(eventAreaBox.getSize().x, minuteToPixelRatio, 0);
         var eventMaterial = new MeshBasicMaterial({ color: 0xb3ecff })
 
         var rect: Mesh = new Mesh(eventGeometry, eventMaterial);
-        rect.position.x = -eventAreaBox.size().x / 2 + eventAreaBox.size().x / 2;
-        rect.position.y = eventAreaBox.size().y / 2 -               // Move to top of area
-                            eventAreaBox.size().y * (1 - uv.y);     // Move to position based on coordinate
+        rect.position.x = -eventAreaBox.getSize().x / 2 + eventAreaBox.getSize().x / 2;
+        rect.position.y = eventAreaBox.getSize().y / 2 -               // Move to top of area
+                            eventAreaBox.getSize().y * (1 - uv.y);     // Move to position based on coordinate
         rect.position.z = 5;
         
         this.hoveringHighlight = rect;

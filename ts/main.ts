@@ -3,6 +3,16 @@ import {ZoomCalendar} from "../ts/zoomcalendar";
 
 var calendar: ZoomCalendar = new ZoomCalendar();
 
+var start = new Date("October 13, 2016 11:13:00");
+var end = new Date("October 13, 2016 17:47:00");
+
+calendar.addEvent(start, end);
+
+start = new Date("October 12, 2016 11:13:00");
+end = new Date("October 14, 2016 17:47:00");
+
+calendar.addEvent(start, end);
+
 console.log("Adding zoomcalendar: " + calendar);
 
 document.body.appendChild(calendar.domElement);

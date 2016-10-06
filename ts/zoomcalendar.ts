@@ -1,8 +1,8 @@
-// import * as d3 from 'd3';
-// import * as zoom from 'd3-zoom';
 import * as d3Zoom from 'd3-zoom';
 import * as d3Time from 'd3-time';
 import * as d3Selection from 'd3-selection';
+
+// import * as d3 from "./d3;
 
 import * as moment from 'moment';
 type Moment = moment.Moment;
@@ -27,6 +27,7 @@ import {WebGLRenderer,
 		Intersection
 } from 'three';
 
+import {Event} from "./event";
 import {Day, DailyHours, Hour} from "./day";
 import * as Globals from "./globals";
  
@@ -97,7 +98,7 @@ export class ZoomCalendar extends WebGLRenderer {
 			this.dates.set(moment(date), null);
 		});
 		
-		// console.log(this.dates);
+		console.log(this.dates);
 		// 	array.forEach(function(data){
 	 //   		obj[data[0]] = data[1]
 		// });
@@ -312,27 +313,17 @@ export class ZoomCalendar extends WebGLRenderer {
 
 	}
 	
-	// addEvent(start: Moment, end: Moment) {
- //       var startOfDay: Moment = start.clone().startOf('day');
- //       var minutesElapsed = moment.duration(start.diff(startOfDay)).asMinutes();
- //       var minutesDuration = moment.duration(end.diff(start)).asMinutes();
-        
- //       var eventAreaBox = new Box3().setFromObject(this.eventArea);
- //       var minuteToPixelRatio = eventAreaBox.size().y / this.minutesInDay;
- //       var height = minutesDuration * minuteToPixelRatio;
- //       var yPosition = (eventAreaBox.size().y / 2) -           // Move to top of parent
- //                       (height / 2) -                         // Move to top of event
- //                       (minutesElapsed * minuteToPixelRatio);  // Move to correct position
-
- //       var eventGeometry: BoxGeometry = 
- //           new BoxGeometry(10, height, 0);
-
- //       var rect: HourMesh = new HourMesh(eventGeometry, Globals.hourMaterial);
- //       rect.position.y = yPosition;
- //       rect.position.x = 0;
- //       rect.position.z = 5;
- //       this.eventArea.add(rect);
- //   }
+	public addEvent(start: Date, end: Date) {
+		var momentStart: Moment = moment(start);
+		var momentEnd: Moment = moment(end);
+		
+		if (!momentStart.isSame(momentEnd, 'day'))
+			return;
+		
+		console.log("Dates are in same day");
+		var event: Event = new Event(momentStart, momentEnd);
+		// var eventDay = Day = this.dates()
+    }
 }
 
 namespace Mouse {
