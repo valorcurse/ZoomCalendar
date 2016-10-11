@@ -1,0 +1,29 @@
+language: node_js
+
+node_js:
+  - 'stable'
+  - '4'
+
+sudo: false
+
+# env:
+#   - workerCount=3
+
+# matrix:
+#   fast_finish: true
+
+branches:
+  only:
+  - threejs
+#   - release-2.0
+
+install:
+  - npm install
+  - grunt
+
+cache:
+  directories:
+    - node_modules
+
+# git:
+#   depth: 1
