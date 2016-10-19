@@ -48,7 +48,7 @@ export class ZoomCalendar extends WebGLRenderer {
 	month: number = 1;
 
 	// dates: Date[];
-	dates: Map<Date, Day> = new Map<Date, Day>();
+	dates: Map<number, Day> = new Map<number, Day>();
 	// dates: {date: Date, mesh: Day};
 	// dates: {};
 	view: any;
@@ -95,7 +95,7 @@ export class ZoomCalendar extends WebGLRenderer {
 			moment(currentDate).startOf("year").toDate(),
 			moment(currentDate).endOf("month").toDate()
 		).forEach((date) => {	
-			this.dates.set(date, null);
+			this.dates.set(date.getTime(), null);
 		});
 		
 		console.log(this.dates);
@@ -326,8 +326,10 @@ export class ZoomCalendar extends WebGLRenderer {
 		
 		// var eventDay = Day = this.dates()
 		console.log(this.dates);
-		console.log(momentStart.startOf('day').toDate());
-		console.log(this.dates.get(momentStart.startOf('day').toDate()));
+		// console.log(momentStart.startOf('day').toDate());
+		var time: number = +momentStart.startOf('day');
+		console.log(time);
+		console.log(this.dates.has(time));
     }
 }
 

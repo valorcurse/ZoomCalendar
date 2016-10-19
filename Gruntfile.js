@@ -1,4 +1,6 @@
 module.exports = function(grunt) {
+    require('load-grunt-tasks')(grunt); // npm install --save-dev load-grunt-tasks
+    
     grunt.initConfig({
         browserify: {
           dist: {
@@ -25,9 +27,20 @@ module.exports = function(grunt) {
             }
           }
         },
+        babel: {
+          options: {
+              sourceMap: true,
+              presets: ['es2015']
+          },
+          dist: {
+              files: {
+                  'js/output.es5.js': 'js/output.js'
+              }
+          }
+        },
         uglify: {
            build: {
-            src: 'js/output.js',
+            src: 'js/output.es5.js',
             dest: 'js/output.min.js'
           }
         }
@@ -37,5 +50,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.registerTask("default", ["browserify", "uglify"]);
+    grunt.registerTask("default", ["browserify", "babel", "uglify"]);
 };
