@@ -17,7 +17,6 @@
     "@types/d3-selection": "*",
     "@types/d3-time": "*",
     "@types/d3-zoom": "*",
-    "@types/moment": "*",
     "@types/three": "*",
     "babelify": "^7.3.0",
     "browser-sync": "*",
@@ -29,7 +28,8 @@
     "grunt-ts": "^6.0.0-beta.3",
     "tsify": "^1.0.1",
     "typescript": "^2.0.0",
-    "watchify": "^3.7.0"
+    "watchify": "^3.7.0",
+    "yarn": "^0.16.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
