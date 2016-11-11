@@ -28,6 +28,7 @@ import {WebGLRenderer,
 import {Event} from "./day/event/event.model";
 // import {Day, DailyHours, Hour} from "./day";
 import {Day} from "./day/day";
+import {DayView} from "./day/day.view";
 import {Hour, DailyHours} from "./day/day.view";
 import * as Globals from "./globals";
  
@@ -167,15 +168,18 @@ export class ZoomCalendar extends WebGLRenderer {
 		for (var i = 0; i < Mouse.hover.intersects.length; i++) {
 			var intersect: any = Mouse.hover.intersects[i];
 			
+			console.log(intersect)
+			if (intersect.object.mouseover)
+				intersect.object.mouseover(intersect.uv);
 			
-			if (intersect.object.parent instanceof Day &&
-				intersect.object.name === "eventArea") 
-			{
-				var day: Day = intersect.object.parent as Day;
-				// console.log(intersect);
-				var uv: Vector2 = intersect.uv;
-				// day.mouseover(uv);
-			}
+			// if (intersect.object.parent instanceof DayView &&
+			// 	intersect.object.name === "eventArea") 
+			// {
+			// 	var day: Day = intersect.object.parent as Day;
+			// 	// console.log(intersect);
+			// 	var uv: Vector2 = intersect.uv;
+			// 	day.mouseover(uv);
+			// }
 		}
 	}
 
@@ -192,6 +196,7 @@ export class ZoomCalendar extends WebGLRenderer {
 
 		Mouse.hover.raycaster.setFromCamera(Mouse.position, this.camera);
 		Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(this.scene.children, true);
+		
 		
 		this.getHoveredDay(event);
 	}
