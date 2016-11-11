@@ -9,11 +9,7 @@ module.exports = function(grunt) {
             options: {
               // watch: true,
               // keepAlive: true,
-              require: [
-                "./ts/day.ts",
-                "./ts/globals.ts",
-                "./ts/zoomcalendar.ts"
-              ],
+              
               browserifyOptions: {
                 debug: true,
                 plugin: [
@@ -50,7 +46,7 @@ module.exports = function(grunt) {
           //   tasks: ['sass:dev']
           // },
           ts: {
-            files: ['ts/*.ts'],
+            files: ['ts/**/*.ts'],
             tasks: ['browserify']
           }
         }
@@ -61,5 +57,4 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.registerTask("default", ["browserify", "babel", "uglify"]);
-    // grunt.registerTask("watch", ["watch"]);
 };

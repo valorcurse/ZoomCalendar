@@ -1,9 +1,11 @@
-import {Day, Hour} from "./day";
+import {Hour} from "./day/day.view";
+// import {Day} from "./day.model";
 
 import {TextGeometry,
         MeshBasicMaterial,
         BoxGeometry,
-        FlatShading
+        FlatShading,
+        Texture
 } from 'three';
 
 // declare module THREE { 
@@ -44,6 +46,10 @@ export const fontSize = hoursArea / 24;
 export const rectMaterial = new MeshBasicMaterial({ color: 0xffffff });
 export const rectGeom = new BoxGeometry(cellSize, cellSize, 0);
 
+export module RTT {
+    export var dayTexture: Texture;
+}
+
 export const textMaterial = new MeshBasicMaterial({
     color: 0x00000,
     shading: FlatShading
@@ -53,7 +59,7 @@ export const textMaterial = new MeshBasicMaterial({
 export const hourMaterial = new MeshBasicMaterial({ color: 0xdddddd });
 export const hourBoxGeom = new BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
 
-export var days: Day[] = [];
+// export var days: Day[] = [];
 
 export var shiftPressed = false;
 

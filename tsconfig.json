@@ -6,12 +6,9 @@
         "module": "commonjs",
         "sourceMap": false
     },
-    "files": [
-        "ts/day.ts",
-        "ts/globals.ts",
-        "ts/main.ts",
-        "ts/zoomcalendar.ts"
-        ],
+    "include": [
+        "ts/**/*.ts"
+    ],
 	"exclude": [
 		"node_modules"
 	]

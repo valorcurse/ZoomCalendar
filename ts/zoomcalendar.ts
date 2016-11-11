@@ -2,8 +2,6 @@ import * as d3Zoom from 'd3-zoom';
 import * as d3Time from 'd3-time';
 import * as d3Selection from 'd3-selection';
 
-// import * as d3 from "./d3;
-
 import * as moment from 'moment';
 type Moment = moment.Moment;
 
@@ -27,8 +25,10 @@ import {WebGLRenderer,
 		Intersection
 } from 'three';
 
-import {Event} from "./event";
-import {Day, DailyHours, Hour} from "./day";
+import {Event} from "./day/event/event.model";
+// import {Day, DailyHours, Hour} from "./day";
+import {Day} from "./day/day";
+import {Hour, DailyHours} from "./day/day.view";
 import * as Globals from "./globals";
  
 interface DateSelection {
@@ -47,10 +47,8 @@ export class ZoomCalendar extends WebGLRenderer {
 	year: number = 2016;
 	month: number = 1;
 
-	// dates: Date[];
 	dates: Map<number, Day> = new Map<number, Day>();
-	// dates: {date: Date, mesh: Day};
-	// dates: {};
+
 	view: any;
 	context: any;
 
@@ -66,13 +64,10 @@ export class ZoomCalendar extends WebGLRenderer {
 
 	public constructor() {
 		super({ antialias: true });
-
-		// this.scene = new Scene();
+		
 		this.scene.updateMatrixWorld(true);
-
-		// var aspect = this.sceneSize.width / this.sceneSize.height;
-		// this.camera = new OrthographicCamera(0, 2 * this.DZOOM * this.aspect, 0, -2 * this.DZOOM, -1000, 1000);
-			this.camera = new OrthographicCamera( 
+		
+		this.camera = new OrthographicCamera( 
             window.innerWidth / -2, 
             window.innerWidth / 2, 
             window.innerHeight / 2, 
@@ -98,18 +93,6 @@ export class ZoomCalendar extends WebGLRenderer {
 			this.dates.set(date.getTime(), null);
 		});
 		
-		console.log(this.dates);
-		// 	array.forEach(function(data){
-	 //   		obj[data[0]] = data[1]
-		// });
-		
-		// var result = arr.reduce(function(map, obj) {
-		//     map[obj.key] = obj.val;
-		//     return map;
-		// }, {});
-
-
-
 		this.view = d3Selection.select(this.domElement);
 
 		this.zoom(this.view);
@@ -130,7 +113,7 @@ export class ZoomCalendar extends WebGLRenderer {
 		
 	}
     
-	init() {
+	async init() {
 		this.generateTextGeometry();
 		this.generateDayTexture();
 		this.createComponents();
@@ -152,7 +135,10 @@ export class ZoomCalendar extends WebGLRenderer {
 			.on("dblclick.zoom", null) // disable zoom in on double-click
 		;
 		
-		// this.zoomed();
+		var start = new Date("January 13, 2016 11:13:00");
+		var end = new Date("January 13, 2016 17:47:00");
+
+		this.addEvent(start, end);
 	}
 
 	zoomed = () => {
@@ -188,7 +174,7 @@ export class ZoomCalendar extends WebGLRenderer {
 				var day: Day = intersect.object.parent as Day;
 				// console.log(intersect);
 				var uv: Vector2 = intersect.uv;
-				day.mouseover(uv);
+				// day.mouseover(uv);
 			}
 		}
 	}
@@ -208,8 +194,6 @@ export class ZoomCalendar extends WebGLRenderer {
 		Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(this.scene.children, true);
 		
 		this.getHoveredDay(event);
-		// var uv: Vector2 = intersect.uv;
-		// day.mouseover(uv);
 	}
 
 	onMouseDown(event: MouseEvent) {
@@ -224,14 +208,16 @@ export class ZoomCalendar extends WebGLRenderer {
 
 	createComponents() {
 		for (let date of this.dates.keys()) {
-			var newDay = new Day(moment(date), this.dailyTexture);
-			this.scene.add(newDay);
+			var newDay: Day = new Day(moment(date));
+			this.scene.add(newDay.view());
 			this.dates.set(date, newDay);
 
 			// var bbox = new BoundingBoxHelper(newDay, 0x0000ff);
 			// bbox.update();
 			// this.scene.add(bbox);
 		}
+		
+		console.log(this.dates);
 
 		var cameraBB = new Box3();
 		cameraBB.setFromObject(this.scene);
@@ -248,7 +234,6 @@ export class ZoomCalendar extends WebGLRenderer {
 	            bevelEnabled: false,
 	            bevelThickness: 10,
 	            bevelSize: 8
-	            // dynamic: false
 	        });
 
 	        Globals.HOURS.GEOMETRY.push(hourGeom)
@@ -263,7 +248,6 @@ export class ZoomCalendar extends WebGLRenderer {
 				bevelEnabled: false,
 	            bevelThickness: 10,
 	            bevelSize: 8
-	            // dynamic: false
 	        });
 
 	        Globals.DAYS.GEOMETRY.push(dayGeom)
@@ -278,8 +262,6 @@ export class ZoomCalendar extends WebGLRenderer {
 	            bevelEnabled: false,
 	            bevelThickness: 10,
 	            bevelSize: 8
-	            // ,
-	            // dynamic: false
 	        });
 
 	        Globals.MONTHS.GEOMETRY.push(monthGeom);
@@ -309,27 +291,25 @@ export class ZoomCalendar extends WebGLRenderer {
         
 
         this.render(bufferScene, camera, bufferTexture);
-        this.dailyTexture = bufferTexture.texture;
-
+        // this.dailyTexture = bufferTexture.texture;
+        Globals.RTT.dayTexture = bufferTexture.texture;
 	}
 	
 	public addEvent(start: Date, end: Date) {
-		var momentStart: Moment = moment(start);
-		var momentEnd: Moment = moment(end);
+		// var momentStart: Moment = moment(start);
+		// var momentEnd: Moment = moment(end);
 		
-		if (!momentStart.isSame(momentEnd, 'day'))
-			return;
+		// if (!momentStart.isSame(momentEnd, 'day'))
+		// 	return;
 		
-		console.log("Dates are in same day");
-		var event: Event = new Event(momentStart, momentEnd);
+		// console.log("Dates are in same day");
+		// var event: Event = new Event(momentStart, momentEnd);
 		
+		// var startOfDay: Moment = momentStart.clone().startOf('day');
+		// var eventDay: Day = this.dates.get(+startOfDay);
+		// eventDay.addEvent(event);
 		
-		// var eventDay = Day = this.dates()
-		console.log(this.dates);
-		// console.log(momentStart.startOf('day').toDate());
-		var time: number = +momentStart.startOf('day');
-		console.log(time);
-		console.log(this.dates.has(time));
+		// console.log(momentStart);
     }
 }
 
