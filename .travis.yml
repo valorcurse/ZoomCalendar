@@ -18,12 +18,13 @@ branches:
 #   - release-2.0
 
 install:
-  - npm install
+  - npm install yarn
+  - yarn
   - grunt
 
-cache:
-  directories:
-    - node_modules
+# cache:
+#   directories:
+#     - node_modules
 
 # git:
 #   depth: 1

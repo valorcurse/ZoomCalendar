@@ -174,25 +174,6 @@ export class ZoomCalendar extends WebGLRenderer {
 		this.camera.updateProjectionMatrix();
 	}
 
-	getHoveredDay(event: MouseEvent) {
-		for (var i = 0; i < Mouse.hover.intersects.length; i++) {
-			var intersect: any = Mouse.hover.intersects[i];
-			
-			console.log(intersect)
-			if (intersect.object.mouseover && intersect.object.intersectable)
-				intersect.object.mouseover(intersect.uv);
-			
-			// if (intersect.object.parent instanceof DayView &&
-			// 	intersect.object.name === "eventArea") 
-			// {
-			// 	var day: Day = intersect.object.parent as Day;
-			// 	// console.log(intersect);
-			// 	var uv: Vector2 = intersect.uv;
-			// 	day.mouseover(uv);
-			// }
-		}
-	}
-
 	onClick(event: MouseEvent) {
 		if (Mouse.hover.intersects.length <= 0 || !Mouse.click.position)
 			return;
@@ -207,8 +188,12 @@ export class ZoomCalendar extends WebGLRenderer {
 		Mouse.hover.raycaster.setFromCamera(Mouse.position, this.camera);
 		Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(this.scene.children, true);
 		
-		
-		this.getHoveredDay(event);
+		for (var i = 0; i < Mouse.hover.intersects.length; i++) {
+			var intersect: any = Mouse.hover.intersects[i];
+			
+			if (intersect.object.mouseover && intersect.object.intersectable)
+				intersect.object.mouseover(intersect.uv);
+		}
 	}
 
 	onMouseDown(event: MouseEvent) {
