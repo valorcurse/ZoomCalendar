@@ -30,7 +30,17 @@ import {Event} from "./day/event/event.model";
 import {Day} from "./day/day";
 import {DayView} from "./day/day.view";
 import {Hour, DailyHours} from "./day/day.view";
-import * as Globals from "./globals";
+// import * as Globals from "./globals";
+import {
+    RTT, 
+    MONTHS,
+    DAYS,
+    HOURS,
+    Materials,
+    Components,
+    Sizes,
+    Point
+} from './globals';
  
 interface DateSelection {
 	start?: Hour,
@@ -169,7 +179,7 @@ export class ZoomCalendar extends WebGLRenderer {
 			var intersect: any = Mouse.hover.intersects[i];
 			
 			console.log(intersect)
-			if (intersect.object.mouseover)
+			if (intersect.object.mouseover && intersect.object.intersectable)
 				intersect.object.mouseover(intersect.uv);
 			
 			// if (intersect.object.parent instanceof DayView &&
@@ -230,7 +240,7 @@ export class ZoomCalendar extends WebGLRenderer {
 
 	generateTextGeometry() {
 		console.log(this.font);
-	    for (var h = 0; h < Globals.HOURS.NUMBER_OF; h++) {
+	    for (var h = 0; h < HOURS.NUMBER_OF; h++) {
 	        var hourGeom = new TextGeometry(String(h + ":00"), {
 	            font: this.font,
 	            size: (window.innerHeight / 24 / 2),
@@ -241,13 +251,13 @@ export class ZoomCalendar extends WebGLRenderer {
 	            bevelSize: 8
 	        });
 
-	        Globals.HOURS.GEOMETRY.push(hourGeom)
+	        HOURS.GEOMETRY.push(hourGeom)
 	    }
 
-	    for (var d = 1; d <= Globals.DAYS.NUMBER_OF; d++) {
+	    for (var d = 1; d <= DAYS.NUMBER_OF; d++) {
 	        var dayGeom = new TextGeometry(String(d), {
 	            font: this.font,
-	            size: Globals.dateSize,
+	            size: Sizes.dateSize,
 				height: 50,
 				curveSegments: 4,
 				bevelEnabled: false,
@@ -255,13 +265,13 @@ export class ZoomCalendar extends WebGLRenderer {
 	            bevelSize: 8
 	        });
 
-	        Globals.DAYS.GEOMETRY.push(dayGeom)
+	        DAYS.GEOMETRY.push(dayGeom)
 	    }
 
 	    for (let date of this.dates.keys()) {
 	        var monthGeom = new TextGeometry(moment(date).format("MMM"), {
 	            font: this.font,
-	            size: Globals.dateSize,
+	            size: Sizes.dateSize,
 	            height: 50,
 	            curveSegments: 4,
 	            bevelEnabled: false,
@@ -269,7 +279,7 @@ export class ZoomCalendar extends WebGLRenderer {
 	            bevelSize: 8
 	        });
 
-	        Globals.MONTHS.GEOMETRY.push(monthGeom);
+	        MONTHS.GEOMETRY.push(monthGeom);
 	    }
 	}
 	
@@ -297,7 +307,7 @@ export class ZoomCalendar extends WebGLRenderer {
 
         this.render(bufferScene, camera, bufferTexture);
         // this.dailyTexture = bufferTexture.texture;
-        Globals.RTT.dayTexture = bufferTexture.texture;
+        RTT.dayTexture = bufferTexture.texture;
 	}
 	
 	public addEvent(start: Date, end: Date) {
@@ -322,7 +332,7 @@ namespace Mouse {
 	export var position: Vector2 = new Vector2();
 
     export module click {
-        export var position: Globals.Point;
+        export var position: Point;
         export var selection: DateSelection = { start: null, end: null };
     }
     

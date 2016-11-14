@@ -26,12 +26,13 @@ import {TextGeometry,
         export var GEOMETRY: TextGeometry[] = [];
     }
 
-export const cellSize = 30;
-export const dateSize = cellSize / 16;
-export const padding = 0.5;
-export const hoursArea = cellSize - padding*2 - dateSize*3;
-export const fontSize = hoursArea / 24;
-
+export module Sizes {
+    export const cellSize = 30;
+    export const dateSize = cellSize / 16;
+    export const padding = 0.5;
+    export const hoursArea = cellSize - padding*2 - dateSize*3;
+    export const fontSize = hoursArea / 24;
+}
 
 export module RTT {
     export var dayTexture: Texture;
@@ -42,7 +43,9 @@ export interface BasicInterface {
     // selectable: boolean;
 }
 
-
+export module Constants {
+    export const minutesInDay: number = 1440; // (24 hours * 60 minutes)
+}
 
 export module Materials {
     export const rectMaterial = new MeshBasicMaterial({ color: 0xffffff });
@@ -54,8 +57,8 @@ export module Materials {
 }
 
 export module Components {
-    export const rectGeom = new BoxGeometry(cellSize, cellSize, 0);
-    export const hourBoxGeom = new BoxGeometry(cellSize - padding * 2 - fontSize, fontSize, 0);
+    export const rectGeom = new BoxGeometry(Sizes.cellSize, Sizes.cellSize, 0);
+    export const hourBoxGeom = new BoxGeometry(Sizes.cellSize - Sizes.padding * 2 - Sizes.fontSize, Sizes.fontSize, 0);
 }
 
 
