@@ -64,9 +64,9 @@ export class Hour extends Object3D implements BasicInterface {
         this.text.geometry.center();
         this.add(this.text);
         
-        // var textBB = new Box3();
+        // const textBB = new Box3();
         // textBB.setFromObject(this.text);
-//         var bbox = new BoundingBoxHelper( this.text, 0x0000ff);
+//         const bbox = new BoundingBoxHelper( this.text, 0x0000ff);
 //         bbox.update();
 // 		this.add(bbox);
 
@@ -80,32 +80,32 @@ export class DailyHours extends Mesh {
     constructor() {
         super();
         
-        var hourPadding = (Sizes.fontSize * 24) / 24;  // Size of all letters / number of padding spots
+        const hourPadding = (Sizes.fontSize * 24) / 24;  // Size of all letters / number of padding spots
      
-        var hourToPixelRatio = window.innerHeight / (Constants.minutesInDay / 60);
+        const hourToPixelRatio = window.innerHeight / (Constants.minutesInDay / 60);
         
-        var eventGeometry: BoxGeometry = 
+        const eventGeometry: BoxGeometry = 
             new BoxGeometry(window.innerWidth, hourToPixelRatio, 0);
                                 
-        for (var h = 0; h <= 23; h++) {
-            var hour: Hour = new Hour(h);
+        for (let h = 0; h <= 23; h++) {
+            const hour: Hour = new Hour(h);
          
     
-            var eventMaterial = h % 2 !== 0 ? 
+            const eventMaterial = h % 2 !== 0 ? 
                             new MeshBasicMaterial({ color: 0xeeeeee }) :
                             new MeshBasicMaterial({ color: 0xffffff });
                             
-            var rect: Mesh = new Mesh(eventGeometry, eventMaterial);
+            const rect: Mesh = new Mesh(eventGeometry, eventMaterial);
             rect.position.y = window.innerHeight / 2 - 
                                 hourToPixelRatio / 2 -
                                 hourToPixelRatio * h;
             rect.position.z = 3;
             this.add(rect);
                     
-            var hourBB = new Box3();
+            const hourBB = new Box3();
             hourBB.setFromObject(hour);
            
-            var padding = hourPadding + (hourBB.getSize().y - Sizes.fontSize);
+            const padding = hourPadding + (hourBB.getSize().y - Sizes.fontSize);
             hour.position.x = -window.innerWidth / 2 + hourBB.getSize().x / 2;
             
             hour.position.y = window.innerHeight / 2 - 
@@ -154,22 +154,22 @@ export class DayView extends Mesh implements BasicInterface {
     }
 
     addEvent(event: Event) {
-        var startOfDay: Moment = event.start().clone().startOf('day');
+        const startOfDay: Moment = event.start().clone().startOf('day');
         
-        var minutesElapsed = moment.duration(event.start().diff(startOfDay)).asMinutes();
-        var minutesDuration = moment.duration(event.end().diff(event.start())).asMinutes();
+        const minutesElapsed = moment.duration(event.start().diff(startOfDay)).asMinutes();
+        const minutesDuration = moment.duration(event.end().diff(event.start())).asMinutes();
         
-        var eventAreaBox = new Box3().setFromObject(this.eventArea);
-        var minuteToPixelRatio = eventAreaBox.getSize().y / Constants.minutesInDay;
-        var height = minutesDuration * minuteToPixelRatio;
-        var yPosition = (eventAreaBox.getSize().y / 2) -        // Move to top of parent
+        const eventAreaBox = new Box3().setFromObject(this.eventArea);
+        const minuteToPixelRatio = eventAreaBox.getSize().y / Constants.minutesInDay;
+        const height = minutesDuration * minuteToPixelRatio;
+        const yPosition = (eventAreaBox.getSize().y / 2) -        // Move to top of parent
                         (height / 2) -                          // Move to top of event
                         (minutesElapsed * minuteToPixelRatio);  // Move to correct position
 
-        var eventGeometry: BoxGeometry = 
+        const eventGeometry: BoxGeometry = 
             new BoxGeometry(10, height, 0);
 
-        var rect: HourMesh = new HourMesh(eventGeometry, Materials.hourMaterial);
+        const rect: HourMesh = new HourMesh(eventGeometry, Materials.hourMaterial);
         rect.position.y = yPosition;
         rect.position.x = 0;
         rect.position.z = 5;
@@ -177,17 +177,17 @@ export class DayView extends Mesh implements BasicInterface {
     }
 
     draw() {
-        var weekOfMonth: number = this.day.moment().week();
-        var dayOfMonth: number = this.day.moment().day();
+        const weekOfMonth: number = this.day.moment().week();
+        const dayOfMonth: number = this.day.moment().day();
         this.position.x = dayOfMonth * Sizes.cellSize + dayOfMonth * this.margin;
         this.position.y = -weekOfMonth * Sizes.cellSize + -weekOfMonth * this.margin;
         
-        var day = this.day.moment().date() - 1,
+        const day = this.day.moment().date() - 1,
             month = this.day.moment().month();
             
         // console.log(MONTHS.GEOMETRY[month]);
 
-        var dayText = new Mesh(DAYS.GEOMETRY[day], Materials.textMaterial),
+        const dayText = new Mesh(DAYS.GEOMETRY[day], Materials.textMaterial),
             monthText = new Mesh(MONTHS.GEOMETRY[month], Materials.textMaterial);
         
         this.dateTitle = new Object3D();
@@ -197,22 +197,22 @@ export class DayView extends Mesh implements BasicInterface {
         dayText.geometry.center();
         monthText.geometry.center();
         
-        var dayBB = new Box3();
+        const dayBB = new Box3();
         dayBB.setFromObject(dayText);
         dayText.position.x = -dayBB.max.x - this.padding/2; 
 
-        var monthBB = new Box3();
+        const monthBB = new Box3();
         monthBB.setFromObject(monthText);
         monthText.position.x = monthBB.max.x + this.padding / 2;
 
-        var dateBB = new Box3();
+        const dateBB = new Box3();
         dateBB.setFromObject(this.dateTitle);
         this.dateTitle.position.y = Sizes.cellSize / 2 - dateBB.max.y - this.padding;
         this.add(this.dateTitle);
 
-        var dateHeight = dateBB.getSize().y + this.padding;
+        const dateHeight = dateBB.getSize().y + this.padding;
         
-        var eventArea = new EventArea(
+        const eventArea = new EventArea(
             Sizes.cellSize, 
             Sizes.cellSize - dateHeight
         );
@@ -227,8 +227,11 @@ class EventArea extends Mesh implements BasicInterface {
     intersectable: boolean = true;
     
     hoveringHighlight: Mesh;
+    dragComponent: Mesh;
     
     dragStart: Vector2;
+    
+    areaBox: Box3 = new Box3().setFromObject(this);
     
     constructor(width: number, height: number) {
         super(
@@ -245,42 +248,57 @@ class EventArea extends Mesh implements BasicInterface {
     
     mouseUp(uv: Vector2) {
         this.dragStart = null;
+        
+        console.log("mouse is up");
+        
+        if (this.dragComponent)
+            this.remove(this.dragComponent);
+    }
+    
+    mouseDrag(uv: Vector2) {
+        if (this.dragComponent)
+            this.remove(this.dragComponent);
+            
+        const dragSize = Math.abs(uv.y - this.dragStart.y) * this.areaBox.getSize().y;
+        
+        const eventGeometry: BoxGeometry = 
+            new BoxGeometry(this.areaBox.getSize().x, dragSize, 0);
+        const eventMaterial = new MeshBasicMaterial(
+            { color: 0xb3ecff, transparent: true, opacity: 0.6 }
+        );
+        
+        this.dragComponent = new Mesh(eventGeometry, eventMaterial);
+        this.dragComponent.position.x = -this.areaBox.getSize().x / 2 + 
+                            this.areaBox.getSize().x / 2;
+        this.dragComponent.position.y = this.areaBox.getSize().y / 2 -
+                            this.areaBox.getSize().y * (1 - uv.y/2 - this.dragStart.y/2);
+        this.dragComponent.position.z = 5;
+        
+        this.add(this.dragComponent);
     }
     
     mouseMove(uv: Vector2) {
         if (this.hoveringHighlight)
             this.remove(this.hoveringHighlight);
         
-        console.log(this.dragStart);
+        if (this.dragStart)
+            this.mouseDrag(uv);
         
+        const minuteStep = 5;
         
+        const minutes = Math.floor((1 - uv.y) * (Constants.minutesInDay / minuteStep));
         
-        var minuteStep = 5;
+        const minuteToPixelRatio = this.areaBox.getSize().y / (Constants.minutesInDay / minuteStep);
         
-        var minutes = Math.floor((1 - uv.y) * (Constants.minutesInDay / minuteStep));
-        
-        var eventAreaBox = new Box3().setFromObject(this);
-        var minuteToPixelRatio = eventAreaBox.getSize().y / (Constants.minutesInDay / minuteStep);
-        
-        if (this.dragStart) {
-            // eventAreaBox.getSize().y * (1 - uv.y);
-            minuteToPixelRatio = Math.abs(uv.y - this.dragStart.y) * eventAreaBox.getSize().y;
-        }
-        
-        var eventGeometry: BoxGeometry = 
-            new BoxGeometry(eventAreaBox.getSize().x, minuteToPixelRatio, 0);
-        var eventMaterial = new MeshBasicMaterial({ color: 0xb3ecff })
+        const eventGeometry: BoxGeometry = 
+            new BoxGeometry(this.areaBox.getSize().x, minuteToPixelRatio, 0);
+        const eventMaterial = new MeshBasicMaterial({ color: 0xb3ecff })
 
-        var rect: Mesh = new Mesh(eventGeometry, eventMaterial);
-        rect.position.x = -eventAreaBox.getSize().x / 2 + eventAreaBox.getSize().x / 2;
-        rect.position.y = eventAreaBox.getSize().y / 2 -               // Move to top of area
-                            eventAreaBox.getSize().y * (1 - uv.y);     // Move to position based on coordinate
-                            
-        if (this.dragStart) {
-            rect.position.y = eventAreaBox.getSize().y / 2 -               // Move to top of area
-                            eventAreaBox.getSize().y * (1 - uv.y/2 - this.dragStart.y/2);     // Move to position based on coordinate
-        }
-                            
+        const rect: Mesh = new Mesh(eventGeometry, eventMaterial);
+        rect.position.x = -this.areaBox.getSize().x / 2 + this.areaBox.getSize().x / 2;
+        rect.position.y = this.areaBox.getSize().y / 2 -               // Move to top of area
+                            this.areaBox.getSize().y * (1 - uv.y);     // Move to position based on coordinate
+                                    
         rect.position.z = 5;
         
         this.hoveringHighlight = rect;
