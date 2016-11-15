@@ -15,7 +15,7 @@ import {Mesh,
 
 import {Event} from "./event/event.model";
 import {DayModel} from "./day.model";
-// import * as Globals from '../globals';
+
 import {
     RTT, 
     BasicInterface,
@@ -62,11 +62,10 @@ export class Hour extends Object3D implements BasicInterface {
     draw() {
         this.text = new HourMesh(HOURS.GEOMETRY[this.hour], Materials.textMaterial);
         this.text.geometry.center();
-        
-        var textBB = new Box3();
-        textBB.setFromObject(this.text);
         this.add(this.text);
         
+        // var textBB = new Box3();
+        // textBB.setFromObject(this.text);
 //         var bbox = new BoundingBoxHelper( this.text, 0x0000ff);
 //         bbox.update();
 // 		this.add(bbox);
@@ -229,6 +228,8 @@ class EventArea extends Mesh implements BasicInterface {
     
     hoveringHighlight: Mesh;
     
+    dragStart: Vector2;
+    
     constructor(width: number, height: number) {
         super(
             new BoxGeometry( width, height, 0), 
@@ -238,9 +239,21 @@ class EventArea extends Mesh implements BasicInterface {
         this.name = "eventArea";
     }
     
-     mouseover(uv: Vector2) {
+    mouseDown(uv: Vector2) {
+        this.dragStart = uv;
+    }
+    
+    mouseUp(uv: Vector2) {
+        this.dragStart = null;
+    }
+    
+    mouseMove(uv: Vector2) {
         if (this.hoveringHighlight)
             this.remove(this.hoveringHighlight);
+        
+        console.log(this.dragStart);
+        
+        
         
         var minuteStep = 5;
         
@@ -248,6 +261,11 @@ class EventArea extends Mesh implements BasicInterface {
         
         var eventAreaBox = new Box3().setFromObject(this);
         var minuteToPixelRatio = eventAreaBox.getSize().y / (Constants.minutesInDay / minuteStep);
+        
+        if (this.dragStart) {
+            // eventAreaBox.getSize().y * (1 - uv.y);
+            minuteToPixelRatio = Math.abs(uv.y - this.dragStart.y) * eventAreaBox.getSize().y;
+        }
         
         var eventGeometry: BoxGeometry = 
             new BoxGeometry(eventAreaBox.getSize().x, minuteToPixelRatio, 0);
@@ -257,6 +275,12 @@ class EventArea extends Mesh implements BasicInterface {
         rect.position.x = -eventAreaBox.getSize().x / 2 + eventAreaBox.getSize().x / 2;
         rect.position.y = eventAreaBox.getSize().y / 2 -               // Move to top of area
                             eventAreaBox.getSize().y * (1 - uv.y);     // Move to position based on coordinate
+                            
+        if (this.dragStart) {
+            rect.position.y = eventAreaBox.getSize().y / 2 -               // Move to top of area
+                            eventAreaBox.getSize().y * (1 - uv.y/2 - this.dragStart.y/2);     // Move to position based on coordinate
+        }
+                            
         rect.position.z = 5;
         
         this.hoveringHighlight = rect;

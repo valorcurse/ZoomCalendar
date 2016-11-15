@@ -54,6 +54,7 @@ export class ZoomCalendar extends WebGLRenderer {
 	aspect: number = this.sceneSize.width / this.sceneSize.height;
 	
 	camera: OrthographicCamera;
+	raycaster: Raycaster;
 
 	year: number = 2016;
 	month: number = 1;
@@ -85,15 +86,17 @@ export class ZoomCalendar extends WebGLRenderer {
             window.innerHeight / -2, 
             -1000, 1000 );
 		this.camera.updateProjectionMatrix();
+		
+		this.raycaster = new Raycaster();
 
 		this.setSize(this.sceneSize.width, this.sceneSize.height);
 		this.setClearColor(0xcccccc, 1);
-		// this.draw();
-
 
 		document.addEventListener('mousemove', this.onMouseMove, false);
 		document.addEventListener('click', this.onClick, false);
 		document.addEventListener('mousedown', this.onMouseDown, false);
+		document.addEventListener('mouseup', this.onMouseUp, false);
+		document.addEventListener('ondrag', this.onDrag, false);
 
 		var currentDate = new Date(this.year, this.month);
 
@@ -120,11 +123,9 @@ export class ZoomCalendar extends WebGLRenderer {
 		var t = d3Zoom.zoomIdentity.translate(0, 0).scale(0.03);
 		this.zoom.transform(this.view, t);
 		this.translate(t.x, t.y, t.k);
-		
-		
 	}
     
-	async init() {
+	init() {
 		this.generateTextGeometry();
 		this.generateDayTexture();
 		this.createComponents();
@@ -134,7 +135,6 @@ export class ZoomCalendar extends WebGLRenderer {
 	    this.zoom
 	    	.on('zoom', this.zoomed)
 	    	.filter(function() {
-	    		console.log(d3Selection.event);
 	    		// Allow for zoom/pan with left/middle mouse button or mouse wheel
 				return ((d3Selection.event.button === 0 && d3Selection.event.ctrlKey)
 					|| d3Selection.event.button === 1 
@@ -174,6 +174,20 @@ export class ZoomCalendar extends WebGLRenderer {
 		this.camera.updateProjectionMatrix();
 	}
 
+	intersectedObjects(event: MouseEvent): any[] {
+		var position: Vector2 = new Vector2();
+		position.x = (event.clientX / window.innerWidth) * 2 - 1;
+		position.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+		this.raycaster.setFromCamera(position, this.camera);
+		
+		var intersects: any[] = this.raycaster.intersectObjects(this.scene.children, true);
+		return intersects.filter(
+			intersect =>
+				intersect.object.intersectable
+		);
+	}
+
 	onClick(event: MouseEvent) {
 		if (Mouse.hover.intersects.length <= 0 || !Mouse.click.position)
 			return;
@@ -181,24 +195,43 @@ export class ZoomCalendar extends WebGLRenderer {
 
 	onMouseMove = (event: MouseEvent) => {
 		event.preventDefault();
-
-		Mouse.position.x = (event.clientX / window.innerWidth) * 2 - 1;
-		Mouse.position.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
-		Mouse.hover.raycaster.setFromCamera(Mouse.position, this.camera);
-		Mouse.hover.intersects = Mouse.hover.raycaster.intersectObjects(this.scene.children, true);
 		
-		for (var i = 0; i < Mouse.hover.intersects.length; i++) {
-			var intersect: any = Mouse.hover.intersects[i];
-			
-			if (intersect.object.mouseover && intersect.object.intersectable)
-				intersect.object.mouseover(intersect.uv);
+		for (let intersect of this.intersectedObjects(event)) {
+			if (intersect.object.mouseMove)
+				intersect.object.mouseMove(intersect.uv);
 		}
 	}
 
-	onMouseDown(event: MouseEvent) {
-		console.log("Mouse is down.");
+	onMouseDown = (event: MouseEvent) => {
 		Mouse.click.position = { x: event.clientX, y: event.clientY };
+		
+		var intersects = this.intersectedObjects(event);
+		for (let intersect of intersects) {
+			if (intersect.object.mouseDown)
+				intersect.object.mouseDown(intersect.uv);
+		}
+	}
+	
+	onMouseUp = (event: MouseEvent) => {
+		// Mouse.click.position = { x: event.clientX, y: event.clientY };
+		
+		var intersects = this.intersectedObjects(event);
+		for (let intersect of intersects) {
+			if (intersect.object.mouseUp)
+				intersect.object.mouseUp(intersect.uv);
+		}
+	}
+	
+	onDrag(event: MouseEvent) {
+		// Mouse.click.position = { x: event.clientX, y: event.clientY };
+		
+		// for (let intersect of this.intersectedObjects(event)) {
+			// if (intersect.object.mousedown)
+				// intersect.object.mouseover(intersect.uv);
+		// }
+		
+		console.log("Dragging mouse!")
+		console.log(event);
 	}
 
 	draw = () => {
@@ -291,7 +324,6 @@ export class ZoomCalendar extends WebGLRenderer {
         
 
         this.render(bufferScene, camera, bufferTexture);
-        // this.dailyTexture = bufferTexture.texture;
         RTT.dayTexture = bufferTexture.texture;
 	}
 	
