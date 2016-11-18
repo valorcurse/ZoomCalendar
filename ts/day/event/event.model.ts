@@ -5,12 +5,9 @@ import {
     Mesh
 } from 'three';
 
-// import {Day, DailyHours, Hour} from "./day";
-// import {DayModel} from "../day.model";
-// import * as Globals from '../../globals';
 import {Day} from "../day";
 
-export class Event {
+export class EventModel {
 
     private _start: Moment;
     private _end: Moment;

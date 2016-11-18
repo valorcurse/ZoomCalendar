@@ -13,7 +13,7 @@ import {Mesh,
         Vector2
 } from 'three';
 
-import {Event} from "./event/event.model";
+import {Event} from "./event/event";
 import {DayModel} from "./day.model";
 
 import {
@@ -149,31 +149,17 @@ export class DayView extends Mesh implements BasicInterface {
 
         this.name = "day";
         this.day = day;
+        this.day.registerObserver("EventAdded", (event: Event) => this.addEvent(event));
         
 		this.draw();
     }
 
     addEvent(event: Event) {
-        const startOfDay: Moment = event.start().clone().startOf('day');
+        console.log("Added new Event!");
+        console.log(event);
         
-        const minutesElapsed = moment.duration(event.start().diff(startOfDay)).asMinutes();
-        const minutesDuration = moment.duration(event.end().diff(event.start())).asMinutes();
-        
-        const eventAreaBox = new Box3().setFromObject(this.eventArea);
-        const minuteToPixelRatio = eventAreaBox.getSize().y / Constants.minutesInDay;
-        const height = minutesDuration * minuteToPixelRatio;
-        const yPosition = (eventAreaBox.getSize().y / 2) -        // Move to top of parent
-                        (height / 2) -                          // Move to top of event
-                        (minutesElapsed * minuteToPixelRatio);  // Move to correct position
-
-        const eventGeometry: BoxGeometry = 
-            new BoxGeometry(10, height, 0);
-
-        const rect: HourMesh = new HourMesh(eventGeometry, Materials.hourMaterial);
-        rect.position.y = yPosition;
-        rect.position.x = 0;
-        rect.position.z = 5;
-        this.eventArea.add(rect);
+        this.eventArea.add(event.view());
+        // const event: Event = new Event(event)
     }
 
     draw() {
@@ -212,14 +198,14 @@ export class DayView extends Mesh implements BasicInterface {
 
         const dateHeight = dateBB.getSize().y + this.padding;
         
-        const eventArea = new EventArea(
+        this.eventArea = new EventArea(
             Sizes.cellSize, 
             Sizes.cellSize - dateHeight
         );
         
-        eventArea.position.y = -dateHeight/2;
+        this.eventArea.position.y = -dateHeight/2;
         
-        this.add(eventArea);
+        this.add(this.eventArea);
     }
 }
 

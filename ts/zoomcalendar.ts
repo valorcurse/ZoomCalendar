@@ -25,12 +25,9 @@ import {WebGLRenderer,
 		Intersection
 } from 'three';
 
-import {Event} from "./day/event/event.model";
-// import {Day, DailyHours, Hour} from "./day";
+import {Event} from "./day/event/event";
 import {Day} from "./day/day";
-import {DayView} from "./day/day.view";
 import {Hour, DailyHours} from "./day/day.view";
-// import * as Globals from "./globals";
 import {
     RTT, 
     MONTHS,
@@ -96,7 +93,6 @@ export class ZoomCalendar extends WebGLRenderer {
 		document.addEventListener('click', this.onClick, false);
 		document.addEventListener('mousedown', this.onMouseDown, false);
 		document.addEventListener('mouseup', this.onMouseUp, false);
-		document.addEventListener('ondrag', this.onDrag, false);
 
 		var currentDate = new Date(this.year, this.month);
 
@@ -221,18 +217,6 @@ export class ZoomCalendar extends WebGLRenderer {
 				intersect.object.mouseUp(intersect.uv);
 		}
 	}
-	
-	onDrag(event: MouseEvent) {
-		// Mouse.click.position = { x: event.clientX, y: event.clientY };
-		
-		// for (let intersect of this.intersectedObjects(event)) {
-			// if (intersect.object.mousedown)
-				// intersect.object.mouseover(intersect.uv);
-		// }
-		
-		console.log("Dragging mouse!")
-		console.log(event);
-	}
 
 	draw = () => {
 		requestAnimationFrame(this.draw);
@@ -328,18 +312,18 @@ export class ZoomCalendar extends WebGLRenderer {
 	}
 	
 	public addEvent(start: Date, end: Date) {
-		// var momentStart: Moment = moment(start);
-		// var momentEnd: Moment = moment(end);
+		var momentStart: Moment = moment(start);
+		var momentEnd: Moment = moment(end);
 		
-		// if (!momentStart.isSame(momentEnd, 'day'))
-		// 	return;
+		if (!momentStart.isSame(momentEnd, 'day'))
+			return;
 		
-		// console.log("Dates are in same day");
+		console.log("Dates are in same day");
 		// var event: Event = new Event(momentStart, momentEnd);
 		
-		// var startOfDay: Moment = momentStart.clone().startOf('day');
-		// var eventDay: Day = this.dates.get(+startOfDay);
-		// eventDay.addEvent(event);
+		var startOfDay: Moment = momentStart.clone().startOf('day');
+		var eventDay: Day = this.dates.get(+startOfDay);
+		eventDay.addEvent(momentStart, momentEnd);
 		
 		// console.log(momentStart);
     }
