@@ -13,7 +13,8 @@ import {Mesh,
         Vector2
 } from 'three';
 
-import {Event} from "./event/event";
+import {View} from "../base/view";
+import {EventView} from "./event/event.view";
 import {DayModel} from "./day.model";
 
 import {
@@ -120,16 +121,13 @@ export class DailyHours extends Mesh {
     }
 }
 
-export class DayView extends Mesh implements BasicInterface {
+export class DayView extends View {
     day: DayModel;
     
     margin: number = 0.1;
     padding: number = 0.5;
     
     box: Box3 = new Box3().setFromObject(this);
-    
-    intersectable: boolean = false;
-    selectable: boolean = true;
 
     dateTitle: Object3D;
     eventArea: Mesh;
@@ -149,17 +147,18 @@ export class DayView extends Mesh implements BasicInterface {
 
         this.name = "day";
         this.day = day;
-        this.day.registerObserver("EventAdded", (event: Event) => this.addEvent(event));
+        this.day.registerObserver("EventAdded", (event: EventView) => this.addEvent(event));
+        this.day.registerObserver("EventRemoved", (event: EventView) => this.removeEvent(event));
         
 		this.draw();
     }
 
-    addEvent(event: Event) {
-        console.log("Added new Event!");
-        console.log(event);
-        
-        this.eventArea.add(event.view());
-        // const event: Event = new Event(event)
+    addEvent(event: EventView) {
+        this.eventArea.add(event);
+    }
+    
+    removeEvent(event: EventView) {
+        this.eventArea.remove(event);
     }
 
     draw() {
@@ -202,6 +201,10 @@ export class DayView extends Mesh implements BasicInterface {
             Sizes.cellSize, 
             Sizes.cellSize - dateHeight
         );
+        // this.eventArea.registerObserver("CreateEvent", 
+            // (start: number, end: number) => 
+            // this.notifyObservers("CreateEvent", {start: start, end: end})
+        // );
         
         this.eventArea.position.y = -dateHeight/2;
         
@@ -209,7 +212,7 @@ export class DayView extends Mesh implements BasicInterface {
     }
 }
 
-class EventArea extends Mesh implements BasicInterface {
+class EventArea extends View {
     intersectable: boolean = true;
     
     hoveringHighlight: Mesh;
@@ -218,6 +221,10 @@ class EventArea extends Mesh implements BasicInterface {
     dragStart: Vector2;
     
     areaBox: Box3 = new Box3().setFromObject(this);
+    minuteStep: number = 5;
+    minuteToPixelRatio: number = this.areaBox.getSize().y / 
+        (Constants.minutesInDay / this.minuteStep);
+    
     
     constructor(width: number, height: number) {
         super(
@@ -237,8 +244,12 @@ class EventArea extends Mesh implements BasicInterface {
         
         console.log("mouse is up");
         
-        if (this.dragComponent)
+        
+        
+        if (this.dragComponent) {
+            // this.notifyObservers("CreateEvent", {start: dragStart, end: uv})
             this.remove(this.dragComponent);
+        }
     }
     
     mouseDrag(uv: Vector2) {
@@ -270,14 +281,14 @@ class EventArea extends Mesh implements BasicInterface {
         if (this.dragStart)
             this.mouseDrag(uv);
         
-        const minuteStep = 5;
+        // const minuteStep = 5;
         
-        const minutes = Math.floor((1 - uv.y) * (Constants.minutesInDay / minuteStep));
+        const minutes = Math.floor((1 - uv.y) * (Constants.minutesInDay / this.minuteStep));
         
-        const minuteToPixelRatio = this.areaBox.getSize().y / (Constants.minutesInDay / minuteStep);
+        // const minuteToPixelRatio = this.areaBox.getSize().y / (Constants.minutesInDay / minuteStep);
         
         const eventGeometry: BoxGeometry = 
-            new BoxGeometry(this.areaBox.getSize().x, minuteToPixelRatio, 0);
+            new BoxGeometry(this.areaBox.getSize().x, this.minuteToPixelRatio, 0);
         const eventMaterial = new MeshBasicMaterial({ color: 0xb3ecff })
 
         const rect: Mesh = new Mesh(eventGeometry, eventMaterial);

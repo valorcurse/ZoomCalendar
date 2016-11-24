@@ -8,23 +8,25 @@ import {TextGeometry,
         Texture
 } from 'three';
 
-// export module Config {
+export module Meshes {
 
-    export module HOURS {
-        export const NUMBER_OF: number = 24;
-        export var  GEOMETRY: TextGeometry[] = [];
-        export var INSTANCES: { [hour: number]: Hour; } = { };
-    }
-    
-    export module DAYS {
-        export const NUMBER_OF: number = 31;
-        export var GEOMETRY: TextGeometry[] = [];
-    }
-    
-    export module MONTHS {
-        export const NUMBER_OF: number = 12;
-        export var GEOMETRY: TextGeometry[] = [];
-    }
+}
+
+export module HOURS {
+    export const NUMBER_OF: number = 24;
+    export var  GEOMETRY: TextGeometry[] = [];
+    export var INSTANCES: { [hour: number]: Hour; } = { };
+}
+
+export module DAYS {
+    export const NUMBER_OF: number = 31;
+    export var GEOMETRY: TextGeometry[] = [];
+}
+
+export module MONTHS {
+    export const NUMBER_OF: number = 12;
+    export var GEOMETRY: TextGeometry[] = [];
+}
 
 export module Sizes {
     export const cellSize = 30;
@@ -40,7 +42,6 @@ export module RTT {
 
 export interface BasicInterface {
     intersectable: boolean;
-    // selectable: boolean;
 }
 
 export module Constants {
@@ -67,4 +68,14 @@ export var shiftPressed = false;
 export interface Point {
     x?: number;
     y?: number;
+}
+
+export function applyMixins(derivedCtor: any, baseCtors: any[]) {
+    baseCtors.forEach(baseCtor => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
+             if (name !== 'constructor') {
+                derivedCtor.prototype[name] = baseCtor.prototype[name];
+            }
+        });
+    });
 }

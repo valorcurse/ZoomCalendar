@@ -1,7 +1,7 @@
-interface CallbackType { (arg: any): void }
+export interface CallbackType { (arg: any): void }
 
 export class Observable {
-    private observers : Map<string, CallbackType[]>;
+    observers: Map<string, CallbackType[]>;
 
     constructor() {
         this.observers = new Map<string, CallbackType[]>();

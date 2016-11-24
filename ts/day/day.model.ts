@@ -2,6 +2,7 @@ import * as moment from 'moment';
 type Moment = moment.Moment;
 
 import {Event} from "./event/event";
+import {EventView} from "./event/event.view";
 
 import {Observable} from "../observers";
 
@@ -17,14 +18,14 @@ export class DayModel extends Observable {
     
     addEvent(start: Moment, end: Moment) {
         const event = new Event(start, end);
-        // const event = new Event(moment(), moment());
         
         this.events.push(event);
-        this.notifyObservers("EventAdded", { event });
+        const view: EventView = event.view();
+        this.notifyObservers("EventAdded", { view });
     }
     
     moment() {
-        return this._moment;
+        return this._moment.clone();
     }
     
 }

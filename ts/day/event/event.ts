@@ -5,6 +5,11 @@ import {EventModel} from "./event.model"
 import {EventView} from "./event.view"
 
 
+export interface Period {
+    start: Moment;
+    end: Moment;
+}
+
 export class Event {
     
     private _model: EventModel;
