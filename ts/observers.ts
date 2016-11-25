@@ -1,13 +1,13 @@
 export interface CallbackType { (arg: any): void }
 
 export class Observable {
-    observers: Map<string, CallbackType[]>;
+    observers: Map<string, CallbackType[]> = new Map<string, CallbackType[]>();
 
     constructor() {
-        this.observers = new Map<string, CallbackType[]>();
+        // this.observers = new Map<string, CallbackType[]>();
     }
 
-    registerObserver (label: string, callback : CallbackType) : void {
+    registerObserver (label: string, callback: CallbackType) : void {
         if (!this.observers.has(label))
             this.observers.set(label, []);
             

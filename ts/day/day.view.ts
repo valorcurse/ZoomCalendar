@@ -130,32 +130,37 @@ export class DayView extends View {
     box: Box3 = new Box3().setFromObject(this);
 
     dateTitle: Object3D;
-    eventArea: Mesh;
-    hourPadding: number;
+    eventArea: Object3D;
 
-    uniforms: any = {  
-			transform: { type: "f", value: 0 },
-		};
+    // uniforms: any = {  
+// 			transform: { type: "f", value: 0 },
+// 		};
 
-	shaderMaterial: ShaderMaterial = new ShaderMaterial({  
-            uniforms: this.uniforms,
-			vertexShader: document.getElementById('vertexShader').textContent
-		});
+// 	shaderMaterial: ShaderMaterial = new ShaderMaterial({  
+            // uniforms: this.uniforms,
+// 			vertexShader: document.getElementById('vertexShader').textContent
+// 		});
 
     constructor(day: DayModel) {
         super(Components.rectGeom, Materials.rectMaterial);
 
         this.name = "day";
         this.day = day;
+		this.draw();
+        
+        
         this.day.registerObserver("EventAdded", (event: EventView) => this.addEvent(event));
         this.day.registerObserver("EventRemoved", (event: EventView) => this.removeEvent(event));
-        
-		this.draw();
     }
 
     addEvent(event: EventView) {
+        console.log(event);
         this.eventArea.add(event);
     }
+    
+    // createEvent(start: number, end: number) {
+    //     this.notifyObservers("CreateEvent", {start: start, end: end});
+    // }
     
     removeEvent(event: EventView) {
         this.eventArea.remove(event);
@@ -199,13 +204,10 @@ export class DayView extends View {
         
         this.eventArea = new EventArea(
             Sizes.cellSize, 
-            Sizes.cellSize - dateHeight
+            Sizes.cellSize - dateHeight,
+            this
         );
-        // this.eventArea.registerObserver("CreateEvent", 
-            // (start: number, end: number) => 
-            // this.notifyObservers("CreateEvent", {start: start, end: end})
-        // );
-        
+
         this.eventArea.position.y = -dateHeight/2;
         
         this.add(this.eventArea);
@@ -214,6 +216,8 @@ export class DayView extends View {
 
 class EventArea extends View {
     intersectable: boolean = true;
+    
+    parent: DayView;
     
     hoveringHighlight: Mesh;
     dragComponent: Mesh;
@@ -226,13 +230,14 @@ class EventArea extends View {
         (Constants.minutesInDay / this.minuteStep);
     
     
-    constructor(width: number, height: number) {
+    constructor(width: number, height: number, parent: DayView) {
         super(
             new BoxGeometry( width, height, 0), 
             new MeshBasicMaterial( { map: RTT.dayTexture } )
         );
             
         this.name = "eventArea";
+        this.parent = parent;
     }
     
     mouseDown(uv: Vector2) {
@@ -240,16 +245,18 @@ class EventArea extends View {
     }
     
     mouseUp(uv: Vector2) {
-        this.dragStart = null;
         
         console.log("mouse is up");
         
-        
+        if (this.dragStart) {
+            this.parent.notifyObservers("CreateEvent", {start: this.dragStart.y, end: uv.y})
+        }
         
         if (this.dragComponent) {
-            // this.notifyObservers("CreateEvent", {start: dragStart, end: uv})
             this.remove(this.dragComponent);
         }
+        
+        this.dragStart = null;
     }
     
     mouseDrag(uv: Vector2) {

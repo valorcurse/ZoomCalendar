@@ -19,10 +19,10 @@ export class Day {
     constructor(moment: Moment) {
         this._model = new DayModel(moment);
         this._view = new DayView(this._model);
-        // this._view.registerObserver("CreateEvent", 
-            // (start: number, end: number) => 
-            // this.addEvent(start, end)
-        // );
+        this._view.registerObserver("CreateEvent", 
+            (arg: any) => 
+            this.addEvent(arg.start, arg.end)
+        );
         
     }
     
@@ -33,14 +33,14 @@ export class Day {
         const period: Period = <Period>{};
         
         if (typeof start === 'number') {
-            const minutes = Constants.minutesInDay * start;
+            const minutes = Constants.minutesInDay * (1-start);
             period.start = this.model().moment().add(minutes, "minutes");
         } else {
             period.start = start;
         }
         
         if (typeof end === 'number') {
-            const minutes = Constants.minutesInDay * end;
+            const minutes = Constants.minutesInDay * (1-end);
             period.end = this.model().moment().add(minutes, "minutes");
         } else {
             period.end = end;

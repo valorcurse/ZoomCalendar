@@ -6,14 +6,15 @@ import {Mesh, Geometry, Material} from "three";
 export class View extends Mesh implements Observable, BasicInterface {
     // Mixin declarations for Observable
     observers: Map<string, CallbackType[]>;
-    registerObserver: () => void;
-    removeObserver: () => void;
-    notifyObservers: () => void;
+    registerObserver: (label: string, callback: CallbackType) => void;
+    removeObserver: (label: string) => void;
+    notifyObservers: (label: string, arg: any) => void;
     
     intersectable: boolean = false;
     
     constructor(geometry: Geometry, material: Material) {
         super(geometry, material);
+        this.observers = new Map<string, CallbackType[]>();
     }
     
 }

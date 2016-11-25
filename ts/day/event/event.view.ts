@@ -10,7 +10,7 @@ import {Mesh,
         // ShaderMaterial,
         // Texture,
         // OrthographicCamera,
-        // Vector2
+        Vector2
 } from 'three';
 
 import {
@@ -28,14 +28,19 @@ import {
 import {EventModel} from './event.model';
 
 export class EventView extends Mesh implements BasicInterface {
+    intersectable: boolean = true;
+    
     model: EventModel;
     
-    intersectable: boolean = true;
+    defaultMaterial: MeshBasicMaterial; 
     
     constructor(model: EventModel) {
         super(Components.rectGeom, Materials.rectMaterial);
         
         this.model = model;
+        this.name = "event";
+        
+        this.draw();
     }
     
     draw() {
@@ -47,22 +52,29 @@ export class EventView extends Mesh implements BasicInterface {
         const eventAreaBox = new Box3().setFromObject(this);
         const minuteToPixelRatio = eventAreaBox.getSize().y / Constants.minutesInDay;
         const height = minutesDuration * minuteToPixelRatio;
-        const yPosition = (eventAreaBox.getSize().y / 2) -        // Move to top of parent
+        const yPosition = (eventAreaBox.getSize().y / 2) -      // Move to top of parent
                         (height / 2) -                          // Move to top of event
                         (minutesElapsed * minuteToPixelRatio);  // Move to correct position
 
         const eventGeometry: BoxGeometry = 
-            new BoxGeometry(10, height, 0);
+            new BoxGeometry(eventAreaBox.getSize().x, height, 0);
 
         this.position.y = yPosition;
         this.position.x = 0;
-        this.position.z = 5;
+        this.position.z = 2;
         
         this.geometry = eventGeometry;
         
-        const eventMaterial = new MeshBasicMaterial(
+        this.defaultMaterial = new MeshBasicMaterial(
             { color: 0x00bfff, transparent: true, opacity: 0.6 }
         );
-        this.material = eventMaterial;
+        this.material = this.defaultMaterial;
+    }
+    
+    mouseMove(uv: Vector2) {
+        console.log("Hovering over this event.");
+        this.material = this.defaultMaterial = new MeshBasicMaterial(
+            { color: 0xb3ecff, transparent: true, opacity: 0.8 }
+        );
     }
 }

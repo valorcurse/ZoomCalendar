@@ -21,7 +21,8 @@ export class DayModel extends Observable {
         
         this.events.push(event);
         const view: EventView = event.view();
-        this.notifyObservers("EventAdded", { view });
+        console.log(view);
+        this.notifyObservers("EventAdded", view);
     }
     
     moment() {

@@ -176,12 +176,38 @@ export class ZoomCalendar extends WebGLRenderer {
 		position.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
 		this.raycaster.setFromCamera(position, this.camera);
+		// console.log(this.scene.children);
 		
-		var intersects: any[] = this.raycaster.intersectObjects(this.scene.children, true);
-		return intersects.filter(
-			intersect =>
-				intersect.object.intersectable
-		);
+		
+		var mainIntersects: any[] = this.raycaster.intersectObjects(this.scene.children, false);
+		
+		if (!mainIntersects.length)
+			return [];
+		
+		const mainIntersect = mainIntersects[0];
+		// console.log(mainIntersect);
+		const intersectableChildren: any[] = this.traverseIntersectableChildren(mainIntersect.object);
+		console.log(intersectableChildren);
+		
+		// console.log(intersects);
+		const intersected = this.raycaster.intersectObjects(intersectableChildren, false);
+		
+		console.log(intersected)
+		
+		return intersected;
+	}
+	
+	traverseIntersectableChildren(object: any, returnChildren: any[] = []): any[] {
+		if (object.intersectable)
+			returnChildren.push(object);
+		
+		const children: any[] = object.children;
+		for (let child of children) {
+			if (child.children)
+				this.traverseIntersectableChildren(child, returnChildren);
+		}
+		
+		return returnChildren;
 	}
 
 	onClick(event: MouseEvent) {
@@ -193,6 +219,7 @@ export class ZoomCalendar extends WebGLRenderer {
 		event.preventDefault();
 		
 		for (let intersect of this.intersectedObjects(event)) {
+			console.log(intersect.object);
 			if (intersect.object.mouseMove)
 				intersect.object.mouseMove(intersect.uv);
 		}
