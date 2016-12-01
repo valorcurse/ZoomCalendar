@@ -1,9 +1,9 @@
 import {applyMixins, BasicInterface} from "../globals";
 import {Observable, CallbackType} from "../observers";
 
-import {Mesh, Geometry, Material} from "three";
+import {Mesh, Geometry, Material, Vector2} from "three";
 
-export class View extends Mesh implements Observable, BasicInterface {
+export abstract class View extends Mesh implements Observable, BasicInterface {
     // Mixin declarations for Observable
     observers: Map<string, CallbackType[]>;
     registerObserver: (label: string, callback: CallbackType) => void;
@@ -11,6 +11,11 @@ export class View extends Mesh implements Observable, BasicInterface {
     notifyObservers: (label: string, arg: any) => void;
     
     intersectable: boolean = false;
+    
+    abstract mouseLeave(): void;
+    abstract mouseOver(uv: Vector2): void;
+    abstract mouseUp(uv: Vector2): void;
+    abstract mouseDown(uv: Vector2): void;
     
     constructor(geometry: Geometry, material: Material) {
         super(geometry, material);

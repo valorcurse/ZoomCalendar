@@ -157,10 +157,12 @@ export class DayView extends View {
         console.log(event);
         this.eventArea.add(event);
     }
-    
-    // createEvent(start: number, end: number) {
-    //     this.notifyObservers("CreateEvent", {start: start, end: end});
-    // }
+
+    mouseLeave() {}
+    mouseOver(uv: Vector2) {}
+    mouseUp(uv: Vector2) {}
+    mouseDown(uv: Vector2) {}
+
     
     removeEvent(event: EventView) {
         this.eventArea.remove(event);
@@ -259,6 +261,8 @@ class EventArea extends View {
         this.dragStart = null;
     }
     
+    mouseLeave() {}
+    
     mouseDrag(uv: Vector2) {
         if (this.dragComponent)
             this.remove(this.dragComponent);
@@ -281,7 +285,7 @@ class EventArea extends View {
         this.add(this.dragComponent);
     }
     
-    mouseMove(uv: Vector2) {
+    mouseOver(uv: Vector2) {
         if (this.hoveringHighlight)
             this.remove(this.hoveringHighlight);
         

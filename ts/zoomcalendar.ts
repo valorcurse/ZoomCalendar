@@ -27,6 +27,7 @@ import {WebGLRenderer,
 
 import {Event} from "./day/event/event";
 import {Day} from "./day/day";
+import {View} from "./base/view";
 import {Hour, DailyHours} from "./day/day.view";
 import {
     RTT, 
@@ -58,18 +59,15 @@ export class ZoomCalendar extends WebGLRenderer {
 
 	dates: Map<number, Day> = new Map<number, Day>();
 
+	mouseOver: View[] = [];
+
 	view: any;
 	context: any;
 
 	font: Font;
 
 	DZOOM: number = 5;
-
 	zoom: any = d3Zoom.zoom();
-
-	lastTranslation: any;
-
-	dailyTexture: Texture;
 
 	public constructor() {
 		super({ antialias: true });
@@ -176,25 +174,16 @@ export class ZoomCalendar extends WebGLRenderer {
 		position.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
 		this.raycaster.setFromCamera(position, this.camera);
-		// console.log(this.scene.children);
-		
-		
+
 		var mainIntersects: any[] = this.raycaster.intersectObjects(this.scene.children, false);
 		
 		if (!mainIntersects.length)
 			return [];
 		
 		const mainIntersect = mainIntersects[0];
-		// console.log(mainIntersect);
 		const intersectableChildren: any[] = this.traverseIntersectableChildren(mainIntersect.object);
-		console.log(intersectableChildren);
 		
-		// console.log(intersects);
-		const intersected = this.raycaster.intersectObjects(intersectableChildren, false);
-		
-		console.log(intersected)
-		
-		return intersected;
+		return this.raycaster.intersectObjects(intersectableChildren, false);
 	}
 	
 	traverseIntersectableChildren(object: any, returnChildren: any[] = []): any[] {
@@ -218,10 +207,28 @@ export class ZoomCalendar extends WebGLRenderer {
 	onMouseMove = (event: MouseEvent) => {
 		event.preventDefault();
 		
+		
+		const intersects = this.intersectedObjects(event);
+		
+		for (let index = 0; index < this.mouseOver.length; index++) {
+			console.log(index);
+			const hovered = this.mouseOver[index];
+			if (intersects.indexOf(hovered) < 0) {
+				this.mouseOver.splice(index, 1);
+				
+				if (hovered.mouseLeave)
+					hovered.mouseLeave();
+			}
+		}
+		
 		for (let intersect of this.intersectedObjects(event)) {
-			console.log(intersect.object);
-			if (intersect.object.mouseMove)
-				intersect.object.mouseMove(intersect.uv);
+			const element = intersect.object;
+			
+			this.mouseOver.push(element);
+			
+			if (intersect.object.mouseOver)
+				intersect.object.mouseOver(intersect.uv);
+			
 		}
 	}
 
@@ -351,8 +358,6 @@ export class ZoomCalendar extends WebGLRenderer {
 		var startOfDay: Moment = momentStart.clone().startOf('day');
 		var eventDay: Day = this.dates.get(+startOfDay);
 		eventDay.addEvent(momentStart, momentEnd);
-		
-		// console.log(momentStart);
     }
 }
 

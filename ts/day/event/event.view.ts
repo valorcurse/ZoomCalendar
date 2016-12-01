@@ -25,9 +25,10 @@ import {
     Constants
 } from '../../globals';
 
+import {View} from '../../base/view';
 import {EventModel} from './event.model';
 
-export class EventView extends Mesh implements BasicInterface {
+export class EventView extends View {
     intersectable: boolean = true;
     
     model: EventModel;
@@ -61,7 +62,7 @@ export class EventView extends Mesh implements BasicInterface {
 
         this.position.y = yPosition;
         this.position.x = 0;
-        this.position.z = 2;
+        // this.position.z = 2;
         
         this.geometry = eventGeometry;
         
@@ -71,10 +72,18 @@ export class EventView extends Mesh implements BasicInterface {
         this.material = this.defaultMaterial;
     }
     
-    mouseMove(uv: Vector2) {
+    mouseOver(uv: Vector2) {
         console.log("Hovering over this event.");
-        this.material = this.defaultMaterial = new MeshBasicMaterial(
+        this.material = new MeshBasicMaterial(
             { color: 0xb3ecff, transparent: true, opacity: 0.8 }
         );
     }
+    
+    mouseLeave() {
+        this.material = this.defaultMaterial;
+    }
+    
+    mouseUp(uv: Vector2) {}
+    
+    mouseDown(uv: Vector2) {}
 }
