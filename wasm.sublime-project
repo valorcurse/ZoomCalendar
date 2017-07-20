@@ -1,0 +1,19 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"env": {
+			"Linux": {
+				"PATH": "$PATH:/home/marcelo/Repositories/emsdk:/home/marcelo/Repositories/emsdk/clang/fastcomp/build_incoming_64/bin:/home/marcelo/Repositories/emsdk/node/4.1.1_64bit/bin:/home/marcelo/Repositories/emsdk/emscripten/incoming:/home/marcelo/Repositories/emsdk/binaryen/master",
+				"EMSDK": "/home/marcelo/Repositories/emsdk",
+				"EM_CONFIG": "/home/marcelo/.emscripten",
+				"EMSCRIPTEN": "/home/marcelo/Repositories/emsdk/emscripten/incoming",
+				"BINARYEN_ROOT": "/home/marcelo/Repositories/emsdk/binaryen/master_64bit_binaryen"
+			}
+		}
+	}
+}

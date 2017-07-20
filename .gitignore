@@ -1,2 +1,8 @@
 node_modules/
 npm-debug.log
+
+*.wasm
+*.wasm.map
+*.wast
+*.js
+*.html
